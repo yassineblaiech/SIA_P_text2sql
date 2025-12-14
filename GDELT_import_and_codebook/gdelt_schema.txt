@@ -1,0 +1,146 @@
+CREATE TABLE gdelt_events (
+    GlobalEventID INT PRIMARY KEY,
+    Day INT,
+    MonthYear INT,
+    Year INT,
+    FractionDate REAL,
+    
+    Actor1Code TEXT,
+    Actor1Name TEXT,
+    Actor1CountryCode TEXT,
+    Actor1KnownGroupCode TEXT,
+    Actor1EthnicCode TEXT,
+    Actor1Religion1Code TEXT,
+    Actor1Religion2Code TEXT,
+    Actor1Type1Code TEXT,
+    Actor1Type2Code TEXT,
+    Actor1Type3Code TEXT,
+    
+    Actor2Code TEXT,
+    Actor2Name TEXT,
+    Actor2CountryCode TEXT,
+    Actor2KnownGroupCode TEXT,
+    Actor2EthnicCode TEXT,
+    Actor2Religion1Code TEXT,
+    Actor2Religion2Code TEXT,
+    Actor2Type1Code TEXT,
+    Actor2Type2Code TEXT,
+    Actor2Type3Code TEXT,
+    
+    IsRootEvent INT,
+    EventCode TEXT,
+    EventBaseCode TEXT,
+    EventRootCode TEXT,
+    QuadClass INT,
+    GoldsteinScale REAL,
+    NumMentions INT,
+    NumSources INT,
+    NumArticles INT,
+    AvgTone REAL,
+    
+    Actor1Geo_Type INT,
+    Actor1Geo_Fullname TEXT,
+    Actor1Geo_CountryCode TEXT,
+    Actor1Geo_ADM1Code TEXT,
+    Actor1Geo_ADM2Code TEXT,
+    Actor1Geo_Lat REAL,
+    Actor1Geo_Long REAL,
+    Actor1Geo_FeatureID TEXT,
+    
+    Actor2Geo_Type INT,
+    Actor2Geo_Fullname TEXT,
+    Actor2Geo_CountryCode TEXT,
+    Actor2Geo_ADM1Code TEXT,
+    Actor2Geo_ADM2Code TEXT,
+    Actor2Geo_Lat REAL,
+    Actor2Geo_Long REAL,
+    Actor2Geo_FeatureID TEXT,
+    
+    ActionGeo_Type INT,
+    ActionGeo_Fullname TEXT,
+    ActionGeo_CountryCode TEXT,
+    ActionGeo_ADM1Code TEXT,
+    ActionGeo_ADM2Code TEXT,
+    ActionGeo_Lat REAL,
+    ActionGeo_Long REAL,
+    ActionGeo_FeatureID TEXT,
+    
+    DATEADDED INT,
+    SOURCEURL TEXT
+);
+
+CREATE TABLE gdelt_mentions (
+    GlobalEventID INT,
+    EventTimeDate INT,
+    MentionTimeDate INT,
+    MentionType INT,
+    MentionSourceName TEXT,
+    MentionIdentifier TEXT,
+    SentenceID INT,
+    Actor1CharOffset INT,
+    Actor2CharOffset INT,
+    ActionCharOffset INT,
+    InRawText INT,
+    Confidence INT,
+    MentionDocLen INT,
+    MentionDocTone REAL,
+    MentionDocTranslationInfo TEXT,
+    Extras TEXT,
+    FOREIGN KEY (GlobalEventID) REFERENCES gdelt_events(GlobalEventID)
+);
+
+INSERT INTO gdelt_events (
+    GlobalEventID, Day, MonthYear, Year, FractionDate, 
+    Actor1Code, Actor1Name, Actor1CountryCode, Actor1Type1Code, 
+    Actor2Code, Actor2Name, Actor2CountryCode, Actor2Type1Code, 
+    IsRootEvent, EventCode, EventBaseCode, EventRootCode, QuadClass, GoldsteinScale, 
+    NumMentions, NumSources, NumArticles, AvgTone, 
+    Actor1Geo_Type, Actor1Geo_Fullname, Actor1Geo_CountryCode, Actor1Geo_Lat, Actor1Geo_Long, Actor1Geo_FeatureID,
+    ActionGeo_Type, ActionGeo_Fullname, ActionGeo_CountryCode, ActionGeo_Lat, ActionGeo_Long, ActionGeo_FeatureID,
+    DATEADDED, SOURCEURL
+) VALUES (
+    410412613, 20150219, 201502, 2015, 2015.1370, 
+    'USA', 'UNITED STATES', 'USA', 'GOV', 
+    'FRA', 'FRANCE', 'FRA', 'GOV', 
+    1, '040', '040', '04', 1, 1.9, 
+    10, 1, 10, 4.5, 
+    3, 'Washington, District of Columbia, United States', 'US', 38.8951, -77.0364, '531871',
+    3, 'Washington, District of Columbia, United States', 'US', 38.8951, -77.0364, '531871',
+    20150219143000, 'http://nytimes.com/example_article_diplomacy'
+);
+
+INSERT INTO gdelt_events (
+    GlobalEventID, Day, MonthYear, Year, FractionDate, 
+    Actor1Code, Actor1Name, Actor1CountryCode, Actor1Type1Code, 
+    Actor2Code, Actor2Name, Actor2CountryCode, Actor2Type1Code, 
+    IsRootEvent, EventCode, EventBaseCode, EventRootCode, QuadClass, GoldsteinScale, 
+    NumMentions, NumSources, NumArticles, AvgTone, 
+    Actor1Geo_Type, Actor1Geo_Fullname, Actor1Geo_CountryCode, Actor1Geo_Lat, Actor1Geo_Long,
+    ActionGeo_Type, ActionGeo_Fullname, ActionGeo_CountryCode, ActionGeo_Lat, ActionGeo_Long,
+    DATEADDED, SOURCEURL
+) VALUES (
+    410412614, 20150219, 201502, 2015, 2015.1370, 
+    'CVL', 'CIVILIAN', 'NGA', 'CVL', 
+    'COP', 'POLICE', 'NGA', 'COP', 
+    1, '140', '140', '14', 3, -6.5, 
+    25, 5, 25, -8.2, 
+    1, 'Nigeria', 'NI', 10.000, 8.000,
+    1, 'Nigeria', 'NI', 10.000, 8.000,
+    20150219150000, 'http://bbc.co.uk/example_article_protest'
+);
+
+INSERT INTO gdelt_mentions (
+    GlobalEventID, EventTimeDate, MentionTimeDate, MentionType, MentionSourceName, MentionIdentifier, 
+    SentenceID, Actor1CharOffset, Actor2CharOffset, ActionCharOffset, InRawText, Confidence, MentionDocLen, MentionDocTone, MentionDocTranslationInfo
+) VALUES (
+    410412613, 20150219143000, 20150219144500, 1, 'nytimes.com', 'http://nytimes.com/example_article_diplomacy', 
+    1, 45, 120, 80, 1, 100, 3500, 4.5, ''
+);
+
+INSERT INTO gdelt_mentions (
+    GlobalEventID, EventTimeDate, MentionTimeDate, MentionType, MentionSourceName, MentionIdentifier, 
+    SentenceID, Actor1CharOffset, Actor2CharOffset, ActionCharOffset, InRawText, Confidence, MentionDocLen, MentionDocTone, MentionDocTranslationInfo
+) VALUES (
+    410412614, 20150219150000, 20150219151500, 1, 'bbc.co.uk', 'http://bbc.co.uk/example_article_protest', 
+    3, 200, 250, 230, 1, 60, 2100, -8.2, ''
+);

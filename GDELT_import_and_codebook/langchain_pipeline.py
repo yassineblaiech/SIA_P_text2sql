@@ -10,7 +10,7 @@ from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 
 # ==========================================
-# PART 1: THE VALIDATOR ENGINE (Your Script Adapted)
+# PART 1: THE VALIDATOR ENGINE 
 # ==========================================
 
 class GDELTValidator:
@@ -113,9 +113,9 @@ class GDELTValidator:
 
 # Initialize LLM
 llm = ChatOpenAI(
-    model="deepseek-chat",              
+    model="deepseek-reasoner",              
     temperature=0.7,
-    base_url="https://api.deepseek.com",
+    base_url="https://api.deepseek.com/v3.2_speciale_expires_on_20251215",
     api_key=os.environ.get("DEEPSEEK_API_KEY")
 )
 
@@ -126,19 +126,22 @@ Your goal is to generate unique, analytical SQL queries based on the provided GD
 Output must be a valid CSV format with columns: id, text_query, sql_query.
 Use a semicolon (,) as the CSV separator to avoid conflicts with SQL commas.
 Quote all fields with double quotes.
+you should write text_query in French. Also, make the text_query as simple and clear as possible (don't use the name of columns in the text_query).
 
 Dataset Rules:
 1. Tables are named 'events' and 'mentions'.
 2. Join them on 'GlobalEventID'.
 3. Use standard SQLite syntax (supported by pandasql).
 4. Do NOT use functions like STDDEV (use simple math or approximations).
-5. Always LIMIT results to 20 to save processing.
 
-GDELT Codebook Summary:
+GDELT Schema:
 {codebook}
 
 Example Valid Queries:
 {examples}
+
+So make sure to seperate columns with , and not ;.
+Also, make sure to quote all fields with double quotes.
 """
 
 gen_user_prompt = "Generate {n} distinct, complex SQL queries (starting ID: {start_id})."
@@ -160,7 +163,7 @@ Common Errors to fix:
 - "no such function": SQLite has limited functions (no STDDEV, no CONCAT in some versions, use ||).
 - Syntax errors.
 
-Output ONLY the corrected CSV row (id;text_query;sql_query) using semicolon separators.
+Output ONLY the corrected CSV row ("id","text_query","sql_query") using , separators and not ;.
 """
 
 fix_user_prompt = """
@@ -193,7 +196,7 @@ def run_pipeline():
     # 2. CONTEXT 
     # (You would paste the full codebook text here, truncated for brevity)
     try:
-        with open("./GDELT_import_and_codebook/gdelt_codebook.txt", "r", encoding="utf-8") as f:
+        with open("./GDELT_import_and_codebook/gdelt_schema.txt", "r", encoding="utf-8") as f:
             gdelt_codebook_text = f.read()
     except FileNotFoundError:
         print("Error: gdelt_codebook.txt not found. Using empty context.")
@@ -207,7 +210,7 @@ def run_pipeline():
     """
 
     # 3. GENERATION STEP
-    N_QUERIES = 10
+    N_QUERIES = 200
     print(f"\n--- Generating {N_QUERIES} Queries ---")
     
     csv_output = gen_chain.invoke({
@@ -250,7 +253,7 @@ def run_pipeline():
             # --- CORRECTION STEP ---
             try:
                 # Ask LLM to fix it
-                csv_line = f'{query_id};"{text}";"{sql}"'
+                csv_line = f'"{query_id}",{text},{sql}'
                 fixed_csv_row = fix_chain.invoke({
                     "row": csv_line,
                     "error": error_msg
@@ -259,7 +262,7 @@ def run_pipeline():
                 # Parse the fixed row
                 # We assume LLM returns a single CSV line. We wrap it in StringIO to parse.
                 # Adding header=None because it's just one row
-                fixed_df = pd.read_csv(StringIO(fixed_csv_row), sep=";", header=None, names=["id", "text_query", "sql_query"])
+                fixed_df = pd.read_csv(StringIO(fixed_csv_row), sep=",", header=None, names=["id", "text_query", "sql_query"])
                 
                 if not fixed_df.empty:
                     fixed_sql = fixed_df.iloc[0]['sql_query']
@@ -277,15 +280,27 @@ def run_pipeline():
 
     # 5. EXPORT FINAL DATASET
     print("\n--- Exporting Final Dataset ---")
-    final_df = pd.DataFrame(final_rows)
+
+    new_df = pd.DataFrame(final_rows)
     output_path = "./GDELT_import_and_codebook/validated_gdelt_queries.csv"
-    
-    # Ensure directory exists
+
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
-    
-    # Save with COMMA separator as requested for final output
+
+    if os.path.exists(output_path):
+        print(f"Found existing file at {output_path}. Appending new data...")
+        try:
+            existing_df = pd.read_csv(output_path)
+            
+            final_df = pd.concat([existing_df, new_df], ignore_index=True)
+        except pd.errors.EmptyDataError:
+            print("Existing file was empty. Starting fresh.")
+            final_df = new_df
+    else:
+        print("No existing file found. Creating new dataset...")
+        final_df = new_df
+
     final_df.to_csv(output_path, index=False, sep=",", quoting=1) # quoting=1 ensures quote_all
-    print(f"Saved {len(final_df)} validated queries to {output_path}")
+    print(f"Saved {len(final_df)} total queries (Old + New) to {output_path}")
 
 if __name__ == "__main__":
     run_pipeline()
