@@ -1,4 +1,4 @@
-CREATE TABLE gdelt_events (
+CREATE TABLE events (
     GlobalEventID INT PRIMARY KEY,
     Day INT,
     MonthYear INT,
@@ -69,7 +69,7 @@ CREATE TABLE gdelt_events (
     SOURCEURL TEXT
 );
 
-CREATE TABLE gdelt_mentions (
+CREATE TABLE mentions (
     GlobalEventID INT,
     EventTimeDate INT,
     MentionTimeDate INT,
@@ -86,10 +86,10 @@ CREATE TABLE gdelt_mentions (
     MentionDocTone REAL,
     MentionDocTranslationInfo TEXT,
     Extras TEXT,
-    FOREIGN KEY (GlobalEventID) REFERENCES gdelt_events(GlobalEventID)
+    FOREIGN KEY (GlobalEventID) REFERENCES events(GlobalEventID)
 );
 
-INSERT INTO gdelt_events (
+INSERT INTO events (
     GlobalEventID, Day, MonthYear, Year, FractionDate, 
     Actor1Code, Actor1Name, Actor1CountryCode, Actor1Type1Code, 
     Actor2Code, Actor2Name, Actor2CountryCode, Actor2Type1Code, 
@@ -109,7 +109,7 @@ INSERT INTO gdelt_events (
     20150219143000, 'http://nytimes.com/example_article_diplomacy'
 );
 
-INSERT INTO gdelt_events (
+INSERT INTO events (
     GlobalEventID, Day, MonthYear, Year, FractionDate, 
     Actor1Code, Actor1Name, Actor1CountryCode, Actor1Type1Code, 
     Actor2Code, Actor2Name, Actor2CountryCode, Actor2Type1Code, 
@@ -129,7 +129,7 @@ INSERT INTO gdelt_events (
     20150219150000, 'http://bbc.co.uk/example_article_protest'
 );
 
-INSERT INTO gdelt_mentions (
+INSERT INTO mentions (
     GlobalEventID, EventTimeDate, MentionTimeDate, MentionType, MentionSourceName, MentionIdentifier, 
     SentenceID, Actor1CharOffset, Actor2CharOffset, ActionCharOffset, InRawText, Confidence, MentionDocLen, MentionDocTone, MentionDocTranslationInfo
 ) VALUES (
@@ -137,7 +137,7 @@ INSERT INTO gdelt_mentions (
     1, 45, 120, 80, 1, 100, 3500, 4.5, ''
 );
 
-INSERT INTO gdelt_mentions (
+INSERT INTO mentions (
     GlobalEventID, EventTimeDate, MentionTimeDate, MentionType, MentionSourceName, MentionIdentifier, 
     SentenceID, Actor1CharOffset, Actor2CharOffset, ActionCharOffset, InRawText, Confidence, MentionDocLen, MentionDocTone, MentionDocTranslationInfo
 ) VALUES (

@@ -1,5 +1,6 @@
 import os
 import glob
+import random
 import pandas as pd
 from pandasql import sqldf
 from io import StringIO
@@ -114,8 +115,7 @@ class GDELTValidator:
 # Initialize LLM
 llm = ChatOpenAI(
     model="deepseek-reasoner",              
-    temperature=0.7,
-    base_url="https://api.deepseek.com/v3.2_speciale_expires_on_20251215",
+    base_url="https://api.deepseek.com",
     api_key=os.environ.get("DEEPSEEK_API_KEY")
 )
 
@@ -142,6 +142,8 @@ Example Valid Queries:
 
 So make sure to seperate columns with , and not ;.
 Also, make sure to quote all fields with double quotes.
+```csv
+"id", "text_query", "sql_query"
 """
 
 gen_user_prompt = "Generate {n} distinct, complex SQL queries (starting ID: {start_id})."
@@ -202,12 +204,18 @@ def run_pipeline():
         print("Error: gdelt_codebook.txt not found. Using empty context.")
         gdelt_codebook_text = ""
     
-    example_queries_text = """
-1,"Liste les 10 événements qui ont le plus de mentions dans la presse, avec leur nombre de mentions et les acteurs principaux.","SELECT GlobalEventID, Actor1Name, Actor2Name, NumMentions FROM events ORDER BY NumMentions DESC LIMIT 10;"
-2,"Donne le nombre d’événements par catégorie QuadClass (coopération verbale, coopération matérielle, conflit verbal, conflit matériel).","SELECT QuadClass, COUNT(*) AS nb_events FROM events GROUP BY QuadClass ORDER BY QuadClass;"
-3,"Calcule le score moyen de Goldstein par pays de l’acteur 1, et retourne les 15 pays les plus “intenses” (en valeur absolue).","SELECT Actor1CountryCode, AVG(GoldsteinScale) AS avg_goldstein, COUNT(*) AS nb_events FROM events WHERE Actor1CountryCode IS NOT NULL GROUP BY Actor1CountryCode HAVING COUNT(*) >= 5 ORDER BY ABS(AVG(GoldsteinScale)) DESC LIMIT 15;"
-4,"Donne les 10 événements ayant le ton moyen le plus négatif, avec les acteurs et le pays géographique principal.","SELECT GlobalEventID, Actor1Name, Actor2Name, Actor1Geo_Fullname, AvgTone FROM events WHERE AvgTone IS NOT NULL ORDER BY AvgTone ASC LIMIT 10;"
-    """
+    with open("./GDELT_import_and_codebook/ttsql_training_dataset_GDELT.csv", "r", encoding="utf-8") as f:
+        list_examples = f.readlines()
+        
+        #Boostrap examples from existing dataset
+        example_queries_text = ""
+        list_indexes = []
+        for i in range (4):
+            index = random.randint(0, len(list_examples)-1)
+            while index in list_indexes:
+                index = random.randint(0, len(list_examples)-1)
+            list_indexes.append(index)
+            example_queries_text += list_examples[list_indexes[i]]
 
     # 3. GENERATION STEP
     N_QUERIES = 200
