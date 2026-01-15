@@ -32,6 +32,8 @@ PATH_MENTIONS = "./gdelt_data_event_mentions/"
 PATH_EXPORT = "./gdelt_data_event_export/"
 INPUT_QUERIES_FILE = "./GDELT_import_and_codebook/validated_gdelt_queries.csv"
 OUTPUT_DATASET = "./GDELT_import_and_codebook/gdelt_viz_dataset.csv"
+INPUT_FILE = "./GDELT_import_and_codebook/gdelt_viz_dataset.csv"
+OUTPUT_FOLDER = "./GDELT_import_and_codebook/generated_plots"
 
 # ==========================================
 # PART 1: DATA LOADER (FULL DATASET)
@@ -62,6 +64,84 @@ def reindex_ids():
         print(f"   {OUTPUT_DATASET}")
         print("Because the Input IDs have changed, the old 'resume' file is invalid.")
         print("="*50)
+
+def generate_pngs_from_dataset(csv_path, output_dir):
+    """
+    Reads the dataset, runs the stored code on the stored data, 
+    and saves plots as PNGs.
+    """
+    if not os.path.exists(csv_path):
+        print(f"Error: File {csv_path} not found.")
+        return
+
+    os.makedirs(output_dir, exist_ok=True)
+    print(f"--- Starting Plot Generation ---")
+    print(f"Input File: {csv_path}")
+    print(f"Output Folder: {output_dir}")
+
+    try:
+        df_dataset = pd.read_csv(csv_path, quotechar='"', skipinitialspace=True)
+        print(f"Loaded {len(df_dataset)} entries.")
+    except Exception as e:
+        print(f"CRITICAL: Failed to read CSV: {e}")
+        return
+
+    plt.switch_backend('Agg')
+
+    success_count = 0
+    fail_count = 0
+
+    for index, row in df_dataset.iterrows():
+        try:
+            q_id = row['id']
+            json_data = row['query_result']
+            code_str = row['visualization_code']
+
+            print(f"Processing ID {q_id}...", end=" ")
+
+            data_list = json.loads(json_data)
+            df = pd.DataFrame(data_list)
+
+            if df.empty:
+                print("⚠️ Skipped (Data was empty)")
+                fail_count += 1
+                continue
+
+            exec_globals = {
+                'pd': pd,
+                'plt': plt,
+                'sns': sns,
+                'df': df
+            }
+
+            plt.clf()
+            plt.close('all')
+            
+            plt.figure(figsize=(10, 6)) 
+
+            clean_code = str(code_str).replace("```python", "").replace("```", "").strip()
+            
+            exec(clean_code, exec_globals)
+
+            output_filename = os.path.join(output_dir, f"viz_{q_id}.png")
+            
+            if plt.get_fignums():
+                plt.savefig(output_filename, bbox_inches='tight', dpi=100)
+                print("✅ Saved")
+                success_count += 1
+            else:
+                print("❌ Code ran but produced no figure.")
+                fail_count += 1
+
+        except Exception as e:
+            print(f"❌ Error: {e}")
+            fail_count += 1
+
+    print("-" * 30)
+    print(f"Generation Complete.")
+    print(f"Total Success: {success_count}")
+    print(f"Total Failed:  {fail_count}")
+    print(f"Gallery location: {os.path.abspath(output_dir)}")
 
 def test_readability():
     print(f"--- Testing Readability of {OUTPUT_DATASET} ---")
@@ -419,6 +499,7 @@ def run_viz_pipeline():
 
 if __name__ == "__main__":
     reindex_ids()
+    generate_pngs_from_dataset(INPUT_FILE, OUTPUT_FOLDER)
     test_readability()
     plt.switch_backend('Agg') 
-    run_viz_pipeline()
+    # run_viz_pipeline()
