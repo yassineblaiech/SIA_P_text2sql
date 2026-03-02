@@ -1,0 +1,51 @@
+48f86eb6-476d-4f8a-84a3-0ad1979bccd4,ruleset id extraction V1 (116 règles),2025-06-05 13:17:05.478054+00
+5b6a097f-1318-4cf6-84ca-a0f03f65f044,validation ruleset V2. règle de validation transmis par le métier + 8 règles que nous avons rajouté pour rendre l'algorithme plus robuste,2025-06-16 11:17:28.332344+00
+531f3f2a-add6-45c8-8554-68fbefe7b5b2,extraction ruleset V3 (117 rules) separating order and real operations,2025-06-18 15:16:06.86838+00
+8454453b-b328-4f40-a561-82d72811e9e3,validation rules V3 (32 rules) Separating order and real operations,2025-06-18 15:10:26.250841+00
+5876b2ac-3228-42f9-849c-baca35c2b6e8,"validation rules V4 (31 rules) updating EDBP RI16 rules, removing EDBP warning rule",2025-06-20 08:26:45.346601+00
+ec8c3304-9a9c-4cad-9a88-2c9c6c5990d7,"validation rules V5 (30 rules removed rule DI204, DI20)",2025-06-20 09:57:18.26868+00
+d2df44f2-ca00-4717-a053-50c749ed15e3,extraction rules v4 - simple update of the mask,2025-06-23 11:03:11.454328+00
+fd6da43d-865f-4f4b-aef7-d72391885c45,validation V6 - simple update of the mask,2025-06-23 11:03:12.70707+00
+fd9964af-2055-448e-a003-80b96f7eb82f,,2025-06-30 16:05:35.424083+00
+c546d71d-a83a-4905-90e0-a3f95593f3f2,,2025-06-30 16:05:37.03171+00
+fb25e495-b8ea-4b4c-92e6-32b6ad73b767,,2025-06-30 16:10:05.781021+00
+e1e4903a-1d4d-4155-9c67-5d7e22e82047,,2025-06-30 16:10:07.291486+00
+6acbd8e1-d425-4e68-b6ee-c882967cf12d,extraction ruleset V5 added M4 CFU extraction rules,2025-06-30 16:51:03.157844+00
+e3bcc81a-21e7-4dc0-858e-b702d910943e,"validation ruleset V6. 124 rules, added optionnal validation rules for M57 CFU",2025-06-30 16:51:04.492631+00
+3691655a-33b1-4bc3-9232-1ad2a2e84fba,,2025-07-01 13:01:05.498974+00
+81a1f784-ba63-4e77-aa0a-d1c024e745f9,,2025-07-01 13:08:40.247174+00
+f01a4788-da83-46c8-ade2-52d15ef844c2,validation ruleset V7 - adding M57 type (encompass CA and CFU),2025-07-01 13:08:41.604885+00
+0f4f0d92-55aa-4fea-978a-f31d0971275a,validation ruleset V8 adding one rule for M4 and correct two mistakes on M57 CFU,2025-07-01 14:42:10.555671+00
+8b2b57b2-b6b0-4032-89eb-aee7c7cbf642,extraction ruleset V6 : no major updates,2025-07-01 14:42:08.389192+00
+8b951c06-08fd-4da8-98f4-a3f5c58c30b7,,2025-07-02 07:54:19.378377+00
+1e5c1bf4-8d5f-48b6-b611-bdf70d2268ab,,2025-07-02 07:54:19.378377+00
+5c0cf838-d72c-410b-89a5-53ab8411e41c,extraction rules V7 :small corrections,2025-07-02 07:56:26.495007+00
+2e5d8df9-8719-4120-822e-cf8dd0191dfa,validation rules V9 small corrections,2025-07-02 07:56:26.772208+00
+5e3ac585-9d18-44a1-b95f-59009d7d2ba3,validation rules V10 :small corrections,2025-07-02 08:39:42.545262+00
+1e11245e-f12f-431b-aecd-fa7f0d598b1b,extraction rules V8 : small corrections,2025-07-02 08:39:42.545262+00
+bf6c47b1-5a59-43f5-be38-b58e6c3478db,extraction V9,2025-07-02 10:16:50.36351+00
+08ddb8c4-29ea-4ca6-95b5-81f5e17b0a3d,validation V11,2025-07-02 10:16:50.36351+00
+b50797ef-8e2f-4d86-ac0f-15dbbb3f8d43,validation V12 :new validation rules for M57_CA,2025-07-07 07:53:45.254443+00
+925511e3-94bc-4f8b-9395-6aee5a777125,extraction V10,2025-07-07 07:53:45.254443+00
+1f3edf9a-15c2-4324-8546-47aa9a4f2e25,extraction V11,2025-07-07 09:07:52.10282+00
+394ef0b7-970c-4acd-bb32-8b613e8f8e36,validation V13 (new validation rules where incorrectly associated to M57_CFU instead of M57_CA,2025-07-07 09:07:52.10282+00
+156febdc-cedf-462f-84b5-45928f357ba5,validation V14 (correcting some mistakes on some M57 CA rules),2025-07-07 14:57:36.11521+00
+f8bdf0c5-1469-412a-bac1-a02332cd88a3,extraction V12,2025-07-07 14:57:36.11521+00
+3b1a4b60-9f1b-412a-b0b5-6384b521d1c0,validation V15,2025-07-10 15:40:00.552252+00
+b5cc08fb-fee7-45dc-9358-6e54931aedff,,2025-07-22 09:19:23.646508+00
+b322dffb-a953-40a8-8142-f506986d788f,validation V16 (add conservative argument = False for some validations),2025-07-22 09:19:24.595179+00
+83485221-8913-4b00-9bd7-1206952d614e,,2025-07-22 10:56:20.771204+00
+c6c500ae-0ffa-4c9f-bc82-7157eb19de5d,validation V17 (adding super conservative_mode = False),2025-07-22 10:56:22.219539+00
+ae574c38-b715-407d-8d35-212fdfbbb8c0,,2025-07-22 15:03:00.628653+00
+a2cd4ddf-51e9-4b09-a15f-fa2108f56d37,validation V18 extending super conservative mode to the rules given to SFIL (they involve several extracted values) ,2025-07-22 15:03:01.820917+00
+a3afab42-3a98-40fc-bbb0-c649fef9fc01,validation V19 ( RF79 is now conservative),2025-07-24 07:35:27.034246+00
+0c27b65a-2f17-4eda-8633-d550493f124c,extraction V13 (extracting DCT and the two other dditional rules),2025-07-24 07:35:25.816511+00
+43123436-0326-4c41-a874-b5c2be0704aa,,2025-07-24 08:46:44.575423+00
+b953de3a-b7fb-4d4d-be8b-529638079c1e,extraction V14 (correction on SCE extraction rule),2025-07-24 08:46:43.47361+00
+a5b373b5-6c5c-459d-ac5c-fe2b07761cac,validation ruleset actually,2025-07-10 15:40:00.552252+00
+52496fa7-8a2a-4077-b2ea-2317112c9cf2,,2025-07-24 10:02:32.24773+00
+0e48b14d-887a-4b33-bdb1-552811bb4675,,2025-07-24 10:02:33.758275+00
+9f7ab8d5-9052-40a1-9cea-ed62cd6e45c4,,2025-07-24 10:54:26.746528+00
+634fc563-f214-400d-ae77-30d20fcb13f3,,2025-07-24 10:54:28.292853+00
+f5e13ebf-01cc-434d-8fb9-4c82ca71f5b9,,2025-09-03 09:56:52.103243+00
+4ec9aadd-a692-4673-8eb0-185d8496e02b,,2025-09-03 09:56:52.436966+00

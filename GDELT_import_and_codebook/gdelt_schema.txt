@@ -144,3 +144,86 @@ INSERT INTO mentions (
     410412614, 20150219150000, 20150219151500, 1, 'bbc.co.uk', 'http://bbc.co.uk/example_article_protest', 
     3, 200, 250, 230, 1, 60, 2100, -8.2, ''
 );
+
+/* =====================================================================================
+GDELT 2.0 DATA DICTIONARY: SCHEMA LOGIC & CODE REFERENCE
+=====================================================================================
+
+[I] ACTOR ATTRIBUTES (Actor1Code, Actor2Code, Actor1Name, etc.)
+-------------------------------------------------------------------------------------
+Actor codes are composite strings (e.g., 'USAGOV'). GDELT breaks these into sub-fields:
+
+1. Actor Country Codes (3-Letter ISO 3166-1 alpha-3)
+   Used in: Actor[1/2]CountryCode
+   AFG: Afghanistan | FRA: France         | PAK: Pakistan
+   ALB: Albania     | GBR: United Kingdom | PSE: Palestine
+   DZA: Algeria     | DEU: Germany        | RUS: Russia
+   AUS: Australia   | IND: India          | SAU: Saudi Arabia
+   BRA: Brazil      | IRN: Iran           | ZAF: South Africa
+   CAN: Canada      | IRQ: Iraq           | SYR: Syria
+   CHN: China       | ISR: Israel         | TUR: Turkey
+   EGY: Egypt       | JPN: Japan          | USA: United States
+   ETH: Ethiopia    | NGA: Nigeria        | UKR: Ukraine
+   Note: 'REB' (Rebels), 'ASA' (Asia), 'AFR' (Africa), 'EUR' (Europe) are also used.
+
+2. Actor Type & Role Codes (CAMEO Type)
+   Used in: Actor[1/2]Type[1/2/3]Code
+   GOV: Government    | MIL: Military      | COP: Police
+   OPP: Pol. Oppos.   | REB: Rebel Group   | INS: Insurgents
+   CVL: Civilian      | MED: Media         | BUS: Business
+   EDU: Education     | JUD: Judiciary     | LAB: Labor/Unions
+   CRM: Criminal      | NGO: NGO           | IGO: Inter-Gov Org
+   IMG: Int. Mil. Grp | ELI: Elites        | REF: Refugees
+
+3. Known Group Codes (CAMEO IGO/NGO/Rebel)
+   Used in: Actor[1/2]KnownGroupCode
+   UNO: United Nations | WBK: World Bank   | IMF: Int. Monetary Fund
+   NATO: NATO          | ALQ: Al-Qaeda      | TAL: Taliban
+   BOK: Boko Haram     | IRC: Red Cross     | IGO/NGO: General
+
+4. Religious & Ethnic Affiliation (Experimental)
+   Used in: Actor[1/2]Religion[1/2]Code, Actor[1/2]EthnicCode
+   Religions: CHR (Christian), MOS (Muslim), JEW (Jewish), BUD (Buddhist), 
+              HIN (Hindu), ATH (Atheist), PAG (Pagan).
+   Ethnics:   ARA (Arab), KUR (Kurd), HUT (Hutu), TUT (Tutsi), 
+              PAS (Pashtun), SRB (Serb), CRO (Croat).
+
+[II] EVENT ACTION ATTRIBUTES (EventCode, QuadClass, GoldsteinScale)
+-------------------------------------------------------------------------------------
+1. EventRootCode (The 20 Primary CAMEO Categories)
+   01: Public Statement | 02: Appeal         | 03: Intent to Coop | 04: Consult
+   05: Diplomatic Coop  | 06: Material Coop  | 07: Provide Aid    | 08: Yield
+   09: Investigate      | 10: Demand         | 11: Disapprove     | 12: Reject
+   13: Threaten         | 14: Protest        | 15: Military Post. | 16: Reduce Rel.
+   17: Coerce           | 18: Assault        | 19: Fight          | 20: Mass Viol.
+
+2. High-Intensity Leaf Codes (Specific EventCodes)
+   Cooperation: 031 (Coop Intent), 051 (Normalize Rel), 064 (Intel), 071 (Econ Aid)
+   Conflict:    182 (Physical Assault), 193 (Small Arms), 195 (Aerial), 
+                202 (Mass Killing), 204 (CBRN)
+
+3. QuadClass (The 4 Pillars)
+   1: Verbal Cooperation | 2: Material Cooperation
+   3: Verbal Conflict    | 4: Material Conflict
+
+[III] GEOGRAPHY ATTRIBUTES (ActorGeo, ActionGeo)
+-------------------------------------------------------------------------------------
+1. Geo_Type (Resolution Level)
+   1: Country | 2: US State | 3: US City | 4: World City | 5: World State (Admin1)
+
+2. FIPS 10-4 Country Codes (2-Letter)
+   Used in: [Actor/Action]Geo_CountryCode (Note: Different from Actor Country Codes)
+   US: USA | CH: China | RS: Russia | FR: France | IN: India | NI: Nigeria
+
+[IV] MENTIONS & METADATA (Mentions Table)
+-------------------------------------------------------------------------------------
+1. Mention Type
+   1: WEB | 2: CITATION | 3: CORE | 4: DTIC | 5: JSTOR | 6: TV
+
+2. Key Metrics
+   Confidence: 10-100 (Algorithmic certainty of the extraction)
+   AvgTone:    -100 to +100 (Sentiment context; 0 is neutral)
+   NumMentions: Total coverage volume for the first 15-min window.
+
+=====================================================================================
+*/
