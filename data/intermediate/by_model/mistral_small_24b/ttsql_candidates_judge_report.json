@@ -1,0 +1,20 @@
+{
+  "generated_at_utc": "2026-03-11T00:26:38.722234+00:00",
+  "input_path": "C:\\Users\\hamza\\Desktop\\Projet SIA\\data\\intermediate\\by_model\\mistral_small_24b\\ttsql_candidates_clean.jsonl",
+  "db_path": "C:\\Users\\hamza\\Desktop\\Projet SIA\\data\\raw\\db.sqlite",
+  "judge_model": "deepseek-chat",
+  "base_url": "https://api.deepseek.com/v1",
+  "total_rows": 200,
+  "pass_rows": 0,
+  "pass_rate": 0.0,
+  "pass_score_threshold": 4.0,
+  "verdict_counts": {},
+  "score_bucket_counts": {},
+  "judge_errors": 200,
+  "difficulty_total": {
+    "easy": 95,
+    "medium": 80,
+    "hard": 25
+  },
+  "difficulty_pass": {}
+}

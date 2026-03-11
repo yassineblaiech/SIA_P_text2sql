@@ -1,0 +1,28 @@
+{
+  "generated_at_utc": "2026-03-09T23:38:12.885974+00:00",
+  "input_path": "C:\\Users\\hamza\\Desktop\\Projet SIA\\data\\intermediate\\by_model\\gpt_oss_120b\\ttsql_candidates_raw.jsonl",
+  "db_path": "C:\\Users\\hamza\\Desktop\\Projet SIA\\data\\raw\\db.sqlite",
+  "validated_rows": 200,
+  "accepted_rows": 200,
+  "rejected_rows": 0,
+  "acceptance_rate": 1.0,
+  "require_non_empty": false,
+  "require_declared_tables_match": false,
+  "keep_duplicates": false,
+  "timeout_ms": 8000,
+  "max_rows_for_hash": 5000,
+  "counts_by_reject_reason": {},
+  "difficulty_total": {
+    "easy": 70,
+    "medium": 86,
+    "hard": 44
+  },
+  "difficulty_accepted": {
+    "easy": 70,
+    "medium": 86,
+    "hard": 44
+  },
+  "runtime_ok_count": 200,
+  "runtime_error_count": 0,
+  "runtime_timeout_count": 0
+}

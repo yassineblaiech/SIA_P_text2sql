@@ -1,0 +1,1718 @@
+id,question_fr,sql,difficulty,tables_used,tags,accept_for_training,reject_reasons,runtime_ok,runtime_error,runtime_timeout,execution_ms,result_row_count,result_col_count,result_hash_sha256
+cand_000001,Combien de documents ont été ingérés chaque année ?,"SELECT d.document_year AS annee, COUNT(*) AS nb_documents FROM documents d GROUP BY d.document_year ORDER BY d.document_year;",easy,"[""documents""]","[""documents"", ""comptage"", ""annee""]",True,[],True,,False,0,2,2,739f2ca558b976a126a0cc7c99340c71dee6ea4305fc7bad1eed749c01cda8d2
+cand_000002,Quel est le nombre de documents contenant une erreur d’ingestion par année ?,"SELECT d.document_year AS annee, COUNT(*) AS nb_erreurs FROM documents d WHERE TRIM(d.error_message) <> '' GROUP BY d.document_year ORDER BY d.document_year;",easy,"[""documents""]","[""documents"", ""erreurs"", ""annee""]",True,[],True,,False,0,1,2,c0e14310dc68358e4c51915497eb18794b0f0d7a81a773e533ba1e79ab6f6013
+cand_000003,Quelle est la moyenne du nombre de pages selon le type de budget (BP ou BA) ?,"SELECT d.budget_type, AVG(d.nb_pages) AS pages_moyenne FROM documents d GROUP BY d.budget_type;",easy,"[""documents""]","[""documents"", ""pages"", ""budget_type""]",True,[],True,,False,0,2,2,1d6dccf2bdc75af208d271ad67dd8516120b7489bc3d61916e1e84cb8c49f713
+cand_000004,Quelles sont les 5 communes avec le plus grand nombre de documents traités ?,"SELECT d.city_name AS commune, COUNT(*) AS nb_documents FROM documents d GROUP BY d.city_name ORDER BY nb_documents DESC LIMIT 5;",easy,"[""documents""]","[""documents"", ""communes"", ""top""]",True,[],True,,False,0,5,2,a0db81ea7013ee0b977ee5d3abb7781e229e252e954e018a93cf8cc80a8076ac
+cand_000005,Quel pourcentage de documents est en état SUCCESS ?,"SELECT ROUND(100.0 * SUM(CASE WHEN s.code = 'SUCCESS' THEN 1 ELSE 0 END) / COUNT(*), 2) AS pourcentage_success FROM documents d JOIN states s ON d.state_id = s.state_id;",easy,"[""documents"", ""states""]","[""documents"", ""states"", ""pourcentage""]",True,[],True,,False,1,1,1,67251f0e0da95bd69c5a667b11d5c55202dbc42b829496c5c8560b87ceb74412
+cand_000006,Quel est le total des recettes extraites pour chaque année ?,"SELECT d.document_year AS annee, SUM(CAST(r.value AS REAL)) AS total_recettes FROM extraction_results r JOIN documents d ON r.document_id = d.document_id WHERE r.safir_field_id = 'Recettes' GROUP BY d.document_year ORDER BY d.document_year;",easy,"[""extraction_results"", ""documents""]","[""extraction_results"", ""recettes"", ""annee""]",True,[],True,,False,3,0,2,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+cand_000007,Combien de résultats d’extraction sont associés à chaque état du processus ?,"SELECT s.code AS etat, COUNT(*) AS nb_resultats FROM extraction_results r JOIN states s ON r.state_id = s.state_id GROUP BY s.code ORDER BY nb_resultats DESC;",easy,"[""extraction_results"", ""states""]","[""extraction_results"", ""states"", ""comptage""]",True,[],True,,False,23,4,2,5dca3efbef124b92651eef73ded5740182c0333813513a629be729a02c61e057
+cand_000008,"Quelle est la répartition des documents selon le type de masque (M57_CA, M57_CFU, etc.) ?","SELECT d.mask, COUNT(*) AS nb_documents FROM documents d GROUP BY d.mask ORDER BY nb_documents DESC;",easy,"[""documents""]","[""documents"", ""mask"", ""repartition""]",True,[],True,,False,0,3,2,c5fab7af840828f8846c3684d69ff34085a9de8ff8e4c07dfe862241f2377530
+cand_000009,"Pour chaque commune, quel est le total des dépenses en 2023, classé du plus élevé au plus bas (top 5) ?","SELECT d.city_name AS commune, SUM(CAST(r.value AS REAL)) AS total_depenses FROM extraction_results r JOIN documents d ON r.document_id = d.document_id WHERE d.document_year = '2023' AND r.safir_field_id = 'Depenses' GROUP BY d.city_name ORDER BY total_depenses DESC LIMIT 5;",medium,"[""extraction_results"", ""documents""]","[""extraction_results"", ""depenses"", ""2023"", ""top""]",True,[],True,,False,3,0,2,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+cand_000010,Comment évoluent les recettes totales de la commune 'Ville de Concarneau' au fil des années ?,"SELECT d.document_year AS annee, SUM(CAST(r.value AS REAL)) AS total_recettes FROM extraction_results r JOIN documents d ON r.document_id = d.document_id WHERE d.city_name = 'Ville de Concarneau' AND r.safir_field_id = 'Recettes' GROUP BY d.document_year ORDER BY d.document_year;",medium,"[""extraction_results"", ""documents""]","[""extraction_results"", ""recettes"", ""commune"", ""evolution""]",True,[],True,,False,3,0,2,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+cand_000011,Quel est le ratio dépenses / recettes pour chaque document de l'année 2024 ?,"WITH rec AS ( SELECT document_id, SUM(CAST(value AS REAL)) AS recettes FROM extraction_results WHERE safir_field_id = 'Recettes' GROUP BY document_id ), dep AS ( SELECT document_id, SUM(CAST(value AS REAL)) AS depenses FROM extraction_results WHERE safir_field_id = 'Depenses' GROUP BY document_id ) SELECT d.document_id, d.city_name, d.document_year, CASE WHEN rec.recettes = 0 THEN NULL ELSE dep.depenses / rec.recettes END AS ratio_dep_rec FROM documents d LEFT JOIN rec ON d.document_id = rec.document_id LEFT JOIN dep ON d.document_id = dep.document_id WHERE d.document_year = '2024';",medium,"[""documents"", ""extraction_results""]","[""ratio"", ""depenses"", ""recettes"", ""2024""]",True,[],True,,False,11,108,4,d311d684acc5cc1131bf41315da55747e6d9377ae81e9d5b8508e2fb9c31f188
+cand_000012,"Quel est le délai moyen entre la création du document et le lancement de l’extraction, par année ?","SELECT d.document_year AS annee, AVG(strftime('%s', er.start_time) - strftime('%s', d.created_at)) / 3600.0 AS delai_moyen_heures FROM documents d JOIN extraction_runs er ON d.document_id = er.document_id GROUP BY d.document_year;",medium,"[""documents"", ""extraction_runs""]","[""delai"", ""extraction_runs"", ""documents"", ""annee""]",True,[],True,,False,0,2,2,514d2d4c347952c3bf30698f66532523819b37dde7e2573b072d759ce4dfb7c8
+cand_000013,Combien de documents sont en état ERROR et possèdent un message d’erreur non vide ?,SELECT COUNT(*) AS nb_documents FROM documents d JOIN states s ON d.state_id = s.state_id WHERE s.code = 'ERROR' AND TRIM(d.error_message) <> '';,medium,"[""documents"", ""states""]","[""documents"", ""error"", ""states""]",True,[],True,,False,4,1,1,c48a37d74445a429bb0aeb80e476ed0040938f9ea842f82d7ec72f90d53c9aef
+cand_000014,Quel est le nombre moyen de résultats d’extraction par document selon le type de budget ?,"SELECT d.budget_type, AVG(cnt) AS moyenne_resultats FROM ( SELECT document_id, COUNT(*) AS cnt FROM extraction_results GROUP BY document_id ) er_cnt JOIN documents d ON er_cnt.document_id = d.document_id GROUP BY d.budget_type;",medium,"[""extraction_results"", ""documents""]","[""extraction_results"", ""budget_type"", ""moyenne""]",True,[],True,,False,2,2,2,c45c98928db3a6d481fad39daabd6bacb1deaeab2cf6516fb5336aa4ad60abf3
+cand_000015,Quelles communes ont vu leur dette totale augmenter de plus de 10 % entre 2023 et 2024 ?,"WITH dette_2023 AS ( SELECT d.city_name, SUM(CAST(r.value AS REAL)) AS dette FROM extraction_results r JOIN documents d ON r.document_id = d.document_id WHERE d.document_year = '2023' AND r.safir_field_id = 'Dette' GROUP BY d.city_name ), dette_2024 AS ( SELECT d.city_name, SUM(CAST(r.value AS REAL)) AS dette FROM extraction_results r JOIN documents d ON r.document_id = d.document_id WHERE d.document_year = '2024' AND r.safir_field_id = 'Dette' GROUP BY d.city_name ) SELECT d23.city_name FROM dette_2023 d23 JOIN dette_2024 d24 ON d23.city_name = d24.city_name WHERE d23.dette > 0 AND (d24.dette - d23.dette) / d23.dette > 0.10;",medium,"[""extraction_results"", ""documents""]","[""dette"", ""variation"", ""2023"", ""2024""]",True,[],True,,False,3,0,1,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+cand_000016,Combien de retours techniques (is_technical_error = 1) ont été enregistrés par commune ?,"SELECT d.city_name AS commune, COUNT(*) AS nb_retours FROM resultfeedbacks rf JOIN extraction_results r ON rf.result_id = r.result_id JOIN documents d ON r.document_id = d.document_id WHERE rf.is_technical_error = 1 GROUP BY d.city_name ORDER BY nb_retours DESC;",medium,"[""resultfeedbacks"", ""extraction_results"", ""documents""]","[""resultfeedbacks"", ""technical_error"", ""commune""]",True,[],True,,False,0,0,2,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+cand_000017,"Quelle proportion de documents possède au moins un résultat d’extraction avec un message d’erreur, par année ?","WITH docs_err AS ( SELECT DISTINCT d.document_id FROM extraction_results r JOIN documents d ON r.document_id = d.document_id WHERE r.message_error IS NOT NULL AND TRIM(r.message_error) <> '' ) SELECT d.document_year AS annee, ROUND(100.0 * COUNT(DISTINCT docs_err.document_id) / COUNT(DISTINCT d.document_id), 2) AS pourcentage FROM documents d LEFT JOIN docs_err ON d.document_id = docs_err.document_id GROUP BY d.document_year;",medium,"[""documents"", ""extraction_results""]","[""extraction_results"", ""message_error"", ""pourcentage"", ""annee""]",True,[],True,,False,7,2,2,84b983b434f48864ca78a3535d33dcb0e0e2143f4a256204de6fc546263c7e4e
+cand_000018,Quelles sont les 3 communes présentant la plus grande variance des dépenses d’une année à l’autre ?,"WITH dep_year AS ( SELECT d.city_name, d.document_year, SUM(CAST(r.value AS REAL)) AS depenses FROM extraction_results r JOIN documents d ON r.document_id = d.document_id WHERE r.safir_field_id = 'Depenses' GROUP BY d.city_name, d.document_year ), stats AS ( SELECT city_name, AVG(depenses) AS avg_dep, AVG(depenses * depenses) AS avg_sq FROM dep_year GROUP BY city_name ), var_calc AS ( SELECT city_name, (avg_sq - avg_dep * avg_dep) AS variance_dep FROM stats ) SELECT city_name, variance_dep FROM var_calc ORDER BY variance_dep DESC LIMIT 3;",hard,"[""extraction_results"", ""documents""]","[""variance"", ""depenses"", ""commune""]",True,[],True,,False,3,0,2,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+cand_000019,"Quel sont les 10 documents avec le meilleur score pondéré (Recettes × 0,6 − Dépenses × 0,4) ?","WITH rec AS ( SELECT document_id, SUM(CAST(value AS REAL)) AS recettes FROM extraction_results WHERE safir_field_id = 'Recettes' GROUP BY document_id ), dep AS ( SELECT document_id, SUM(CAST(value AS REAL)) AS depenses FROM extraction_results WHERE safir_field_id = 'Depenses' GROUP BY document_id ) SELECT d.document_id, d.city_name, d.document_year, (rec.recettes * 0.6 - dep.depenses * 0.4) AS score_pondere FROM documents d LEFT JOIN rec ON d.document_id = rec.document_id LEFT JOIN dep ON d.document_id = dep.document_id ORDER BY score_pondere DESC LIMIT 10;",hard,"[""documents"", ""extraction_results""]","[""score"", ""recettes"", ""depenses"", ""top""]",True,[],True,,False,10,10,4,b4dc7c3fe80a264456c3a779163a7354da2f9b61088ba93eceb19f283b9f656b
+cand_000020,Quel est le nombre de documents selon le type de budget (BP ou BA) ?,"SELECT d.budget_type, COUNT(*) AS nb_documents FROM documents d GROUP BY d.budget_type;",easy,"[""documents""]","[""documents"", ""budget_type"", ""count""]",True,[],True,,False,0,2,2,43e13772b64bf85fd0c7d29c27630e0c920113452ef7d2a906ce60080b356e20
+cand_000021,Quelles sont les 5 communes qui possèdent le plus grand nombre de documents ?,"SELECT d.city_name, COUNT(*) AS nb_documents FROM documents d GROUP BY d.city_name ORDER BY nb_documents DESC LIMIT 5;",easy,"[""documents""]","[""documents"", ""city"", ""top_n""]",True,[],True,,False,0,5,2,6f1b22ead11dd7a8bee7116aca380dfae8e028cce3520a472214151a0509ba37
+cand_000022,Quelle est la moyenne du nombre de pages par document pour chaque année ?,"SELECT d.document_year, AVG(d.nb_pages) AS moyenne_pages FROM documents d GROUP BY d.document_year;",easy,"[""documents""]","[""documents"", ""pages"", ""average""]",True,[],True,,False,0,2,2,4b19a3dd877926e1a64a40eb23f4f7adce63dcf49549dbfc7e8819079ed5bffd
+cand_000023,Quel pourcentage des documents est en état SUCCESS ?,SELECT (COUNT(*) * 100.0 / (SELECT COUNT(*) FROM documents)) AS pct_success FROM documents d JOIN states s ON d.state_id = s.state_id WHERE s.code = 'SUCCESS';,easy,"[""documents"", ""states""]","[""documents"", ""state"", ""percentage""]",True,[],True,,False,5,1,1,6e16c65cadc050cd845c85f448ab00ccc600dd07d7b926d986f99e6f1e73bae8
+cand_000024,Quel est le total des recettes extraites chaque année ?,"SELECT d.document_year, SUM(CAST(r.value AS REAL)) AS total_recettes FROM extraction_results r JOIN documents d ON r.document_id = d.document_id WHERE r.safir_field_id = 'Recettes' GROUP BY d.document_year;",easy,"[""extraction_results"", ""documents""]","[""extraction_results"", ""recettes"", ""yearly"", ""sum""]",True,[],True,,False,3,0,2,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+cand_000025,Quel est le total des dépenses extraites chaque année ?,"SELECT d.document_year, SUM(CAST(r.value AS REAL)) AS total_depenses FROM extraction_results r JOIN documents d ON r.document_id = d.document_id WHERE r.safir_field_id = 'Depenses' GROUP BY d.document_year;",easy,"[""extraction_results"", ""documents""]","[""extraction_results"", ""depenses"", ""yearly"", ""sum""]",True,[],True,,False,3,0,2,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+cand_000026,Quel est le ratio dépenses / recettes pour chaque commune en 2024 ?,"WITH rev AS (SELECT d.city_name, SUM(CAST(r.value AS REAL)) AS recettes FROM extraction_results r JOIN documents d ON r.document_id = d.document_id WHERE r.safir_field_id = 'Recettes' AND d.document_year = '2024' GROUP BY d.city_name), exp AS (SELECT d.city_name, SUM(CAST(r.value AS REAL)) AS depenses FROM extraction_results r JOIN documents d ON r.document_id = d.document_id WHERE r.safir_field_id = 'Depenses' AND d.document_year = '2024' GROUP BY d.city_name) SELECT rev.city_name, (exp.depenses / rev.recettes) AS ratio_depenses_recettes FROM rev JOIN exp ON rev.city_name = exp.city_name WHERE rev.recettes <> 0;",easy,"[""extraction_results"", ""documents""]","[""ratio"", ""depenses"", ""recettes"", ""city"", ""2024""]",True,[],True,,False,5,0,2,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+cand_000027,Comment évoluent les recettes de la commune 'Ville de Concarneau' d'une année à l'autre ?,"SELECT d.document_year, SUM(CAST(r.value AS REAL)) AS recettes FROM extraction_results r JOIN documents d ON r.document_id = d.document_id WHERE r.safir_field_id = 'Recettes' AND d.city_name = 'Ville de Concarneau' GROUP BY d.document_year ORDER BY d.document_year;",medium,"[""extraction_results"", ""documents""]","[""recettes"", ""city"", ""trend""]",True,[],True,,False,5,0,2,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+cand_000028,Quelles sont les 5 communes avec la plus forte hausse en pourcentage des dépenses entre 2023 et 2024 ?,"WITH dep23 AS (SELECT d.city_name, SUM(CAST(r.value AS REAL)) AS depenses FROM extraction_results r JOIN documents d ON r.document_id = d.document_id WHERE r.safir_field_id = 'Depenses' AND d.document_year = '2023' GROUP BY d.city_name), dep24 AS (SELECT d.city_name, SUM(CAST(r.value AS REAL)) AS depenses FROM extraction_results r JOIN documents d ON r.document_id = d.document_id WHERE r.safir_field_id = 'Depenses' AND d.document_year = '2024' GROUP BY d.city_name) SELECT d24.city_name, ((d24.depenses - d23.depenses) / d23.depenses) * 100.0 AS hausse_pct FROM dep23 d23 JOIN dep24 d24 ON d23.city_name = d24.city_name WHERE d23.depenses > 0 ORDER BY hausse_pct DESC LIMIT 5;",medium,"[""extraction_results"", ""documents""]","[""depenses"", ""city"", ""increase"", ""yearly""]",True,[],True,,False,4,0,2,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+cand_000029,Quel est le nombre moyen d'erreurs d'extraction par état du document ?,"WITH err_counts AS (SELECT d.state_id, COUNT(*) AS nb_erreurs FROM extraction_results r JOIN documents d ON r.document_id = d.document_id WHERE r.message_error IS NOT NULL AND r.message_error <> '' GROUP BY d.state_id), doc_counts AS (SELECT state_id, COUNT(*) AS nb_documents FROM documents GROUP BY state_id) SELECT s.code AS etat, COALESCE(err_counts.nb_erreurs, 0) * 1.0 / doc_counts.nb_documents AS moyenne_erreurs_par_document FROM doc_counts LEFT JOIN err_counts ON doc_counts.state_id = err_counts.state_id JOIN states s ON doc_counts.state_id = s.state_id;",medium,"[""extraction_results"", ""documents"", ""states""]","[""extraction_results"", ""errors"", ""state"", ""average""]",True,[],True,,False,11,126,2,331627a047e1fff11b020a2be05a57a6a6bc6694eedd49e757691d21971657d1
+cand_000030,Combien de documents comportent au moins une erreur d'extraction chaque année ?,"SELECT d.document_year, COUNT(DISTINCT d.document_id) AS docs_avec_erreur FROM documents d JOIN extraction_results r ON d.document_id = r.document_id WHERE r.message_error IS NOT NULL AND r.message_error <> '' GROUP BY d.document_year;",medium,"[""documents"", ""extraction_results""]","[""documents"", ""errors"", ""yearly"", ""count""]",True,[],True,,False,10,2,2,9a73a70513b6145a2b37ea3468b8e02496a1b3b72aa5ca7e8ce7182cb7d76297
+cand_000031,Quelle est la moyenne des recettes par document selon le type de budget (BP ou BA) pour chaque commune ?,"SELECT d.city_name, d.budget_type, AVG(CAST(r.value AS REAL)) AS moyenne_recettes_par_resultat FROM extraction_results r JOIN documents d ON r.document_id = d.document_id WHERE r.safir_field_id = 'Recettes' GROUP BY d.city_name, d.budget_type;",medium,"[""extraction_results"", ""documents""]","[""recettes"", ""budget_type"", ""city"", ""average""]",True,[],True,,False,3,0,3,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+cand_000032,Quelles communes ont vu leur dette augmenter de plus de 10 % entre 2023 et 2024 ?,"WITH dette23 AS (SELECT d.city_name, SUM(CAST(r.value AS REAL)) AS dette FROM extraction_results r JOIN documents d ON r.document_id = d.document_id WHERE r.safir_field_id = 'Dette' AND d.document_year = '2023' GROUP BY d.city_name), dette24 AS (SELECT d.city_name, SUM(CAST(r.value AS REAL)) AS dette FROM extraction_results r JOIN documents d ON r.document_id = d.document_id WHERE r.safir_field_id = 'Dette' AND d.document_year = '2024' GROUP BY d.city_name) SELECT d24.city_name, ((d24.dette - d23.dette) / d23.dette) * 100.0 AS hausse_pct FROM dette23 d23 JOIN dette24 d24 ON d23.city_name = d24.city_name WHERE d23.dette > 0 AND ((d24.dette - d23.dette) / d23.dette) * 100.0 > 10;",medium,"[""extraction_results"", ""documents""]","[""dette"", ""city"", ""increase"", ""yearly""]",True,[],True,,False,3,0,2,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+cand_000033,Combien de retours techniques (is_technical_error = 1) sont enregistrés par commune ?,"SELECT d.city_name, COUNT(*) AS nb_retours_techniques FROM resultfeedbacks f JOIN extraction_results r ON f.result_id = r.result_id JOIN documents d ON r.document_id = d.document_id WHERE f.is_technical_error = 1 GROUP BY d.city_name;",medium,"[""resultfeedbacks"", ""extraction_results"", ""documents""]","[""feedback"", ""technical_error"", ""city"", ""count""]",True,[],True,,False,0,0,2,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+cand_000034,Quels sont les 5 documents avec le meilleur résultat net (recettes - dépenses) ?,"WITH rev AS (SELECT d.document_id, SUM(CAST(r.value AS REAL)) AS recettes FROM extraction_results r JOIN documents d ON r.document_id = d.document_id WHERE r.safir_field_id = 'Recettes' GROUP BY d.document_id), dep AS (SELECT d.document_id, SUM(CAST(r.value AS REAL)) AS depenses FROM extraction_results r JOIN documents d ON r.document_id = d.document_id WHERE r.safir_field_id = 'Depenses' GROUP BY d.document_id) SELECT rev.document_id, (rev.recettes - dep.depenses) AS resultat_net FROM rev JOIN dep ON rev.document_id = dep.document_id ORDER BY resultat_net DESC LIMIT 5;",medium,"[""extraction_results"", ""documents""]","[""net_result"", ""documents"", ""top_n""]",True,[],True,,False,3,0,2,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+cand_000035,"Quel est le revenu moyen par page pour chaque document, et quels sont les 5 documents les plus performants ?","WITH rev AS (SELECT d.document_id, SUM(CAST(r.value AS REAL)) AS recettes FROM extraction_results r JOIN documents d ON r.document_id = d.document_id WHERE r.safir_field_id = 'Recettes' GROUP BY d.document_id) SELECT rev.document_id, rev.recettes / d.nb_pages AS recettes_par_page FROM rev JOIN documents d ON rev.document_id = d.document_id ORDER BY recettes_par_page DESC LIMIT 5;",hard,"[""extraction_results"", ""documents""]","[""recettes"", ""pages"", ""average"", ""top_n""]",True,[],True,,False,3,0,2,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+cand_000036,Quels documents présentent une incohérence entre la somme des postes D001 et D002 et le total des dépenses ?,"WITH somme_parts AS (SELECT d.document_id, SUM(CAST(r.value AS REAL)) AS total_parts FROM extraction_results r JOIN documents d ON r.document_id = d.document_id WHERE r.safir_field_id IN ('D001','D002') GROUP BY d.document_id), total_dep AS (SELECT d.document_id, CAST(r.value AS REAL) AS total_depenses FROM extraction_results r JOIN documents d ON r.document_id = d.document_id WHERE r.safir_field_id = 'TotalDepenses') SELECT sp.document_id FROM somme_parts sp JOIN total_dep td ON sp.document_id = td.document_id WHERE ABS(sp.total_parts - td.total_depenses) > 0.01;",hard,"[""extraction_results"", ""documents""]","[""validation"", ""incoherence"", ""depenses"", ""document""]",True,[],True,,False,8,0,1,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+cand_000037,Quelles communes affichent la plus grande variance des dépenses d'une année à l'autre ?,"WITH dep_annee AS (SELECT d.city_name, d.document_year, SUM(CAST(r.value AS REAL)) AS depenses FROM extraction_results r JOIN documents d ON r.document_id = d.document_id WHERE r.safir_field_id = 'Depenses' GROUP BY d.city_name, d.document_year), stats AS (SELECT city_name, AVG(depenses) AS moyenne_dep, AVG(depenses * depenses) AS moyenne_carre FROM dep_annee GROUP BY city_name), variance AS (SELECT city_name, moyenne_carre - moyenne_dep * moyenne_dep AS variance_dep FROM stats) SELECT city_name, variance_dep FROM variance ORDER BY variance_dep DESC LIMIT 5;",hard,"[""extraction_results"", ""documents""]","[""depenses"", ""variance"", ""city"", ""yearly""]",True,[],True,,False,3,0,2,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+cand_000038,"Quel classement des communes selon un score composite (0,6 × recettes moyennes + 0,4 × taux de croissance des dépenses 2023‑2024) ?","WITH rev_doc AS (SELECT d.city_name, d.document_id, SUM(CAST(r.value AS REAL)) AS recettes FROM extraction_results r JOIN documents d ON r.document_id = d.document_id WHERE r.safir_field_id = 'Recettes' GROUP BY d.city_name, d.document_id), avg_rev AS (SELECT city_name, AVG(recettes) AS moyenne_recettes FROM rev_doc GROUP BY city_name), dep23 AS (SELECT d.city_name, SUM(CAST(r.value AS REAL)) AS depenses FROM extraction_results r JOIN documents d ON r.document_id = d.document_id WHERE r.safir_field_id = 'Depenses' AND d.document_year = '2023' GROUP BY d.city_name), dep24 AS (SELECT d.city_name, SUM(CAST(r.value AS REAL)) AS depenses FROM extraction_results r JOIN documents d ON r.document_id = d.document_id WHERE r.safir_field_id = 'Depenses' AND d.document_year = '2024' GROUP BY d.city_name), croissance AS (SELECT d24.city_name, ((d24.depenses - d23.depenses) / d23.depenses) * 100.0 AS taux_croissance FROM dep23 d23 JOIN dep24 d24 ON d23.city_name = d24.city_name WHERE d23.depenses > 0) SELECT a.city_name, (0.6 * a.moyenne_recettes) + (0.4 * c.taux_croissance) AS score_composite FROM avg_rev a JOIN croissance c ON a.city_name = c.city_name ORDER BY score_composite DESC LIMIT 10;",hard,"[""extraction_results"", ""documents""]","[""score_composite"", ""recettes"", ""depenses"", ""growth"", ""city""]",True,[],True,,False,3,0,2,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+cand_000039,Quelles sont les 5 communes qui ont généré le plus de recettes en 2024 ?,"SELECT d.city_name,
+       SUM(CAST(er_rec.value AS REAL)) AS total_recettes
+FROM extraction_results er_year
+JOIN extraction_results er_rec
+  ON er_rec.document_id = er_year.document_id
+JOIN documents d
+  ON d.document_id = er_year.document_id
+WHERE er_year.safir_field_id = 'Année'
+  AND er_year.value = '2024'
+  AND er_rec.safir_field_id = 'D002'
+GROUP BY d.city_name
+ORDER BY total_recettes DESC
+LIMIT 5;",easy,"[""extraction_results"", ""documents""]","[""top"", ""communes"", ""recettes"", ""2024"", ""ranking""]",True,[],True,,False,6,5,2,f3493f422c02b3fe7d0ac3d5e92c3ee52113f0cea3b693f2d33aad6016aa9dee
+cand_000040,Quel pourcentage des documents est en état « SUCCESS » ?,"SELECT ROUND(100.0 * SUM(CASE WHEN s.code = 'SUCCESS' THEN 1 ELSE 0 END) / COUNT(*), 2) AS pct_success
+FROM documents d
+JOIN states s ON s.state_id = d.state_id;",easy,"[""documents"", ""states""]","[""percentage"", ""documents"", ""state_success"", ""aggregation""]",True,[],True,,False,1,1,1,6e16c65cadc050cd845c85f448ab00ccc600dd07d7b926d986f99e6f1e73bae8
+cand_000041,"Combien de documents comportent un message d’erreur, ventilés par année ?","SELECT er_year.value AS annee,
+       COUNT(DISTINCT d.document_id) AS nb_documents_erreur
+FROM documents d
+JOIN extraction_results er_year ON er_year.document_id = d.document_id
+WHERE er_year.safir_field_id = 'Année'
+  AND d.error_message IS NOT NULL
+  AND TRIM(d.error_message) <> ''
+GROUP BY er_year.value
+ORDER BY annee;",easy,"[""documents"", ""extraction_results""]","[""count"", ""error_messages"", ""per_year"", ""documents""]",True,[],True,,False,3,0,2,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+cand_000042,"Combien d’extractions ont été exécutées selon leur état (PENDING, SUCCESS, etc.) ?","SELECT s.code AS etat,
+       COUNT(*) AS nb_runs
+FROM extraction_runs er
+JOIN states s ON s.state_id = er.state_id
+GROUP BY s.code
+ORDER BY nb_runs DESC;",easy,"[""extraction_runs"", ""states""]","[""count"", ""extraction_runs"", ""state"", ""aggregation""]",True,[],True,,False,1,3,2,470343e6bbad773ff41e594c8afdeb4b1a11f1d29d3fd5a2d99973dc9b40c2c3
+cand_000043,Quel est le taux de croissance des recettes de la commune « Ville de Concarneau » entre 2023 et 2024 ?,"WITH data AS (
+  SELECT er_year.value AS annee,
+         SUM(CAST(er_rec.value AS REAL)) AS total_recettes
+  FROM extraction_results er_year
+  JOIN extraction_results er_rec ON er_rec.document_id = er_year.document_id
+  JOIN documents d ON d.document_id = er_year.document_id
+  WHERE er_year.safir_field_id = 'Année'
+    AND er_rec.safir_field_id = 'D002'
+    AND d.city_name = 'Ville de Concarneau'
+    AND er_year.value IN ('2023','2024')
+  GROUP BY er_year.value
+)
+SELECT ((SELECT total_recettes FROM data WHERE annee = '2024') -
+        (SELECT total_recettes FROM data WHERE annee = '2023')) /
+       (SELECT total_recettes FROM data WHERE annee = '2023') * 100.0 AS croissance_pct;",medium,"[""extraction_results"", ""documents""]","[""growth_rate"", ""recettes"", ""commune"", ""2023_2024""]",True,[],True,,False,4,1,1,6e16c65cadc050cd845c85f448ab00ccc600dd07d7b926d986f99e6f1e73bae8
+cand_000044,"Quel est le ratio dépenses / recettes pour chaque commune en 2024, classé du plus élevé au plus bas ?","WITH dep AS (
+  SELECT d.city_name,
+         SUM(CAST(er.value AS REAL)) AS total_dep
+  FROM extraction_results er
+  JOIN extraction_results yr ON yr.document_id = er.document_id
+  JOIN documents d ON d.document_id = er.document_id
+  WHERE er.safir_field_id = 'D001'
+    AND yr.safir_field_id = 'Année'
+    AND yr.value = '2024'
+  GROUP BY d.city_name
+),
+rec AS (
+  SELECT d.city_name,
+         SUM(CAST(er.value AS REAL)) AS total_rec
+  FROM extraction_results er
+  JOIN extraction_results yr ON yr.document_id = er.document_id
+  JOIN documents d ON d.document_id = er.document_id
+  WHERE er.safir_field_id = 'D002'
+    AND yr.safir_field_id = 'Année'
+    AND yr.value = '2024'
+  GROUP BY d.city_name
+)
+SELECT dep.city_name,
+       dep.total_dep,
+       rec.total_rec,
+       CASE WHEN rec.total_rec = 0 THEN NULL ELSE dep.total_dep / rec.total_rec END AS ratio_dep_rec
+FROM dep
+JOIN rec ON rec.city_name = dep.city_name
+ORDER BY ratio_dep_rec DESC
+LIMIT 10;",medium,"[""extraction_results"", ""documents""]","[""ratio"", ""depenses_recettes"", ""2024"", ""ranking""]",True,[],True,,False,14,10,4,a260f4f0ac2966029199833fe0dc0397a4a939d4387ca9284e58e0e56089976f
+cand_000045,Quelles communes ont vu leurs dépenses augmenter de plus de 10 % entre 2023 et 2024 ?,"WITH dep AS (
+  SELECT d.city_name,
+         yr.value AS annee,
+         SUM(CAST(er.value AS REAL)) AS total_dep
+  FROM extraction_results er
+  JOIN extraction_results yr ON yr.document_id = er.document_id
+  JOIN documents d ON d.document_id = er.document_id
+  WHERE er.safir_field_id = 'D001'
+    AND yr.safir_field_id = 'Année'
+    AND yr.value IN ('2023','2024')
+  GROUP BY d.city_name, yr.value
+)
+SELECT d1.city_name,
+       (d2.total_dep - d1.total_dep) / d1.total_dep * 100.0 AS croissance_pct
+FROM dep d1
+JOIN dep d2 ON d2.city_name = d1.city_name
+WHERE d1.annee = '2023' AND d2.annee = '2024'
+  AND d1.total_dep > 0
+  AND (d2.total_dep - d1.total_dep) / d1.total_dep > 0.10
+ORDER BY croissance_pct DESC;",medium,"[""extraction_results"", ""documents""]","[""increase"", ""depenses"", ""percentage"", ""2023_2024""]",True,[],True,,False,7,0,2,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+cand_000046,"Quel est le revenu moyen par page pour chaque document en 2024, et quelles sont les 5 meilleures performances ?","WITH rec AS (
+  SELECT er.document_id,
+         SUM(CAST(er.value AS REAL)) AS total_rec
+  FROM extraction_results er
+  JOIN extraction_results yr ON yr.document_id = er.document_id
+  WHERE er.safir_field_id = 'D002'
+    AND yr.safir_field_id = 'Année'
+    AND yr.value = '2024'
+  GROUP BY er.document_id
+)
+SELECT d.document_id,
+       d.city_name,
+       rec.total_rec,
+       d.nb_pages,
+       rec.total_rec / d.nb_pages AS recettes_par_page
+FROM rec
+JOIN documents d ON d.document_id = rec.document_id
+ORDER BY recettes_par_page DESC
+LIMIT 5;",medium,"[""extraction_results"", ""documents""]","[""average"", ""recettes_per_page"", ""2024"", ""top_documents""]",True,[],True,,False,7,5,5,f4b61954aac3e7f72280c2094a47ccc6b8b15008cf51dd59acfdee4d2214f332
+cand_000047,Quels documents contiennent plus de 5 résultats d’extraction avec un message d’erreur ?,"SELECT d.document_id,
+       d.city_name,
+       COUNT(*) AS nb_errors
+FROM extraction_results er
+JOIN documents d ON d.document_id = er.document_id
+WHERE er.message_error IS NOT NULL
+  AND TRIM(er.message_error) <> ''
+GROUP BY d.document_id, d.city_name
+HAVING COUNT(*) > 5
+ORDER BY nb_errors DESC;",medium,"[""extraction_results"", ""documents""]","[""error_messages"", ""extraction_results"", ""documents"", ""filter""]",True,[],True,,False,11,109,3,16b85e93d96b984539df186f538349bb7e8b85327bdb25c869cda0349e6d895c
+cand_000048,Quelle est la moyenne des dépenses totales par commune pour le type de budget BP en 2023 ?,"WITH dep AS (
+  SELECT d.city_name,
+         SUM(CAST(er.value AS REAL)) AS total_dep
+  FROM extraction_results er
+  JOIN extraction_results yr ON yr.document_id = er.document_id
+  JOIN documents d ON d.document_id = er.document_id
+  WHERE er.safir_field_id = 'D001'
+    AND yr.safir_field_id = 'Année'
+    AND yr.value = '2023'
+    AND d.budget_type = 'BP'
+  GROUP BY d.city_name
+)
+SELECT AVG(total_dep) AS avg_dep_bp_2023
+FROM dep;",medium,"[""extraction_results"", ""documents""]","[""average"", ""depenses"", ""budget_type"", ""2023""]",True,[],True,,False,7,1,1,6e16c65cadc050cd845c85f448ab00ccc600dd07d7b926d986f99e6f1e73bae8
+cand_000049,Quelles sont les 3 communes présentant la plus grande variance des dépenses entre 2023 et 2024 ?,"WITH dep AS (
+  SELECT d.city_name,
+         yr.value AS annee,
+         SUM(CAST(er.value AS REAL)) AS total_dep
+  FROM extraction_results er
+  JOIN extraction_results yr ON yr.document_id = er.document_id
+  JOIN documents d ON d.document_id = er.document_id
+  WHERE er.safir_field_id = 'D001'
+    AND yr.safir_field_id = 'Année'
+    AND yr.value IN ('2023','2024')
+  GROUP BY d.city_name, yr.value
+)
+SELECT d1.city_name,
+       ((d2.total_dep - d1.total_dep) * (d2.total_dep - d1.total_dep)) AS variance_dep
+FROM dep d1
+JOIN dep d2 ON d2.city_name = d1.city_name
+WHERE d1.annee = '2023' AND d2.annee = '2024'
+ORDER BY variance_dep DESC
+LIMIT 3;",medium,"[""extraction_results"", ""documents""]","[""variance"", ""depenses"", ""2023_2024"", ""top_communes""]",True,[],True,,False,7,0,2,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+cand_000050,"Quel est le score composite (0,6 × recettes moyennes + 0,4 × taux de croissance des dépenses 2023‑2024) pour chaque commune, classé par performance ?","WITH rec AS (
+  SELECT d.city_name,
+         SUM(CAST(er.value AS REAL)) AS total_rec,
+         COUNT(DISTINCT yr.value) AS years_cnt
+  FROM extraction_results er
+  JOIN extraction_results yr ON yr.document_id = er.document_id
+  JOIN documents d ON d.document_id = er.document_id
+  WHERE er.safir_field_id = 'D002'
+    AND yr.safir_field_id = 'Année'
+    AND yr.value IN ('2023','2024')
+  GROUP BY d.city_name
+),
+dep2023 AS (
+  SELECT d.city_name,
+         SUM(CAST(er.value AS REAL)) AS total_dep_2023
+  FROM extraction_results er
+  JOIN extraction_results yr ON yr.document_id = er.document_id
+  JOIN documents d ON d.document_id = er.document_id
+  WHERE er.safir_field_id = 'D001'
+    AND yr.safir_field_id = 'Année'
+    AND yr.value = '2023'
+  GROUP BY d.city_name
+),
+dep2024 AS (
+  SELECT d.city_name,
+         SUM(CAST(er.value AS REAL)) AS total_dep_2024
+  FROM extraction_results er
+  JOIN extraction_results yr ON yr.document_id = er.document_id
+  JOIN documents d ON d.document_id = er.document_id
+  WHERE er.safir_field_id = 'D001'
+    AND yr.safir_field_id = 'Année'
+    AND yr.value = '2024'
+  GROUP BY d.city_name
+)
+SELECT r.city_name,
+       (0.6 * (r.total_rec / r.years_cnt) ) +
+       (0.4 * CASE WHEN d2023.total_dep_2023 = 0 THEN 0
+                   ELSE (d2024.total_dep_2024 - d2023.total_dep_2023) / d2023.total_dep_2023 * 100.0
+              END) AS composite_score
+FROM rec r
+JOIN dep2023 d2023 ON d2023.city_name = r.city_name
+JOIN dep2024 d2024 ON d2024.city_name = r.city_name
+ORDER BY composite_score DESC
+LIMIT 10;",hard,"[""extraction_results"", ""documents""]","[""composite_score"", ""recettes"", ""depenses_growth"", ""ranking""]",True,[],True,,False,20,0,2,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+cand_000051,"Quels sont les 5 documents dont la durée d’exécution de l’extraction dépasse la moyenne, classés du plus long au plus court ?","WITH durations AS (
+  SELECT d.document_id,
+         d.city_name,
+         (julianday(d.created_at) - julianday(er.start_time)) * 86400.0 AS duration_seconds
+  FROM documents d
+  JOIN extraction_runs er ON er.document_id = d.document_id
+  WHERE er.start_time IS NOT NULL AND d.created_at IS NOT NULL
+)
+SELECT document_id,
+       city_name,
+       duration_seconds
+FROM durations
+WHERE duration_seconds > (SELECT AVG(duration_seconds) FROM durations)
+ORDER BY duration_seconds DESC
+LIMIT 5;",hard,"[""documents"", ""extraction_runs""]","[""duration"", ""extraction_runs"", ""performance"", ""top""]",True,[],True,,False,0,0,3,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+cand_000052,"Quel est le pourcentage de documents contenant au moins un avertissement, ventilé par type de masque ?","WITH total_per_mask AS (
+  SELECT mask, COUNT(*) AS total_cnt
+  FROM documents
+  GROUP BY mask
+),
+with_warning AS (
+  SELECT mask, COUNT(*) AS warning_cnt
+  FROM documents
+  WHERE warning_message IS NOT NULL AND TRIM(warning_message) <> ''
+  GROUP BY mask
+)
+SELECT t.mask,
+       t.total_cnt,
+       COALESCE(w.warning_cnt,0) AS warning_cnt,
+       ROUND(100.0 * COALESCE(w.warning_cnt,0) / t.total_cnt,2) AS pct_with_warning
+FROM total_per_mask t
+LEFT JOIN with_warning w ON w.mask = t.mask
+ORDER BY pct_with_warning DESC;",hard,"[""documents""]","[""warning_messages"", ""mask"", ""percentage"", ""distribution""]",True,[],True,,False,0,3,4,76df9bc263b9319c0f843aed1f7ba9f36d2b246767a37a891cfc381254f141a9
+cand_000053,Quelles communes présentent des documents où plusieurs années différentes ont été extraites (incohérence du champ Année) ?,"SELECT d.city_name,
+       d.document_id,
+       GROUP_CONCAT(DISTINCT er.value) AS years_found,
+       COUNT(DISTINCT er.value) AS nb_distinct_years
+FROM extraction_results er
+JOIN documents d ON d.document_id = er.document_id
+WHERE er.safir_field_id = 'Année'
+GROUP BY d.document_id, d.city_name
+HAVING COUNT(DISTINCT er.value) > 1
+ORDER BY nb_distinct_years DESC
+LIMIT 10;",hard,"[""extraction_results"", ""documents""]","[""data_quality"", ""inconsistent_years"", ""documents"", ""communes""]",True,[],True,,False,3,0,4,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+cand_000054,Quel est le nombre total de documents par année ?,"SELECT document_year, COUNT(*) AS nb_documents FROM documents GROUP BY document_year ORDER BY document_year;",easy,"[""documents""]","[""count"", ""documents"", ""year""]",True,[],True,,False,0,2,2,9e23d1840a4fdd115b3c4b1d9ff9ce7af9f8158ca7718753fe749596c5ceba49
+cand_000055,Combien de documents sont classés par type de budget (BP ou BA) ?,"SELECT budget_type, COUNT(*) AS nb FROM documents GROUP BY budget_type;",easy,"[""documents""]","[""budget_type"", ""count""]",True,[],True,,False,0,2,2,1623e76ac6f4199c2b150008fceec136af94e148bf8f556448dc92256ccb6050
+cand_000056,Quelles sont les 5 communes avec le plus grand nombre de documents ?,"SELECT city_name, COUNT(*) AS nb_docs FROM documents GROUP BY city_name ORDER BY nb_docs DESC LIMIT 5;",easy,"[""documents""]","[""top"", ""documents"", ""city""]",True,[],True,,False,0,5,2,4147a35e0899fb714c0e8bb989d128512e3a548655164714b83932943548c224
+cand_000057,Quel est le total des dépenses (champ D001) par commune pour l'année 2024 ?,"SELECT d.city_name, SUM(CAST(r.value AS REAL)) AS total_dep FROM extraction_results r JOIN documents d ON r.document_id = d.document_id WHERE r.safir_field_id = 'D001' AND d.document_year = '2024' GROUP BY d.city_name ORDER BY total_dep DESC;",medium,"[""extraction_results"", ""documents""]","[""sum"", ""expenses"", ""city"", ""year""]",True,[],True,,False,3,18,2,a7e32ee164c6b7a7fe193d644709ce3c6a868448b7270e6fbd873de8e43a939a
+cand_000058,Quel est le pourcentage de variation des dépenses D001 entre 2023 et 2024 pour chaque commune ?,"WITH dep2023 AS (SELECT d.city_name, SUM(CAST(r.value AS REAL)) AS total_2023 FROM extraction_results r JOIN documents d ON r.document_id = d.document_id WHERE r.safir_field_id = 'D001' AND d.document_year = '2023' GROUP BY d.city_name), dep2024 AS (SELECT d.city_name, SUM(CAST(r.value AS REAL)) AS total_2024 FROM extraction_results r JOIN documents d ON r.document_id = d.document_id WHERE r.safir_field_id = 'D001' AND d.document_year = '2024' GROUP BY d.city_name) SELECT d2023.city_name, d2023.total_2023, d2024.total_2024, ((d2024.total_2024 - d2023.total_2023) * 100.0 / d2023.total_2023) AS pct_change FROM dep2023 d2023 JOIN dep2024 d2024 ON d2023.city_name = d2024.city_name ORDER BY pct_change DESC LIMIT 10;",medium,"[""extraction_results"", ""documents""]","[""growth"", ""expenses"", ""year"", ""city""]",True,[],True,,False,6,0,4,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+cand_000059,Quel est le ratio dépenses / recettes par commune pour l'année 2024 ?,"SELECT d.city_name, SUM(CAST(e_dep.value AS REAL)) AS total_dep, SUM(CAST(e_rec.value AS REAL)) AS total_rec, (SUM(CAST(e_dep.value AS REAL)) / NULLIF(SUM(CAST(e_rec.value AS REAL)),0)) AS dep_rec_ratio FROM documents d JOIN extraction_results e_dep ON d.document_id = e_dep.document_id AND e_dep.safir_field_id = 'D001' JOIN extraction_results e_rec ON d.document_id = e_rec.document_id AND e_rec.safir_field_id = 'Recettes' WHERE d.document_year = '2024' GROUP BY d.city_name ORDER BY dep_rec_ratio DESC LIMIT 10;",medium,"[""documents"", ""extraction_results""]","[""ratio"", ""expenses"", ""revenues"", ""city"", ""year""]",True,[],True,,False,6,0,4,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+cand_000060,Quel est le nombre moyen de résultats d'extraction par document selon le type de budget ?,"SELECT d.budget_type, AVG(cnt) AS avg_results FROM (SELECT document_id, COUNT(*) AS cnt FROM extraction_results GROUP BY document_id) er JOIN documents d ON er.document_id = d.document_id GROUP BY d.budget_type;",medium,"[""extraction_results"", ""documents""]","[""average"", ""extraction_results"", ""budget_type""]",True,[],True,,False,1,2,2,136dbb396e8dbc3a75c0f24bde77f9247275d8c25eca47d647d1e5cff428fbb9
+cand_000061,Combien de documents contiennent au moins une erreur d'extraction par année ?,"SELECT d.document_year, COUNT(DISTINCT d.document_id) AS docs_with_error FROM documents d JOIN extraction_results r ON d.document_id = r.document_id WHERE r.message_error IS NOT NULL AND r.message_error <> '' GROUP BY d.document_year;",medium,"[""documents"", ""extraction_results""]","[""error"", ""count"", ""year""]",True,[],True,,False,9,2,2,57dfe8d3519dedb05eeb306615f96c1546671d6e7f92d1231db3254b245d84f0
+cand_000062,Quel est le pourcentage de documents avec au moins un avertissement parmi l'ensemble des documents ?,SELECT (COUNT(DISTINCT d.document_id) * 100.0 / (SELECT COUNT(*) FROM documents)) AS pct_warning FROM documents d JOIN extraction_results r ON d.document_id = r.document_id WHERE r.message_warning IS NOT NULL AND r.message_warning <> '';,easy,"[""documents"", ""extraction_results""]","[""percentage"", ""warning"", ""documents""]",True,[],True,,False,6,1,1,6e16c65cadc050cd845c85f448ab00ccc600dd07d7b926d986f99e6f1e73bae8
+cand_000063,Quelles sont les 5 communes présentant la plus grande variance des dépenses D001 entre 2023 et 2024 ?,"WITH dep AS (SELECT d.city_name, d.document_year, SUM(CAST(r.value AS REAL)) AS total_dep FROM extraction_results r JOIN documents d ON r.document_id = d.document_id WHERE r.safir_field_id = 'D001' AND d.document_year IN ('2023','2024') GROUP BY d.city_name, d.document_year), piv AS (SELECT city_name, MAX(CASE WHEN document_year='2023' THEN total_dep END) AS dep_2023, MAX(CASE WHEN document_year='2024' THEN total_dep END) AS dep_2024 FROM dep GROUP BY city_name) SELECT city_name, ABS(dep_2024 - dep_2023) AS variance FROM piv ORDER BY variance DESC LIMIT 5;",medium,"[""extraction_results"", ""documents""]","[""variance"", ""expenses"", ""city"", ""year""]",True,[],True,,False,3,5,2,fcea600eb7287e6910030c66140e204e18b0374795aa6daea4978e3d3116a0c3
+cand_000064,"Quel est le nombre moyen de pages par document pour chaque commune en 2023 et 2024, et quelles communes ont vu une hausse de plus de 20 % en 2024 ?","WITH pages2023 AS (SELECT d.city_name, AVG(d.nb_pages) AS avg_pages FROM documents d WHERE d.document_year = '2023' GROUP BY d.city_name), pages2024 AS (SELECT d.city_name, AVG(d.nb_pages) AS avg_pages FROM documents d WHERE d.document_year = '2024' GROUP BY d.city_name) SELECT p2024.city_name, p2023.avg_pages AS avg_2023, p2024.avg_pages AS avg_2024, ((p2024.avg_pages - p2023.avg_pages) * 100.0 / p2023.avg_pages) AS pct_change FROM pages2023 p2023 JOIN pages2024 p2024 ON p2023.city_name = p2024.city_name WHERE ((p2024.avg_pages - p2023.avg_pages) * 100.0 / p2023.avg_pages) > 20 ORDER BY pct_change DESC;",hard,"[""documents""]","[""pages"", ""growth"", ""city"", ""year""]",True,[],True,,False,0,0,4,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+cand_000065,"Quel est le nombre de documents par masque (M57_CA, M57_CFU, etc.) ?","SELECT mask, COUNT(*) AS nb FROM documents GROUP BY mask ORDER BY nb DESC;",easy,"[""documents""]","[""mask"", ""count"", ""documents""]",True,[],True,,False,0,3,2,67ebed5c6c3d58f835b5634be51bbca7822b10541c2b5366100f71d18315b069
+cand_000066,Comment se répartissent les documents par état et par année ?,"SELECT d.document_year, s.code AS state_code, COUNT(*) AS nb FROM documents d JOIN states s ON d.state_id = s.state_id GROUP BY d.document_year, s.code ORDER BY d.document_year, nb DESC;",medium,"[""documents"", ""states""]","[""state"", ""year"", ""distribution""]",True,[],True,,False,1,5,3,758900b55a5f634765e9295d3e6860858554bd10f2ff8e7e300c97f4dfa7ea94
+cand_000067,"Pour chaque commune, quel est le délai moyen (en heures) entre la création du document et le lancement de l'extraction pour l'année 2024 ?","SELECT d.city_name, AVG(strftime('%s', er.start_time) - strftime('%s', d.created_at)) / 3600.0 AS avg_delay_hours FROM documents d JOIN extraction_runs er ON d.document_id = er.document_id WHERE d.document_year = '2024' GROUP BY d.city_name ORDER BY avg_delay_hours DESC LIMIT 10;",hard,"[""documents"", ""extraction_runs""]","[""delay"", ""extraction"", ""city"", ""year""]",True,[],True,,False,0,10,2,c4ce57a783ff2583725bba49d24fb1697469dab1d47768a00990c6a02aeccbfc
+cand_000068,Quel est le nombre moyen de champs extraits par document selon le type de masque ?,"SELECT d.mask, AVG(cnt) AS avg_fields FROM (SELECT document_id, COUNT(*) AS cnt FROM extraction_results GROUP BY document_id) er JOIN documents d ON er.document_id = d.document_id GROUP BY d.mask ORDER BY avg_fields DESC;",medium,"[""extraction_results"", ""documents""]","[""average"", ""fields"", ""mask""]",True,[],True,,False,1,3,2,798add035c1db5cdcc2ce34095b48d3554c522f99d5bc4ef0e2a76fec484c7e9
+cand_000069,Quelles sont les 5 communes avec le plus grand nombre de documents dont le type de budget est BP ?,"SELECT d.city_name, COUNT(*) AS nb_bp_docs FROM documents d WHERE d.budget_type = 'BP' GROUP BY d.city_name ORDER BY nb_bp_docs DESC LIMIT 5;",easy,"[""documents""]","[""budget_type"", ""bp"", ""top"", ""city""]",True,[],True,,False,0,5,2,c2526c48c0274705159dae509c2ba46734ea851fe0d327b2c88fcde1cbe1fef1
+cand_000070,Quels documents présentent une incohérence : la somme des dépenses D001 et D002 diffère de plus de 5 % du total déclaré (champ TotalDepenses) ?,"WITH dep AS (SELECT r.document_id, SUM(CAST(r.value AS REAL)) AS sum_dep FROM extraction_results r WHERE r.safir_field_id IN ('D001','D002') GROUP BY r.document_id), total AS (SELECT r.document_id, CAST(r.value AS REAL) AS total_dep FROM extraction_results r WHERE r.safir_field_id = 'TotalDepenses') SELECT d.document_id, d.city_name, d.document_year, dep.sum_dep, total.total_dep, ((dep.sum_dep - total.total_dep) * 100.0 / total.total_dep) AS pct_diff FROM dep JOIN total ON dep.document_id = total.document_id JOIN documents d ON dep.document_id = d.document_id WHERE ABS((dep.sum_dep - total.total_dep) * 100.0 / total.total_dep) > 5 ORDER BY pct_diff DESC LIMIT 10;",hard,"[""extraction_results"", ""documents""]","[""anomaly"", ""expenses"", ""validation"", ""document""]",True,[],True,,False,9,0,6,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+cand_000071,"Quel est le classement des communes selon un score composite : 0,6 × moyenne des recettes + 0,4 × taux de croissance des dépenses D001 entre 2023 et 2024 ?","WITH rec AS (SELECT d.city_name, AVG(CAST(r.value AS REAL)) AS avg_rec FROM extraction_results r JOIN documents d ON r.document_id = d.document_id WHERE r.safir_field_id = 'Recettes' GROUP BY d.city_name), dep2023 AS (SELECT d.city_name, SUM(CAST(r.value AS REAL)) AS total_2023 FROM extraction_results r JOIN documents d ON r.document_id = d.document_id WHERE r.safir_field_id = 'D001' AND d.document_year = '2023' GROUP BY d.city_name), dep2024 AS (SELECT d.city_name, SUM(CAST(r.value AS REAL)) AS total_2024 FROM extraction_results r JOIN documents d ON r.document_id = d.document_id WHERE r.safir_field_id = 'D001' AND d.document_year = '2024' GROUP BY d.city_name), growth AS (SELECT d2023.city_name, ((d2024.total_2024 - d2023.total_2023) * 100.0 / d2023.total_2023) AS pct_growth FROM dep2023 d2023 JOIN dep2024 d2024 ON d2023.city_name = d2024.city_name) SELECT rec.city_name, (0.6 * rec.avg_rec + 0.4 * growth.pct_growth) AS composite_score FROM rec JOIN growth ON rec.city_name = growth.city_name ORDER BY composite_score DESC LIMIT 10;",hard,"[""extraction_results"", ""documents""]","[""composite_score"", ""revenues"", ""growth"", ""city""]",True,[],True,,False,2,0,2,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+cand_000072,Quel est le nombre de documents déposés chaque année ?,"SELECT d.document_year,
+       COUNT(*) AS nb_documents
+FROM documents d
+GROUP BY d.document_year;",easy,"[""documents""]","[""count"", ""year""]",True,[],True,,False,0,2,2,7d634b1eb6c289e97897799fb5caee0de7f672894321f30636702b960f7dc530
+cand_000073,Combien de communes différentes sont couvertes chaque année ?,"SELECT d.document_year,
+       COUNT(DISTINCT d.city_name) AS nb_communes
+FROM documents d
+GROUP BY d.document_year;",easy,"[""documents""]","[""count"", ""distinct"", ""city"", ""year""]",True,[],True,,False,0,2,2,fcddbb6c05f5323be237a0b6fee45dea81a35426e84e0501ad217522f88da1b8
+cand_000074,Quel est le pourcentage de documents en état « SUCCESS » par année ?,"SELECT d.document_year,
+       ROUND(100.0 * SUM(CASE WHEN s.code = 'SUCCESS' THEN 1 ELSE 0 END) / COUNT(*), 2) AS pct_success
+FROM documents d
+JOIN states s ON d.state_id = s.state_id
+GROUP BY d.document_year;",easy,"[""documents"", ""states""]","[""percentage"", ""state"", ""year""]",True,[],True,,False,1,2,2,f94f3207acae71ebafccda54f9e98a223bc5d7a59af5f7859031577b31769fb4
+cand_000075,Quelle est la moyenne des dépenses (D001) par type de budget (BP/BA) pour l'année 2023 ?,"SELECT d.budget_type,
+       AVG(CAST(er.value AS REAL)) AS moyenne_D001
+FROM documents d
+JOIN extraction_results er ON er.document_id = d.document_id
+WHERE d.document_year = '2023'
+  AND er.safir_field_id = 'D001'
+GROUP BY d.budget_type;",easy,"[""documents"", ""extraction_results""]","[""average"", ""expense"", ""budget_type"", ""year""]",True,[],True,,False,3,2,2,1a4234d81fbe57843a0a04c1bfeadf894387ff054041353e3230bab379906407
+cand_000076,Combien d'extractions ont échoué (état ERROR) ?,"SELECT COUNT(*) AS nb_extractions_error
+FROM extraction_runs er
+JOIN states s ON er.state_id = s.state_id
+WHERE s.code = 'ERROR';",easy,"[""extraction_runs"", ""states""]","[""count"", ""run"", ""state""]",True,[],True,,False,4,1,1,6e16c65cadc050cd845c85f448ab00ccc600dd07d7b926d986f99e6f1e73bae8
+cand_000077,"Quel est le ratio dépenses (D001) / recettes (D002) par commune pour 2024, classé du plus élevé au plus bas ?","SELECT d.city_name,
+       SUM(CASE WHEN er.safir_field_id = 'D001' THEN CAST(er.value AS REAL) ELSE 0 END) AS total_D001,
+       SUM(CASE WHEN er.safir_field_id = 'D002' THEN CAST(er.value AS REAL) ELSE 0 END) AS total_D002,
+       ROUND(SUM(CASE WHEN er.safir_field_id = 'D001' THEN CAST(er.value AS REAL) END) / NULLIF(SUM(CASE WHEN er.safir_field_id = 'D002' THEN CAST(er.value AS REAL) END), 0), 4) AS ratio_D001_D002
+FROM documents d
+JOIN extraction_results er ON er.document_id = d.document_id
+WHERE d.document_year = '2024'
+  AND er.safir_field_id IN ('D001','D002')
+GROUP BY d.city_name
+HAVING total_D002 > 0
+ORDER BY ratio_D001_D002 DESC;",medium,"[""documents"", ""extraction_results""]","[""ratio"", ""expense"", ""revenue"", ""city"", ""year""]",True,[],True,,False,3,0,4,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+cand_000078,Quel est le taux de croissance des dépenses (D001) entre 2023 et 2024 pour chaque commune ?,"WITH d2023 AS (
+    SELECT d.city_name,
+           CAST(er.value AS REAL) AS d001_2023
+    FROM documents d
+    JOIN extraction_results er ON er.document_id = d.document_id
+    WHERE d.document_year = '2023'
+      AND er.safir_field_id = 'D001'
+),
+     d2024 AS (
+    SELECT d.city_name,
+           CAST(er.value AS REAL) AS d001_2024
+    FROM documents d
+    JOIN extraction_results er ON er.document_id = d.document_id
+    WHERE d.document_year = '2024'
+      AND er.safir_field_id = 'D001'
+)
+SELECT d2023.city_name,
+       d2023.d001_2023,
+       d2024.d001_2024,
+       ROUND((d2024.d001_2024 - d2023.d001_2023) * 100.0 / NULLIF(d2023.d001_2023, 0), 2) AS croissance_pct
+FROM d2023
+JOIN d2024 USING (city_name)
+ORDER BY croissance_pct DESC;",medium,"[""documents"", ""extraction_results""]","[""growth"", ""expense"", ""city"", ""year""]",True,[],True,,False,7,0,4,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+cand_000079,Quelles sont les 5 communes avec la plus forte hausse en pourcentage des dépenses (D001) entre 2023 et 2024 ?,"WITH d2023 AS (
+    SELECT d.city_name,
+           CAST(er.value AS REAL) AS d001_2023
+    FROM documents d
+    JOIN extraction_results er ON er.document_id = d.document_id
+    WHERE d.document_year = '2023'
+      AND er.safir_field_id = 'D001'
+),
+     d2024 AS (
+    SELECT d.city_name,
+           CAST(er.value AS REAL) AS d001_2024
+    FROM documents d
+    JOIN extraction_results er ON er.document_id = d.document_id
+    WHERE d.document_year = '2024'
+      AND er.safir_field_id = 'D001'
+)
+SELECT d2023.city_name,
+       ROUND((d2024.d001_2024 - d2023.d001_2023) * 100.0 / NULLIF(d2023.d001_2023, 0), 2) AS hausse_pct
+FROM d2023
+JOIN d2024 USING (city_name)
+ORDER BY hausse_pct DESC
+LIMIT 5;",medium,"[""documents"", ""extraction_results""]","[""top"", ""growth"", ""expense"", ""city"", ""year""]",True,[],True,,False,7,0,2,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+cand_000080,"Quelle est la moyenne des dépenses (D001) par type de masque (M57_CA, M57_CFU, …) pour l'année 2024 ?","SELECT d.mask,
+       AVG(CAST(er.value AS REAL)) AS moyenne_D001
+FROM documents d
+JOIN extraction_results er ON er.document_id = d.document_id
+WHERE d.document_year = '2024'
+  AND er.safir_field_id = 'D001'
+GROUP BY d.mask;",medium,"[""documents"", ""extraction_results""]","[""average"", ""expense"", ""mask"", ""year""]",True,[],True,,False,3,2,2,21d3360bbf942ab695e627057aa9ca5fb72bd1fd2fd9b334deb376d7b5ac2d4d
+cand_000081,"Pour chaque commune, quel est le résultat net (recettes D002 – dépenses D001) en 2024 et quelles sont les 5 meilleures performances ?","SELECT d.city_name,
+       SUM(CASE WHEN er.safir_field_id = 'D001' THEN CAST(er.value AS REAL) ELSE 0 END) AS total_D001,
+       SUM(CASE WHEN er.safir_field_id = 'D002' THEN CAST(er.value AS REAL) ELSE 0 END) AS total_D002,
+       (SUM(CASE WHEN er.safir_field_id = 'D002' THEN CAST(er.value AS REAL) END) -
+        SUM(CASE WHEN er.safir_field_id = 'D001' THEN CAST(er.value AS REAL) END)) AS net_result
+FROM documents d
+JOIN extraction_results er ON er.document_id = d.document_id
+WHERE d.document_year = '2024'
+  AND er.safir_field_id IN ('D001','D002')
+GROUP BY d.city_name
+ORDER BY net_result DESC
+LIMIT 5;",medium,"[""documents"", ""extraction_results""]","[""net"", ""result"", ""expense"", ""revenue"", ""city"", ""year""]",True,[],True,,False,3,5,4,418c9bc373f50b0efe90d51daa688a9864edb642ce2825926a13ff2a85b4a5d0
+cand_000082,"Combien de documents contiennent à la fois un avertissement et une erreur d'extraction, ventilés par année ?","SELECT d.document_year,
+       COUNT(DISTINCT d.document_id) AS nb_documents
+FROM documents d
+WHERE (d.warning_message IS NOT NULL AND d.warning_message <> '')
+  AND EXISTS (
+      SELECT 1
+      FROM extraction_results er
+      WHERE er.document_id = d.document_id
+        AND er.message_error IS NOT NULL
+        AND er.message_error <> ''
+  )
+GROUP BY d.document_year;",medium,"[""documents"", ""extraction_results""]","[""count"", ""warning"", ""error"", ""year""]",True,[],True,,False,0,2,2,d399b1dab2fa2e18f69ea0e067ce0a0972c28a8988f89746d252e227cdcb962a
+cand_000083,"Pour chaque type de budget, quelles sont les moyennes des dépenses (D001) et des recettes (D002) en 2023 et 2024 ?","SELECT d.budget_type,
+       d.document_year,
+       AVG(CASE WHEN er.safir_field_id = 'D001' THEN CAST(er.value AS REAL) END) AS moyenne_D001,
+       AVG(CASE WHEN er.safir_field_id = 'D002' THEN CAST(er.value AS REAL) END) AS moyenne_D002
+FROM documents d
+JOIN extraction_results er ON er.document_id = d.document_id
+WHERE er.safir_field_id IN ('D001','D002')
+  AND d.document_year IN ('2023','2024')
+GROUP BY d.budget_type, d.document_year;",medium,"[""documents"", ""extraction_results""]","[""average"", ""expense"", ""revenue"", ""budget_type"", ""year""]",True,[],True,,False,3,4,4,075ba2a89310721f885195e1bc6500327302aacc749681c7054f222398a1da50
+cand_000084,Quelles communes ont vu leurs dépenses (D001) en 2024 dépasser 150 % de celles de 2023 ?,"WITH d2023 AS (
+    SELECT d.city_name,
+           CAST(er.value AS REAL) AS d001_2023
+    FROM documents d
+    JOIN extraction_results er ON er.document_id = d.document_id
+    WHERE d.document_year = '2023'
+      AND er.safir_field_id = 'D001'
+),
+     d2024 AS (
+    SELECT d.city_name,
+           CAST(er.value AS REAL) AS d001_2024
+    FROM documents d
+    JOIN extraction_results er ON er.document_id = d.document_id
+    WHERE d.document_year = '2024'
+      AND er.safir_field_id = 'D001'
+)
+SELECT d2023.city_name,
+       d2023.d001_2023,
+       d2024.d001_2024,
+       ROUND(d2024.d001_2024 * 100.0 / NULLIF(d2023.d001_2023, 0), 2) AS ratio_pct
+FROM d2023
+JOIN d2024 USING (city_name)
+WHERE d2024.d001_2024 > 1.5 * d2023.d001_2023;",medium,"[""documents"", ""extraction_results""]","[""filter"", ""growth"", ""expense"", ""city"", ""year""]",True,[],True,,False,6,0,4,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+cand_000085,"Quel score composite (0,6 × moyenne des recettes D002 + 0,4 × taux de croissance des dépenses D001) attribuer à chaque commune et quelles sont les 10 meilleures ?","WITH avg_rev AS (
+    SELECT d.city_name,
+           SUM(CAST(er.value AS REAL)) / 2.0 AS avg_D002
+    FROM documents d
+    JOIN extraction_results er ON er.document_id = d.document_id
+    WHERE er.safir_field_id = 'D002'
+      AND d.document_year IN ('2023','2024')
+    GROUP BY d.city_name
+),
+     d001_2023 AS (
+    SELECT d.city_name,
+           SUM(CAST(er.value AS REAL)) AS d001_2023
+    FROM documents d
+    JOIN extraction_results er ON er.document_id = d.document_id
+    WHERE er.safir_field_id = 'D001' AND d.document_year = '2023'
+    GROUP BY d.city_name
+),
+     d001_2024 AS (
+    SELECT d.city_name,
+           SUM(CAST(er.value AS REAL)) AS d001_2024
+    FROM documents d
+    JOIN extraction_results er ON er.document_id = d.document_id
+    WHERE er.safir_field_id = 'D001' AND d.document_year = '2024'
+    GROUP BY d.city_name
+)
+SELECT a.city_name,
+       ROUND(0.6 * a.avg_D002 + 0.4 * ((b.d001_2024 - b.d001_2023) * 100.0 / NULLIF(b.d001_2023, 0)), 2) AS score_composite
+FROM avg_rev a
+JOIN (
+    SELECT d001_2023.city_name,
+           d001_2023.d001_2023,
+           d001_2024.d001_2024
+    FROM d001_2023
+    JOIN d001_2024 USING (city_name)
+) b ON a.city_name = b.city_name
+ORDER BY score_composite DESC
+LIMIT 10;",hard,"[""documents"", ""extraction_results""]","[""composite_score"", ""revenue"", ""expense"", ""growth"", ""city""]",True,[],True,,False,9,0,2,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+cand_000086,"Pour chaque commune, quel est le pourcentage de résultats d'extraction qui ont reçu une erreur technique (is_technical_error = 1) ?","WITH total AS (
+    SELECT d.city_name,
+           COUNT(*) AS total_results
+    FROM documents d
+    JOIN extraction_results er ON er.document_id = d.document_id
+    GROUP BY d.city_name
+),
+     tech AS (
+    SELECT d.city_name,
+           COUNT(*) AS tech_errors
+    FROM documents d
+    JOIN extraction_results er ON er.document_id = d.document_id
+    JOIN resultfeedbacks rf ON rf.result_id = er.result_id
+    WHERE rf.is_technical_error = 1
+    GROUP BY d.city_name
+)
+SELECT t.city_name,
+       ROUND(100.0 * tech.tech_errors / NULLIF(t.total_results, 0), 2) AS pct_tech_errors
+FROM total t
+JOIN tech ON t.city_name = tech.city_name
+WHERE pct_tech_errors > 20
+ORDER BY pct_tech_errors DESC;",hard,"[""documents"", ""extraction_results"", ""resultfeedbacks""]","[""percentage"", ""technical_error"", ""city""]",True,[],True,,False,5,0,2,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+cand_000087,"Pour chaque année, quelle est la médiane des dépenses (D001) par commune et quelles communes dépassent le 90e percentile ?","WITH per_commune AS (
+    SELECT d.document_year,
+           d.city_name,
+           SUM(CAST(er.value AS REAL)) AS total_D001
+    FROM documents d
+    JOIN extraction_results er ON er.document_id = d.document_id
+    WHERE er.safir_field_id = 'D001'
+    GROUP BY d.document_year, d.city_name
+),
+     thresholds AS (
+    SELECT document_year,
+           MAX(total_D001) AS p90_D001
+    FROM (
+        SELECT document_year,
+               total_D001,
+               ROW_NUMBER() OVER (PARTITION BY document_year ORDER BY total_D001) AS rn,
+               COUNT(*) OVER (PARTITION BY document_year) AS cnt
+        FROM per_commune
+    )
+    WHERE rn > 0.9 * cnt
+    GROUP BY document_year
+)
+SELECT pc.document_year,
+       pc.city_name,
+       pc.total_D001
+FROM per_commune pc
+JOIN thresholds th ON pc.document_year = th.document_year
+WHERE pc.total_D001 > th.p90_D001
+ORDER BY pc.document_year, pc.total_D001 DESC;",hard,"[""documents"", ""extraction_results""]","[""percentile"", ""median"", ""expense"", ""city"", ""year""]",True,[],True,,False,3,0,3,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+cand_000088,Combien de documents sont déposés chaque année ?,"SELECT d.document_year AS annee, COUNT(*) AS nb_documents FROM documents d GROUP BY d.document_year ORDER BY annee;",easy,"[""documents""]","[""count_documents"", ""yearly""]",True,[],True,,False,0,2,2,325da3e9c2c0d0c703998654e03a60e773d3d664e0776aeefa1891bfa4e1b620
+cand_000089,Quel pourcentage des documents est en état « SUCCESS » chaque année ?,"SELECT d.document_year AS annee,
+       ROUND(100.0 * SUM(CASE WHEN s.code = 'SUCCESS' THEN 1 ELSE 0 END) / COUNT(*), 2) AS pct_success
+FROM documents d
+JOIN states s ON d.state_id = s.state_id
+GROUP BY d.document_year
+ORDER BY annee;",easy,"[""documents"", ""states""]","[""percentage_success"", ""yearly"", ""state""]",True,[],True,,False,1,2,2,f2c9b56a9258c6e849086dd476df0ec48248e2e4d03cc5fc91dd60fbccad7f84
+cand_000090,Quel est le nombre moyen de résultats d'extraction par document pour chaque type de masque ?,"SELECT sub.mask,
+       ROUND(AVG(sub.cnt), 2) AS avg_results_par_doc
+FROM (
+    SELECT d.document_id, d.mask, COUNT(r.result_id) AS cnt
+    FROM documents d
+    LEFT JOIN extraction_results r ON r.document_id = d.document_id
+    GROUP BY d.document_id
+) sub
+GROUP BY sub.mask
+ORDER BY sub.mask;",easy,"[""documents"", ""extraction_results""]","[""avg_extraction_results"", ""mask"", ""per_document""]",True,[],True,,False,6,3,2,fb51f6c5ff0019c0a7b43066d84decf097aa4d3a5e24f1c2a214bb1b12c1319f
+cand_000091,Quelles sont les 5 communes qui ont le plus de dépenses (champ D001) en 2024 ?,"SELECT d.city_name,
+       SUM(CAST(r.value AS REAL)) AS total_depenses
+FROM documents d
+JOIN extraction_results r ON r.document_id = d.document_id
+WHERE d.document_year = '2024' AND r.safir_field_id = 'D001'
+GROUP BY d.city_name
+ORDER BY total_depenses DESC
+LIMIT 5;",easy,"[""documents"", ""extraction_results""]","[""top_expenses"", ""d001"", ""2024"", ""commune""]",True,[],True,,False,3,5,2,660a56580e7e531ede9b2712726a044543ea8e2eb77513144d88c4b8e76e0ebd
+cand_000092,Quel pourcentage des documents comporte un message d’erreur chaque année ?,"SELECT d.document_year AS annee,
+       ROUND(100.0 * SUM(CASE WHEN TRIM(d.error_message) <> '' THEN 1 ELSE 0 END) / COUNT(*), 2) AS pct_avec_erreur
+FROM documents d
+GROUP BY d.document_year
+ORDER BY annee;",easy,"[""documents""]","[""error_percentage"", ""yearly"", ""documents""]",True,[],True,,False,0,2,2,f54ba01a91bf0d1322e254323b87e983d1ce0e2895530205a698b628ed9f7696
+cand_000093,"Combien de résultats d’extraction contiennent un message d’erreur, ventilés par type de masque ?","SELECT d.mask,
+       COUNT(r.result_id) AS nb_erreurs
+FROM documents d
+JOIN extraction_results r ON r.document_id = d.document_id
+WHERE r.message_error IS NOT NULL AND TRIM(r.message_error) <> ''
+GROUP BY d.mask
+ORDER BY nb_erreurs DESC;",easy,"[""documents"", ""extraction_results""]","[""extraction_error_count"", ""mask"", ""results""]",True,[],True,,False,9,3,2,b93e7b7576ccce211045e3cb0959aa76d5d436afd6ca81c6aac390d4568cd433
+cand_000094,Combien d’extractions ont été exécutées selon leur état (code) ?,"SELECT s.code AS etat,
+       COUNT(*) AS nb_extractions
+FROM extraction_runs er
+JOIN states s ON er.state_id = s.state_id
+GROUP BY s.code
+ORDER BY nb_extractions DESC;",easy,"[""extraction_runs"", ""states""]","[""extraction_runs_state"", ""count""]",True,[],True,,False,1,3,2,a9750a7c819d2558640b51ab981b98ac4d3fe7525ae2abee69ef8274e55ef5f9
+cand_000095,"Quel est le ratio dépenses D001 / recettes D002 pour chaque commune en 2024, classé du plus élevé au plus bas ?","WITH sums AS (
+  SELECT d.city_name,
+         r.safir_field_id,
+         SUM(CAST(r.value AS REAL)) AS total_val
+  FROM documents d
+  JOIN extraction_results r ON r.document_id = d.document_id
+  WHERE d.document_year = '2024' AND r.safir_field_id IN ('D001','D002')
+  GROUP BY d.city_name, r.safir_field_id
+)
+SELECT d.city_name,
+       ROUND( (d.expenses / NULLIF(d.revenues,0)), 2) AS ratio_dep_rec
+FROM (
+    SELECT city_name,
+           MAX(CASE WHEN safir_field_id = 'D001' THEN total_val END) AS expenses,
+           MAX(CASE WHEN safir_field_id = 'D002' THEN total_val END) AS revenues
+    FROM sums
+    GROUP BY city_name
+) d
+WHERE d.revenues IS NOT NULL
+ORDER BY ratio_dep_rec DESC;",medium,"[""documents"", ""extraction_results""]","[""ratio_expenses_revenues"", ""d001_d002"", ""2024"", ""commune""]",True,[],True,,False,4,18,2,5ef822f1ab2c13bf0cf234648c788459fb32a389adde46af276f7dbb63a1298a
+cand_000096,Quelle est la moyenne des dépenses D001 par type de budget (BP ou BA) pour l’année 2023 ?,"SELECT d.budget_type,
+       ROUND(AVG(CAST(r.value AS REAL)), 2) AS moyenne_depenses
+FROM documents d
+JOIN extraction_results r ON r.document_id = d.document_id
+WHERE d.document_year = '2023' AND r.safir_field_id = 'D001'
+GROUP BY d.budget_type
+ORDER BY d.budget_type;",medium,"[""documents"", ""extraction_results""]","[""average_expenses"", ""budget_type"", ""2023"", ""d001""]",True,[],True,,False,3,2,2,902bab87af4dd0a583d8cd377dd669dcdaabd7c792945966b9b13675714d47ff
+cand_000097,"Quel est le résultat net (recettes D002 – dépenses D001) de chaque commune en 2024, et quelles sont les 5 meilleures performances ?","WITH sums AS (
+  SELECT d.city_name,
+         r.safir_field_id,
+         SUM(CAST(r.value AS REAL)) AS total_val
+  FROM documents d
+  JOIN extraction_results r ON r.document_id = d.document_id
+  WHERE d.document_year = '2024' AND r.safir_field_id IN ('D001','D002')
+  GROUP BY d.city_name, r.safir_field_id
+)
+SELECT city_name,
+       ROUND(revenues - expenses, 2) AS resultat_net
+FROM (
+    SELECT city_name,
+           MAX(CASE WHEN safir_field_id = 'D001' THEN total_val END) AS expenses,
+           MAX(CASE WHEN safir_field_id = 'D002' THEN total_val END) AS revenues
+    FROM sums
+    GROUP BY city_name
+) sub
+ORDER BY resultat_net DESC
+LIMIT 5;",medium,"[""documents"", ""extraction_results""]","[""net_result"", ""d001_d002"", ""2024"", ""top5""]",True,[],True,,False,3,5,2,1fbddfe6ccf8afa4e3c4e74638f1b8d1381cf5a7ab862ba06b1b81f126d0b25b
+cand_000098,"Combien de documents contiennent au moins un résultat d’extraction avec un message d’erreur, ventilés par type de masque ?","SELECT d.mask,
+       COUNT(DISTINCT d.document_id) AS nb_documents_avec_erreur
+FROM documents d
+JOIN extraction_results r ON r.document_id = d.document_id
+WHERE r.message_error IS NOT NULL AND TRIM(r.message_error) <> ''
+GROUP BY d.mask
+ORDER BY nb_documents_avec_erreur DESC;",medium,"[""documents"", ""extraction_results""]","[""documents_with_error"", ""mask"", ""extraction""]",True,[],True,,False,10,3,2,b2d26bc5783ba8e2fc507babf50f757d1271e9407e67648f0c6c7e97ca4d8c92
+cand_000099,"Quel score composite (0,6 × moyenne des recettes D002 + 0,4 × taux de croissance des dépenses D001 entre 2023‑2024) attribuer à chaque commune, et quelles sont les 10 meilleures ?","WITH expenses AS (
+  SELECT d.city_name,
+         d.document_year,
+         SUM(CAST(r.value AS REAL)) AS total_dep
+  FROM documents d
+  JOIN extraction_results r ON r.document_id = d.document_id
+  WHERE r.safir_field_id = 'D001' AND d.document_year IN ('2023','2024')
+  GROUP BY d.city_name, d.document_year
+),
+revenues AS (
+  SELECT d.city_name,
+         SUM(CAST(r.value AS REAL)) AS total_rec
+  FROM documents d
+  JOIN extraction_results r ON r.document_id = d.document_id
+  WHERE r.safir_field_id = 'D002' AND d.document_year = '2024'
+  GROUP BY d.city_name
+),
+ growth AS (
+  SELECT e2023.city_name,
+         ((e2024.total_dep - e2023.total_dep) / NULLIF(e2023.total_dep,0)) * 100.0 AS growth_pct
+  FROM expenses e2023
+  JOIN expenses e2024 ON e2023.city_name = e2024.city_name
+  WHERE e2023.document_year = '2023' AND e2024.document_year = '2024'
+)
+SELECT g.city_name,
+       ROUND(0.6 * r.total_rec + 0.4 * g.growth_pct, 2) AS score_composite
+FROM growth g
+JOIN revenues r ON g.city_name = r.city_name
+ORDER BY score_composite DESC
+LIMIT 10;",medium,"[""documents"", ""extraction_results""]","[""composite_score"", ""growth"", ""revenues"", ""hard""]",True,[],True,,False,3,0,2,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+cand_000100,"Quel est le délai moyen, en heures, entre la création du document et le lancement de l’extraction pour chaque année ?","SELECT d.document_year AS annee,
+       ROUND(AVG( (julianday(er.start_time) - julianday(d.created_at)) * 24 ), 2) AS délai_moyen_heures
+FROM documents d
+JOIN extraction_runs er ON er.document_id = d.document_id
+GROUP BY d.document_year
+ORDER BY annee;",medium,"[""documents"", ""extraction_runs""]","[""extraction_delay"", ""yearly"", ""hours""]",True,[],True,,False,0,2,2,5927e58832d4ab2a4782dcde443173d8012d42a88198ac0f12e6586361bcbc4b
+cand_000101,"Quelles communes présentent, en 2024, un écart supérieur à 5 % entre la somme des dépenses D001 et des recettes D002 et le champ total déclaré (safir_field_id = 'Total') ?","WITH sums AS (
+  SELECT d.city_name,
+         r.safir_field_id,
+         SUM(CAST(r.value AS REAL)) AS total_val
+  FROM documents d
+  JOIN extraction_results r ON r.document_id = d.document_id
+  WHERE d.document_year = '2024' AND r.safir_field_id IN ('D001','D002','Total')
+  GROUP BY d.city_name, r.safir_field_id
+),
+combined AS (
+  SELECT city_name,
+         MAX(CASE WHEN safir_field_id = 'D001' THEN total_val END) AS dep,
+         MAX(CASE WHEN safir_field_id = 'D002' THEN total_val END) AS rec,
+         MAX(CASE WHEN safir_field_id = 'Total' THEN total_val END) AS total_declared
+  FROM sums
+  GROUP BY city_name
+)
+SELECT city_name,
+       ROUND(((dep + rec) - total_declared) / NULLIF(total_declared,0) * 100.0, 2) AS ecart_pct
+FROM combined
+WHERE total_declared IS NOT NULL
+  AND ABS(((dep + rec) - total_declared) / NULLIF(total_declared,0) * 100.0) > 5
+ORDER BY ecart_pct DESC;",hard,"[""documents"", ""extraction_results""]","[""total_discrepancy"", ""d001_d002"", ""total"", ""hard""]",True,[],True,,False,4,0,2,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+cand_000102,"Combien de documents ont à la fois un résultat d’extraction avec un message d’erreur et un feedback technique (is_technical_error = 1), ventilés par année ?","SELECT d.document_year AS annee,
+       COUNT(DISTINCT d.document_id) AS nb_documents
+FROM documents d
+JOIN extraction_results r ON r.document_id = d.document_id
+JOIN resultfeedbacks f ON f.result_id = r.result_id
+WHERE r.message_error IS NOT NULL AND TRIM(r.message_error) <> ''
+  AND f.is_technical_error = 1
+GROUP BY d.document_year
+ORDER BY annee;",hard,"[""documents"", ""extraction_results"", ""resultfeedbacks""]","[""error_and_technical_feedback"", ""documents"", ""yearly"", ""hard""]",True,[],True,,False,0,0,2,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+cand_000103,Quelle est la médiane des dépenses D001 par type de masque pour l’année 2024 ?,"WITH ordered AS (
+  SELECT d.mask,
+         CAST(r.value AS REAL) AS dep,
+         ROW_NUMBER() OVER (PARTITION BY d.mask ORDER BY CAST(r.value AS REAL)) AS rn,
+         COUNT(*) OVER (PARTITION BY d.mask) AS cnt
+  FROM documents d
+  JOIN extraction_results r ON r.document_id = d.document_id
+  WHERE d.document_year = '2024' AND r.safir_field_id = 'D001'
+)
+SELECT mask,
+       AVG(dep) AS median_depenses
+FROM ordered
+WHERE rn IN ( (cnt+1)/2 , (cnt+2)/2 )
+GROUP BY mask;",hard,"[""documents"", ""extraction_results""]","[""median_expenses"", ""mask"", ""2024"", ""hard""]",True,[],True,,False,3,2,2,651f8d9aec6a36d58441b960333c6df2273fd6949c1fc4783740c76513358c77
+cand_000104,"Pour chaque commune, quel pourcentage des résultats d’extraction possède un avertissement (message_warning non vide) en 2024 ?","SELECT d.city_name,
+       ROUND(100.0 * SUM(CASE WHEN r.message_warning IS NOT NULL AND TRIM(r.message_warning) <> '' THEN 1 ELSE 0 END) / COUNT(r.result_id), 2) AS pct_avertissements
+FROM documents d
+JOIN extraction_results r ON r.document_id = d.document_id
+WHERE d.document_year = '2024'
+GROUP BY d.city_name
+ORDER BY pct_avertissements DESC;",hard,"[""documents"", ""extraction_results""]","[""warning_percentage"", ""commune"", ""2024"", ""hard""]",True,[],True,,False,8,18,2,66ca99ac032ee32c14b5f64bc083f117a282535cb248c9b80e1b5537f302eca1
+cand_000105,Quelle est la moyenne du nombre de pages par document selon le masque ?,"SELECT mask,
+       ROUND(AVG(nb_pages), 2) AS avg_pages
+FROM documents
+GROUP BY mask
+ORDER BY avg_pages DESC;",easy,"[""documents""]","[""average"", ""pages"", ""mask""]",True,[],True,,False,0,3,2,b38c341d52fdaab62e939ba116e54ad3a57aeda0a56b83e24b5dd4a1ae4ce6f9
+cand_000106,"Combien de documents ont été déposés en 2024, répartis par type de budget (BP/BA) ?","SELECT budget_type,
+       COUNT(*) AS nb_documents
+FROM documents
+WHERE document_year = '2024'
+GROUP BY budget_type;",easy,"[""documents""]","[""count"", ""budget_type"", ""year""]",True,[],True,,False,0,2,2,ba46f0bbb28582e2a4da485d930010da2c67c978a6d0bd4e00ba49522192935d
+cand_000107,Quelles sont les 5 communes qui ont le plus grand nombre de documents en 2023 ?,"SELECT city_name,
+       COUNT(*) AS nb_documents
+FROM documents
+WHERE document_year = '2023'
+GROUP BY city_name
+ORDER BY nb_documents DESC
+LIMIT 5;",easy,"[""documents""]","[""top"", ""communes"", ""documents"", ""year""]",True,[],True,,False,0,5,2,3fcc2cdefb5f8ae55f10c5af6e821dce92e66962c561a867ec9c147591a63509
+cand_000108,Combien d'extractions ont été exécutées selon leur état (code) ?,"SELECT s.code AS state_code,
+       COUNT(*) AS nb_runs
+FROM extraction_runs er
+JOIN states s ON er.state_id = s.state_id
+GROUP BY s.code
+ORDER BY nb_runs DESC;",easy,"[""extraction_runs"", ""states""]","[""count"", ""extraction_runs"", ""state""]",True,[],True,,False,1,3,2,ef1a3232450f4da4bf8c15f9e9da40c117ce7836047ca573136b94145cfec83b
+cand_000109,Combien de champs SAFIR différents ont été extraits pour chaque masque ?,"SELECT d.mask,
+       COUNT(DISTINCT er.safir_field_id) AS nb_fields
+FROM extraction_results er
+JOIN documents d ON er.document_id = d.document_id
+GROUP BY d.mask
+ORDER BY nb_fields DESC;",easy,"[""extraction_results"", ""documents""]","[""distinct"", ""fields"", ""mask""]",True,[],True,,False,9,3,2,052258378064ca2ee9269a492c3a3b6057b1fc1396198812cc62699b6b36683e
+cand_000110,Quel pourcentage de documents comporte au moins un avertissement chaque année ?,"SELECT d.document_year,
+       ROUND(100.0 * SUM(CASE WHEN TRIM(d.warning_message) <> '' THEN 1 ELSE 0 END) / COUNT(*), 2) AS pct_warning
+FROM documents d
+GROUP BY d.document_year
+ORDER BY d.document_year;",easy,"[""documents""]","[""percentage"", ""warning"", ""documents"", ""year""]",True,[],True,,False,0,2,2,fa05b0747d9a7cfc12169c6feef31efdb5964c12a855d8e0771f91e6ac400914
+cand_000111,"Quel est le ratio dépenses D001 / recettes D002 par commune pour 2023, et quelles sont les 10 meilleures ?","SELECT d.city_name,
+       ROUND(SUM(CASE WHEN er.safir_field_id = 'D001' THEN CAST(er.value AS REAL) END) /
+             NULLIF(SUM(CASE WHEN er.safir_field_id = 'D002' THEN CAST(er.value AS REAL) END),0), 4) AS ratio_D001_D002
+FROM extraction_results er
+JOIN documents d ON er.document_id = d.document_id
+WHERE d.document_year = '2023' AND er.safir_field_id IN ('D001','D002')
+GROUP BY d.city_name
+HAVING SUM(CASE WHEN er.safir_field_id = 'D002' THEN 1 END) > 0
+ORDER BY ratio_D001_D002 DESC
+LIMIT 10;",medium,"[""extraction_results"", ""documents""]","[""ratio"", ""expenses"", ""revenues"", ""d001"", ""d002"", ""commune"", ""year""]",True,[],True,,False,3,6,2,3d7c9f8aa898b4e99fe657b72bc3a7d36b35138acea5a8a2e84cac7e1aad2959
+cand_000112,Quel est le taux de croissance des dépenses D001 entre 2023 et 2024 pour chaque commune ?,"WITH d AS (
+  SELECT d.city_name,
+         d.document_year,
+         SUM(CAST(er.value AS REAL)) AS sum_D001
+  FROM extraction_results er
+  JOIN documents d ON er.document_id = d.document_id
+  WHERE er.safir_field_id = 'D001' AND d.document_year IN ('2023','2024')
+  GROUP BY d.city_name, d.document_year
+)
+SELECT c.city_name,
+       ROUND( (COALESCE(d2024.sum_D001,0) - COALESCE(d2023.sum_D001,0)) /
+              NULLIF(COALESCE(d2023.sum_D001,0),0) * 100.0, 2) AS growth_pct
+FROM (SELECT DISTINCT city_name FROM d) c
+LEFT JOIN d d2023 ON d2023.city_name = c.city_name AND d2023.document_year = '2023'
+LEFT JOIN d d2024 ON d2024.city_name = c.city_name AND d2024.document_year = '2024'
+WHERE COALESCE(d2023.sum_D001,0) > 0
+ORDER BY growth_pct DESC;",medium,"[""extraction_results"", ""documents""]","[""growth"", ""d001"", ""year"", ""commune""]",True,[],True,,False,3,5,2,32516870ebbfa627c19baa53a2f6257e0a3d99b46946bf6258e6334032c06f29
+cand_000113,Quelles communes ont des dépenses D001 supérieures à 120 % des recettes D002 en 2024 ?,"SELECT d.city_name,
+       SUM(CASE WHEN er.safir_field_id = 'D001' THEN CAST(er.value AS REAL) END) AS total_D001,
+       SUM(CASE WHEN er.safir_field_id = 'D002' THEN CAST(er.value AS REAL) END) AS total_D002
+FROM extraction_results er
+JOIN documents d ON er.document_id = d.document_id
+WHERE d.document_year = '2024' AND er.safir_field_id IN ('D001','D002')
+GROUP BY d.city_name
+HAVING total_D001 > 1.2 * total_D002
+ORDER BY total_D001 DESC;",medium,"[""extraction_results"", ""documents""]","[""threshold"", ""expenses"", ""revenues"", ""ratio"", ""commune"", ""year""]",True,[],True,,False,3,15,3,f23da213d617aba12c4b96fc613005384f49698aa3cbc8a07f15af372e8cb58a
+cand_000114,"Quel est le temps moyen (en heures) entre la création du document et le lancement de l'extraction, selon le code d'état du document ?","SELECT s.code AS state_code,
+       ROUND(AVG((julianday(er.start_time) - julianday(d.created_at)) * 24.0), 2) AS avg_hours
+FROM extraction_runs er
+JOIN documents d ON er.document_id = d.document_id
+JOIN states s ON d.state_id = s.state_id
+WHERE er.start_time IS NOT NULL
+GROUP BY s.code
+ORDER BY avg_hours DESC;",medium,"[""extraction_runs"", ""documents"", ""states""]","[""average"", ""processing_time"", ""hours"", ""state""]",True,[],True,,False,1,3,2,0bfe587e6a91dd4bad500473ed91881310c269c23fdd05545d7805a10f3aab6d
+cand_000115,"Quel est le résultat net (recettes D002 – dépenses D001) par commune pour 2024, et quelles sont les 5 meilleures performances ?","SELECT d.city_name,
+       ROUND(SUM(CASE WHEN er.safir_field_id = 'D002' THEN CAST(er.value AS REAL) END) -
+             SUM(CASE WHEN er.safir_field_id = 'D001' THEN CAST(er.value AS REAL) END), 2) AS net_result
+FROM extraction_results er
+JOIN documents d ON er.document_id = d.document_id
+WHERE d.document_year = '2024' AND er.safir_field_id IN ('D001','D002')
+GROUP BY d.city_name
+ORDER BY net_result DESC
+LIMIT 5;",medium,"[""extraction_results"", ""documents""]","[""net_result"", ""revenues"", ""expenses"", ""commune"", ""year""]",True,[],True,,False,3,5,2,a95caffe2d80835b0ff049408792f109af631e24e52736a516a8ad751cf19c65
+cand_000116,"Combien de documents contiennent au moins un résultat d'extraction avec un message d'erreur, par année ?","SELECT d.document_year,
+       COUNT(DISTINCT d.document_id) AS nb_documents_with_error
+FROM documents d
+JOIN extraction_results er ON er.document_id = d.document_id
+WHERE TRIM(er.message_error) <> ''
+GROUP BY d.document_year
+ORDER BY d.document_year;",medium,"[""documents"", ""extraction_results""]","[""count"", ""documents"", ""error"", ""year""]",True,[],True,,False,9,2,2,fdddfd2c2b87096b5057bac264b447dc30256ba8f34bc28b9c22a21752af96af
+cand_000117,Quels documents présentent une différence supérieure à 5 % entre la somme des dépenses D001 et des recettes D002 et le champ total déclaré ?,"SELECT d.document_id,
+       d.city_name,
+       d.document_year,
+       ROUND( (COALESCE(sum_D001,0) + COALESCE(sum_D002,0) - COALESCE(sum_Total,0)) / NULLIF(COALESCE(sum_Total,0),0) * 100.0, 2) AS diff_pct
+FROM (
+  SELECT er.document_id,
+         SUM(CASE WHEN er.safir_field_id = 'D001' THEN CAST(er.value AS REAL) END) AS sum_D001,
+         SUM(CASE WHEN er.safir_field_id = 'D002' THEN CAST(er.value AS REAL) END) AS sum_D002,
+         SUM(CASE WHEN er.safir_field_id = 'Total' THEN CAST(er.value AS REAL) END) AS sum_Total
+  FROM extraction_results er
+  GROUP BY er.document_id
+) agg
+JOIN documents d ON d.document_id = agg.document_id
+WHERE sum_Total IS NOT NULL AND ABS((COALESCE(sum_D001,0) + COALESCE(sum_D002,0) - sum_Total)) > 0.05 * sum_Total
+ORDER BY diff_pct DESC;",hard,"[""extraction_results"", ""documents""]","[""anomaly"", ""total"", ""expenses"", ""revenues"", ""difference"", ""document""]",True,[],True,,False,6,0,4,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+cand_000118,Quelle est la médiane des dépenses D001 par type de budget pour l'année 2023 ?,"WITH ranked AS (
+  SELECT d.budget_type,
+         CAST(er.value AS REAL) AS val,
+         ROW_NUMBER() OVER (PARTITION BY d.budget_type ORDER BY CAST(er.value AS REAL)) AS rn,
+         COUNT(*) OVER (PARTITION BY d.budget_type) AS cnt
+  FROM extraction_results er
+  JOIN documents d ON er.document_id = d.document_id
+  WHERE er.safir_field_id = 'D001' AND d.document_year = '2023'
+)
+SELECT budget_type,
+       ROUND(AVG(val),2) AS median_D001
+FROM ranked
+WHERE rn IN ( (cnt+1)/2 , (cnt+2)/2 )
+GROUP BY budget_type;",hard,"[""extraction_results"", ""documents""]","[""median"", ""d001"", ""budget_type"", ""year""]",True,[],True,,False,3,2,2,e254379375531e8c67386a94c232d8ad712270ce3ef97e1804ca3054a7f46aa2
+cand_000119,Quelles communes affichent une baisse continue des dépenses D001 sur les trois dernières années (2022‑2024) ?,"WITH yearly AS (
+  SELECT d.city_name,
+         d.document_year,
+         SUM(CAST(er.value AS REAL)) AS sum_D001
+  FROM extraction_results er
+  JOIN documents d ON er.document_id = d.document_id
+  WHERE er.safir_field_id = 'D001' AND d.document_year IN ('2022','2023','2024')
+  GROUP BY d.city_name, d.document_year
+)
+SELECT y1.city_name
+FROM yearly y1
+JOIN yearly y2 ON y2.city_name = y1.city_name AND y2.document_year = '2023'
+JOIN yearly y3 ON y3.city_name = y1.city_name AND y3.document_year = '2024'
+WHERE y1.document_year = '2022'
+  AND y1.sum_D001 > y2.sum_D001
+  AND y2.sum_D001 > y3.sum_D001;",hard,"[""extraction_results"", ""documents""]","[""trend"", ""decreasing"", ""d001"", ""years"", ""commune""]",True,[],True,,False,3,0,1,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+cand_000120,Quel pourcentage de résultats d'extraction comporte un avertissement pour chaque commune en 2024 ?,"SELECT d.city_name,
+       ROUND(100.0 * SUM(CASE WHEN TRIM(er.message_warning) <> '' THEN 1 ELSE 0 END) / COUNT(*), 2) AS pct_warning_results
+FROM extraction_results er
+JOIN documents d ON er.document_id = d.document_id
+WHERE d.document_year = '2024'
+GROUP BY d.city_name
+ORDER BY pct_warning_results DESC;",hard,"[""extraction_results"", ""documents""]","[""percentage"", ""warning"", ""extraction_results"", ""commune"", ""year""]",True,[],True,,False,8,18,2,4bd25969d4c54658934eb2de1dda71660af524aa45bc0559875b6c06a77db5e4
+cand_000121,Quel est le nombre total de résultats d'extraction obtenus par champ SAFIR ?,"SELECT er.safir_field_id, COUNT(*) AS nb_results
+FROM extraction_results er
+GROUP BY er.safir_field_id
+ORDER BY nb_results DESC;",easy,"[""extraction_results""]","[""count_results_per_field""]",True,[],True,,False,7,141,2,31475df13b2f998fb81866f05aece5607dda95b37a916926c172c49e1622180b
+cand_000122,Quelle est la moyenne du nombre de pages par type de masque ?,"SELECT d.mask, AVG(d.nb_pages) AS avg_pages
+FROM documents d
+GROUP BY d.mask;",easy,"[""documents""]","[""avg_pages_per_mask""]",True,[],True,,False,0,3,2,86131d67d4006cf8cd8e1a2487cc6d91e843027c12c632c8d61a140fabc92fd6
+cand_000123,"Quel est le total des dépenses (champ D001) pour la commune ""BAGNOLET VILLE - VILLE"" en 2024 ?","SELECT d.city_name,
+       SUM(CAST(er.value AS REAL)) AS total_expenses
+FROM extraction_results er
+JOIN documents d ON er.document_id = d.document_id
+WHERE er.safir_field_id = 'D001' AND d.document_year = '2024' AND d.city_name = 'BAGNOLET VILLE - VILLE'
+GROUP BY d.city_name;",easy,"[""extraction_results"", ""documents""]","[""total_expenses_city_year""]",True,[],True,,False,1,1,2,2bf3f548e5e6a3b33b65d1f4e48b4d5ec9c41e2de17ad0d08ba3f47f7f3d196b
+cand_000124,Combien de documents contiennent au moins un message d'erreur d'extraction par année ?,"SELECT d.document_year,
+       COUNT(DISTINCT d.document_id) AS docs_with_error
+FROM extraction_results er
+JOIN documents d ON er.document_id = d.document_id
+WHERE er.message_error IS NOT NULL AND er.message_error <> ''
+GROUP BY d.document_year;",easy,"[""extraction_results"", ""documents""]","[""docs_with_error_per_year""]",True,[],True,,False,9,2,2,2535bdeb1432d0a90ad9e8b885577103e8c7ad3348ee068dc83de0d82273c9c0
+cand_000125,Quelle est la moyenne des dépenses (D001) par type de budget (BP ou BA) pour l'année 2023 ?,"SELECT d.budget_type,
+       AVG(CAST(er.value AS REAL)) AS avg_expense
+FROM extraction_results er
+JOIN documents d ON er.document_id = d.document_id
+WHERE er.safir_field_id = 'D001' AND d.document_year = '2023'
+GROUP BY d.budget_type;",easy,"[""extraction_results"", ""documents""]","[""avg_expense_by_budget_type""]",True,[],True,,False,3,2,2,4cdde9f479e6b3ca4e7369ba00e38ecaa4c841a5918b73f9a7be0d9358679543
+cand_000126,Combien de champs SAFIR différents ont été extraits pour le masque M57_CA ?,"SELECT COUNT(DISTINCT er.safir_field_id) AS nb_fields
+FROM extraction_results er
+JOIN documents d ON er.document_id = d.document_id
+WHERE d.mask = 'M57_CA';",easy,"[""extraction_results"", ""documents""]","[""distinct_fields_per_mask""]",True,[],True,,False,6,1,1,2bf3f548e5e6a3b33b65d1f4e48b4d5ec9c41e2de17ad0d08ba3f47f7f3d196b
+cand_000127,"Quel est le ratio dépenses (D001) / recettes (D002) par commune en 2024, classé du plus élevé au plus bas, top 10 ?","SELECT d.city_name,
+       SUM(CASE WHEN er.safir_field_id = 'D001' THEN CAST(er.value AS REAL) ELSE 0 END) /
+       NULLIF(SUM(CASE WHEN er.safir_field_id = 'D002' THEN CAST(er.value AS REAL) END),0) AS expense_rev_ratio
+FROM extraction_results er
+JOIN documents d ON er.document_id = d.document_id
+WHERE d.document_year = '2024'
+GROUP BY d.city_name
+HAVING SUM(CASE WHEN er.safir_field_id = 'D002' THEN 1 ELSE 0 END) > 0
+ORDER BY expense_rev_ratio DESC
+LIMIT 10;",medium,"[""extraction_results"", ""documents""]","[""expense_rev_ratio_top10""]",True,[],True,,False,9,10,2,e9ebe9ad6e0bafdb67ce883cbfc797ade8539730e456ff3d55ff4843f8f7ae36
+cand_000128,Quelles communes ont vu leurs dépenses (D001) croître de plus de 20 % entre 2023 et 2024 ?,"WITH exp AS (
+  SELECT d.city_name,
+         d.document_year,
+         SUM(CAST(er.value AS REAL)) AS total_exp
+  FROM extraction_results er
+  JOIN documents d ON er.document_id = d.document_id
+  WHERE er.safir_field_id = 'D001' AND d.document_year IN ('2023','2024')
+  GROUP BY d.city_name, d.document_year
+)
+SELECT e2024.city_name,
+       ((e2024.total_exp - e2023.total_exp) / NULLIF(e2023.total_exp,0)) * 100.0 AS growth_pct
+FROM exp e2024
+JOIN exp e2023 ON e2024.city_name = e2023.city_name
+WHERE e2024.document_year = '2024' AND e2023.document_year = '2023'
+  AND e2023.total_exp > 0
+  AND ((e2024.total_exp - e2023.total_exp) / e2023.total_exp) * 100.0 > 20
+ORDER BY growth_pct DESC;",medium,"[""extraction_results"", ""documents""]","[""expense_growth_over_20pct""]",True,[],True,,False,3,0,2,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+cand_000129,"Combien de résultats d'extraction sont obtenus en moyenne par document, ventilés par type de masque ?","SELECT d.mask,
+       AVG(cnt) AS avg_results_per_doc
+FROM (
+  SELECT d.document_id, COUNT(*) AS cnt
+  FROM extraction_results er
+  JOIN documents d ON er.document_id = d.document_id
+  GROUP BY d.document_id
+) sub
+JOIN documents d ON sub.document_id = d.document_id
+GROUP BY d.mask;",medium,"[""extraction_results"", ""documents""]","[""avg_results_per_doc_by_mask""]",True,[],True,,False,2,3,2,a6c8896ff98924a739918be3d8640760e1e663a5b207254a0082d679b86be39b
+cand_000130,"Quel est le pourcentage de résultats d'extraction contenant un avertissement, par champ SAFIR, pour l'année 2024 ?","SELECT er.safir_field_id,
+       ROUND(100.0 * SUM(CASE WHEN er.message_warning IS NOT NULL AND er.message_warning <> '' THEN 1 ELSE 0 END) / COUNT(*),2) AS pct_warning
+FROM extraction_results er
+JOIN documents d ON er.document_id = d.document_id
+WHERE d.document_year = '2024'
+GROUP BY er.safir_field_id
+ORDER BY pct_warning DESC;",medium,"[""extraction_results"", ""documents""]","[""warning_rate_per_field""]",True,[],True,,False,8,126,2,8f47f641bec9a656e64acdadd41deeb1e509b34b3bab39832935234d4274060b
+cand_000131,"Quelles sont les 5 communes avec les recettes (D002) les plus élevées en 2023, et comment leurs recettes se répartissent‑elles selon le type de budget ?","WITH rev AS (
+  SELECT d.city_name,
+         d.budget_type,
+         SUM(CAST(er.value AS REAL)) AS total_rev
+  FROM extraction_results er
+  JOIN documents d ON er.document_id = d.document_id
+  WHERE er.safir_field_id = 'D002' AND d.document_year = '2023'
+  GROUP BY d.city_name, d.budget_type
+), city_total AS (
+  SELECT city_name,
+         SUM(total_rev) AS city_rev
+  FROM rev
+  GROUP BY city_name
+  ORDER BY city_rev DESC
+  LIMIT 5
+)
+SELECT ct.city_name,
+       ct.city_rev,
+       r.budget_type,
+       r.total_rev AS rev_by_budget_type
+FROM city_total ct
+JOIN rev r ON ct.city_name = r.city_name
+ORDER BY ct.city_rev DESC, r.budget_type;",medium,"[""extraction_results"", ""documents""]","[""top_cities_revenue_budget_breakdown""]",True,[],True,,False,3,5,4,25506afe42224862c77684af95b27cc6a790f0ceb023a995f4301a1120e4be76
+cand_000132,"Quel est le délai moyen, en heures, entre la création du document et le lancement de l'extraction, par année ?","SELECT d.document_year,
+       ROUND(AVG((julianday(erun.start_time) - julianday(d.created_at)) * 24),2) AS avg_hours_delay
+FROM documents d
+JOIN extraction_runs erun ON erun.document_id = d.document_id
+GROUP BY d.document_year;",medium,"[""documents"", ""extraction_runs""]","[""avg_delay_hours_per_year""]",True,[],True,,False,0,2,2,56d902ab26ded214cf59fba5cfd5ab10997fd4e45a6c6ab046f43b7387d26d9a
+cand_000133,"Quel pourcentage de documents comporte au moins un message d'erreur d'extraction, par type de masque ?","SELECT d.mask,
+       ROUND(100.0 * COUNT(DISTINCT CASE WHEN EXISTS (
+         SELECT 1 FROM extraction_results er
+         WHERE er.document_id = d.document_id
+           AND er.message_error IS NOT NULL AND er.message_error <> ''
+       ) THEN d.document_id END) / COUNT(*),2) AS pct_docs_with_error
+FROM documents d
+GROUP BY d.mask;",medium,"[""documents"", ""extraction_results""]","[""error_doc_ratio_by_mask""]",True,[],True,,False,1,3,2,9a3ccae90bffb87e5315470e4713be5479a98d12fb33ae92b5bd537398412f4b
+cand_000134,"Quel score composite de risque, combinant la croissance des dépenses et le taux d'avertissements, attribuer à chaque commune et quelles sont les 10 meilleures ?","WITH exp AS (
+  SELECT d.city_name,
+         d.document_year,
+         SUM(CAST(er.value AS REAL)) AS total_exp
+  FROM extraction_results er
+  JOIN documents d ON er.document_id = d.document_id
+  WHERE er.safir_field_id = 'D001' AND d.document_year IN ('2023','2024')
+  GROUP BY d.city_name, d.document_year
+), growth AS (
+  SELECT e2024.city_name,
+         ((e2024.total_exp - e2023.total_exp) / NULLIF(e2023.total_exp,0)) * 100.0 AS growth_pct
+  FROM exp e2024
+  JOIN exp e2023 ON e2024.city_name = e2023.city_name
+  WHERE e2024.document_year = '2024' AND e2023.document_year = '2023'
+), warnings AS (
+  SELECT d.city_name,
+         ROUND(100.0 * SUM(CASE WHEN er.message_warning IS NOT NULL AND er.message_warning <> '' THEN 1 ELSE 0 END) / COUNT(*),2) AS warning_pct
+  FROM extraction_results er
+  JOIN documents d ON er.document_id = d.document_id
+  WHERE d.document_year = '2024'
+  GROUP BY d.city_name
+)
+SELECT g.city_name,
+       ROUND(0.5 * COALESCE(g.growth_pct,0) + 0.5 * COALESCE(w.warning_pct,0),2) AS risk_score
+FROM growth g
+LEFT JOIN warnings w ON g.city_name = w.city_name
+ORDER BY risk_score DESC
+LIMIT 10;",medium,"[""extraction_results"", ""documents""]","[""composite_risk_score""]",True,[],True,,False,3,0,2,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+cand_000135,"Quelles communes présentent, pour une année donnée, des dépenses supérieures à 120 % des recettes, et quel est le pourcentage d'excès ?","WITH sums AS (
+  SELECT d.city_name,
+         d.document_year,
+         SUM(CASE WHEN er.safir_field_id = 'D001' THEN CAST(er.value AS REAL) ELSE 0 END) AS total_exp,
+         SUM(CASE WHEN er.safir_field_id = 'D002' THEN CAST(er.value AS REAL) ELSE 0 END) AS total_rev
+  FROM extraction_results er
+  JOIN documents d ON er.document_id = d.document_id
+  GROUP BY d.city_name, d.document_year
+)
+SELECT city_name,
+       document_year,
+       total_exp,
+       total_rev,
+       ROUND((total_exp / NULLIF(total_rev,0) - 1) * 100.0,2) AS excess_pct
+FROM sums
+WHERE total_rev > 0 AND total_exp > 1.2 * total_rev
+ORDER BY excess_pct DESC;",hard,"[""extraction_results"", ""documents""]","[""expense_over_rev_excess""]",True,[],True,,False,11,0,5,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+cand_000136,Quel est le revenu médian (champ D001) par masque pour l'année 2024 ?,"WITH expenses AS (
+  SELECT d.mask,
+         CAST(er.value AS REAL) AS expense,
+         ROW_NUMBER() OVER (PARTITION BY d.mask ORDER BY CAST(er.value AS REAL)) AS rn,
+         COUNT(*) OVER (PARTITION BY d.mask) AS cnt
+  FROM extraction_results er
+  JOIN documents d ON er.document_id = d.document_id
+  WHERE er.safir_field_id = 'D001' AND d.document_year = '2024'
+)
+SELECT mask,
+       AVG(expense) AS median_expense
+FROM expenses
+WHERE rn IN ( (cnt+1)/2 , (cnt+2)/2 )
+GROUP BY mask;",hard,"[""extraction_results"", ""documents""]","[""median_expense_by_mask""]",True,[],True,,False,3,2,2,905ec91e3d4acf8071e7dde83759426664737ba26280bd57688b091c778be545
+cand_000137,Quelles sont les 5 communes où le nombre d'avertissements d'extraction a le plus augmenté entre 2023 et 2024 ?,"WITH warn_counts AS (
+  SELECT d.city_name,
+         d.document_year,
+         SUM(CASE WHEN er.message_warning IS NOT NULL AND er.message_warning <> '' THEN 1 ELSE 0 END) AS warn_cnt
+  FROM extraction_results er
+  JOIN documents d ON er.document_id = d.document_id
+  WHERE d.document_year IN ('2023','2024')
+  GROUP BY d.city_name, d.document_year
+), diff AS (
+  SELECT w2024.city_name,
+         w2024.warn_cnt - COALESCE(w2023.warn_cnt,0) AS warning_increase
+  FROM warn_counts w2024
+  LEFT JOIN warn_counts w2023
+    ON w2024.city_name = w2023.city_name AND w2023.document_year = '2023'
+  WHERE w2024.document_year = '2024'
+)
+SELECT city_name,
+       warning_increase
+FROM diff
+WHERE warning_increase > 0
+ORDER BY warning_increase DESC
+LIMIT 5;",hard,"[""extraction_results"", ""documents""]","[""warning_increase_top5""]",True,[],True,,False,10,5,2,a730e737d6eb5057f6fc87dfe0a3f3ec4c931454524bdfe2dbc53a484cd08661
+cand_000138,"Quel est le délai moyen, en jours, entre la création du document et la première occurrence d'un message d'erreur d'extraction, par commune pour 2024 ?","WITH errors AS (
+  SELECT d.city_name,
+         d.created_at AS doc_created,
+         MIN(er.created_at) AS first_error_time
+  FROM extraction_results er
+  JOIN documents d ON er.document_id = d.document_id
+  WHERE d.document_year = '2024'
+    AND er.message_error IS NOT NULL AND er.message_error <> ''
+  GROUP BY d.city_name, d.created_at
+)
+SELECT city_name,
+       ROUND(AVG(julianday(first_error_time) - julianday(doc_created)),2) AS avg_days_to_error
+FROM errors
+GROUP BY city_name;",hard,"[""extraction_results"", ""documents""]","[""avg_days_to_first_error""]",True,[],True,,False,11,18,2,78eaafc33dafb134bc11aa3bb99fc849c82fa1e8ee657697f2ad3765263c51d7
+cand_000139,Quel est le montant total des dépenses (champ D001) pour l'année 2024 ?,SELECT SUM(CAST(er.value AS REAL)) AS total_expenses_2024 FROM extraction_results er JOIN documents d ON er.document_id = d.document_id WHERE er.safir_field_id = 'D001' AND d.document_year = '2024';,easy,"[""extraction_results"", ""documents""]","[""total_expenses"", ""year_2024""]",True,[],True,,False,3,1,1,67251f0e0da95bd69c5a667b11d5c55202dbc42b829496c5c8560b87ceb74412
+cand_000140,"Combien de documents ont été déposés en 2023, ventilés par type de budget (BP ou BA) ?","SELECT d.budget_type, COUNT(*) AS doc_count FROM documents d WHERE d.document_year = '2023' GROUP BY d.budget_type;",easy,"[""documents""]","[""documents_per_budget_type"", ""year_2023""]",True,[],True,,False,0,2,2,236e1cdd71793fbb3c444ce194b937d257d77ceb8f44bd194c2d9879797ff15a
+cand_000141,Quel est le nombre de documents en état « SUCCESS » pour chaque année ?,"SELECT d.document_year, COUNT(*) AS success_docs FROM documents d JOIN states s ON d.state_id = s.state_id WHERE s.code = 'SUCCESS' GROUP BY d.document_year;",easy,"[""documents"", ""states""]","[""success_documents_by_year""]",True,[],True,,False,5,2,2,b3b055dfe1969da5d54ab14ca3a3f986aa148100c0174f2c37dedb92128a4917
+cand_000142,Quelles sont les 5 communes présentant les recettes les plus élevées (champ D002) en 2024 ?,"SELECT d.city_name, SUM(CAST(er.value AS REAL)) AS total_revenue FROM extraction_results er JOIN documents d ON er.document_id = d.document_id WHERE er.safir_field_id = 'D002' AND d.document_year = '2024' GROUP BY d.city_name ORDER BY total_revenue DESC LIMIT 5;",easy,"[""extraction_results"", ""documents""]","[""top_revenues"", ""year_2024""]",True,[],True,,False,3,5,2,48bc22fcf204d0e6db4d8809eb4145342dc5aa5125f9924fbd78aa116e837f69
+cand_000143,Quel pourcentage des résultats d'extraction comporte un avertissement (message_warning) en 2024 ?,"WITH total AS (SELECT COUNT(*) AS cnt FROM extraction_results er JOIN documents d ON er.document_id = d.document_id WHERE d.document_year = '2024'), with_warning AS (SELECT COUNT(*) AS cnt FROM extraction_results er JOIN documents d ON er.document_id = d.document_id WHERE d.document_year = '2024' AND er.message_warning IS NOT NULL AND TRIM(er.message_warning) <> '') SELECT (with_warning.cnt * 100.0) / total.cnt AS warning_percentage FROM total, with_warning;",easy,"[""extraction_results"", ""documents""]","[""warning_percentage"", ""year_2024""]",True,[],True,,False,6,1,1,3d16253b43b8decf7ae318c7259181eac606079e830e1fe24a8c96f104c276a9
+cand_000144,"Quel est le ratio dépenses / recettes (D001 / D002) par commune en 2024, et quelles sont les 10 meilleures ?","SELECT d.city_name, SUM(CASE WHEN er.safir_field_id = 'D001' THEN CAST(er.value AS REAL) END) AS total_expense, SUM(CASE WHEN er.safir_field_id = 'D002' THEN CAST(er.value AS REAL) END) AS total_revenue, (SUM(CASE WHEN er.safir_field_id = 'D001' THEN CAST(er.value AS REAL) END) / NULLIF(SUM(CASE WHEN er.safir_field_id = 'D002' THEN CAST(er.value AS REAL) END),0)) AS expense_revenue_ratio FROM extraction_results er JOIN documents d ON er.document_id = d.document_id WHERE d.document_year = '2024' AND er.safir_field_id IN ('D001','D002') GROUP BY d.city_name HAVING total_revenue > 0 ORDER BY expense_revenue_ratio DESC LIMIT 10;",medium,"[""extraction_results"", ""documents""]","[""expense_revenue_ratio"", ""top_10"", ""year_2024""]",True,[],True,,False,3,0,4,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+cand_000145,"Quel est le taux de croissance des dépenses (D001) entre 2023 et 2024 par commune, pour les communes dont la croissance dépasse 10 % ?","WITH expenses AS (SELECT d.city_name, d.document_year, SUM(CAST(er.value AS REAL)) AS expense_sum FROM extraction_results er JOIN documents d ON er.document_id = d.document_id WHERE er.safir_field_id = 'D001' AND d.document_year IN ('2023','2024') GROUP BY d.city_name, d.document_year) SELECT e2024.city_name, e2023.expense_sum AS expense_2023, e2024.expense_sum AS expense_2024, ((e2024.expense_sum - e2023.expense_sum) / NULLIF(e2023.expense_sum,0)) * 100.0 AS growth_percent FROM expenses e2023 JOIN expenses e2024 ON e2023.city_name = e2024.city_name WHERE e2023.document_year = '2023' AND e2024.document_year = '2024' AND e2023.expense_sum > 0 AND ((e2024.expense_sum - e2023.expense_sum) / e2023.expense_sum) * 100.0 > 10.0 ORDER BY growth_percent DESC;",medium,"[""extraction_results"", ""documents""]","[""expense_growth"", ""year_2023_2024"", ""above_10_percent""]",True,[],True,,False,3,0,4,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+cand_000146,Combien de communes ont des dépenses supérieures à 120 % de leurs recettes en 2024 ?,"SELECT COUNT(*) AS communes_over_120_percent FROM ( SELECT d.city_name, SUM(CASE WHEN er.safir_field_id = 'D001' THEN CAST(er.value AS REAL) END) AS expense, SUM(CASE WHEN er.safir_field_id = 'D002' THEN CAST(er.value AS REAL) END) AS revenue FROM extraction_results er JOIN documents d ON er.document_id = d.document_id WHERE d.document_year = '2024' AND er.safir_field_id IN ('D001','D002') GROUP BY d.city_name HAVING revenue > 0 AND expense > 1.2 * revenue ) sub;",medium,"[""extraction_results"", ""documents""]","[""expenses_over_revenue_threshold"", ""year_2024""]",True,[],True,,False,4,1,1,3d16253b43b8decf7ae318c7259181eac606079e830e1fe24a8c96f104c276a9
+cand_000147,"Quel est le résultat net (recettes D002 – dépenses D001) de chaque commune en 2024, classé du plus élevé au plus bas ?","SELECT d.city_name, (SUM(CASE WHEN er.safir_field_id = 'D002' THEN CAST(er.value AS REAL) END) - SUM(CASE WHEN er.safir_field_id = 'D001' THEN CAST(er.value AS REAL) END)) AS net_result FROM extraction_results er JOIN documents d ON er.document_id = d.document_id WHERE d.document_year = '2024' AND er.safir_field_id IN ('D001','D002') GROUP BY d.city_name ORDER BY net_result DESC;",medium,"[""extraction_results"", ""documents""]","[""net_result_ranking"", ""year_2024""]",True,[],True,,False,4,18,2,31c4da6ca07a3aaec45602e29446e098d3f4622aaf008870e43ebbc70a3636c7
+cand_000148,"Combien de résultats d'extraction contiennent un message d'erreur en 2024, ventilés par type de masque ?","SELECT d.mask, COUNT(*) AS error_count FROM extraction_results er JOIN documents d ON er.document_id = d.document_id WHERE d.document_year = '2024' AND er.message_error IS NOT NULL AND TRIM(er.message_error) <> '' GROUP BY d.mask;",medium,"[""extraction_results"", ""documents""]","[""error_counts_by_mask"", ""year_2024""]",True,[],True,,False,9,2,2,f37c4a6ae4477d7324cbfd49d10c0e711398e44bdb82625420a5cd158214fb92
+cand_000149,"Quel est le score composite de risque (0,6 × croissance des dépenses + 0,4 × taux d'avertissements) par commune, et quelles sont les 10 communes les plus à risque ?","WITH expenses AS (SELECT d.city_name, d.document_year, SUM(CAST(er.value AS REAL)) AS expense_sum FROM extraction_results er JOIN documents d ON er.document_id = d.document_id WHERE er.safir_field_id = 'D001' AND d.document_year IN ('2023','2024') GROUP BY d.city_name, d.document_year), growth AS (SELECT e2024.city_name, ((e2024.expense_sum - e2023.expense_sum) / NULLIF(e2023.expense_sum,0)) * 100.0 AS growth_percent FROM expenses e2023 JOIN expenses e2024 ON e2023.city_name = e2024.city_name WHERE e2023.document_year = '2023' AND e2024.document_year = '2024' AND e2023.expense_sum > 0), warnings AS (SELECT d.city_name, COUNT(*) AS total_results, SUM(CASE WHEN er.message_warning IS NOT NULL AND TRIM(er.message_warning) <> '' THEN 1 ELSE 0 END) AS warning_cnt FROM extraction_results er JOIN documents d ON er.document_id = d.document_id WHERE d.document_year = '2024' GROUP BY d.city_name), risk AS (SELECT g.city_name, g.growth_percent, (w.warning_cnt * 100.0) / NULLIF(w.total_results,0) AS warning_pct FROM growth g JOIN warnings w ON g.city_name = w.city_name) SELECT city_name, (0.6 * growth_percent) + (0.4 * warning_pct) AS composite_risk_score FROM risk ORDER BY composite_risk_score DESC LIMIT 10;",hard,"[""extraction_results"", ""documents""]","[""composite_risk_score"", ""top_10"", ""year_2023_2024""]",True,[],True,,False,3,0,2,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+cand_000150,"Quelles communes affichent une augmentation continue des dépenses (D001) sur les années 2022, 2023 et 2024 ?","WITH yearly AS (SELECT d.city_name, d.document_year, SUM(CAST(er.value AS REAL)) AS expense_sum FROM extraction_results er JOIN documents d ON er.document_id = d.document_id WHERE er.safir_field_id = 'D001' AND d.document_year IN ('2022','2023','2024') GROUP BY d.city_name, d.document_year), pivot AS (SELECT y2022.city_name, y2022.expense_sum AS exp_2022, y2023.expense_sum AS exp_2023, y2024.expense_sum AS exp_2024 FROM yearly y2022 JOIN yearly y2023 ON y2022.city_name = y2023.city_name AND y2023.document_year = '2023' JOIN yearly y2024 ON y2022.city_name = y2024.city_name AND y2024.document_year = '2024' WHERE y2022.document_year = '2022') SELECT city_name, exp_2022, exp_2023, exp_2024 FROM pivot WHERE exp_2023 > exp_2022 AND exp_2024 > exp_2023 ORDER BY city_name;",hard,"[""extraction_results"", ""documents""]","[""consistent_expense_increase"", ""years_2022_2024""]",True,[],True,,False,3,0,4,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+cand_000151,Quelle est la médiane des dépenses (champ D001) par commune pour l'année 2024 ?,"WITH ordered AS (SELECT d.city_name, CAST(er.value AS REAL) AS expense, ROW_NUMBER() OVER (PARTITION BY d.city_name ORDER BY CAST(er.value AS REAL)) AS rn, COUNT(*) OVER (PARTITION BY d.city_name) AS cnt FROM extraction_results er JOIN documents d ON er.document_id = d.document_id WHERE d.document_year = '2024' AND er.safir_field_id = 'D001') SELECT city_name, AVG(expense) AS median_expense FROM ordered WHERE rn IN ((cnt+1)/2, (cnt+2)/2) GROUP BY city_name ORDER BY median_expense DESC;",hard,"[""extraction_results"", ""documents""]","[""median_expense"", ""year_2024""]",True,[],True,,False,4,18,2,c8ea419aa2cece46e7d8459fc7964398cf34ec6a3ce499ee4c3915786a1406bf
+cand_000152,"Quel est le délai moyen, en heures, entre la création du document et le lancement de l'extraction pour chaque commune en 2024, et quelles sont les 5 plus longues ?","SELECT d.city_name, AVG(strftime('%s', erun.start_time) - strftime('%s', d.created_at)) / 3600.0 AS avg_delay_hours FROM documents d JOIN extraction_runs erun ON erun.document_id = d.document_id WHERE d.document_year = '2024' GROUP BY d.city_name ORDER BY avg_delay_hours DESC LIMIT 5;",hard,"[""documents"", ""extraction_runs""]","[""extraction_delay"", ""top_5"", ""year_2024""]",True,[],True,,False,0,5,2,b736ce0cc4a53aefa5884ffbe3ae060a87c4187da677f532474631c6510a4091
+cand_000153,Combien de champs SAFIR différents ont été extraits en 2024 ?,SELECT COUNT(DISTINCT er.safir_field_id) AS distinct_fields_2024 FROM extraction_results er JOIN documents d ON er.document_id = d.document_id WHERE d.document_year = '2024';,easy,"[""extraction_results"", ""documents""]","[""distinct_safir_fields"", ""year_2024""]",True,[],True,,False,7,1,1,3c549e69fd4ca894155c4304c2dfe9f9a78e45272c20547a94e0270ef711febe
+cand_000154,Quel est le nombre total de pages des documents de type de masque M57_CA en 2023 ?,SELECT SUM(d.nb_pages) AS total_pages_2023 FROM documents d WHERE d.mask = 'M57_CA' AND d.document_year = '2023';,easy,"[""documents""]","[""total_pages_by_mask"", ""year_2023""]",True,[],True,,False,0,1,1,3c549e69fd4ca894155c4304c2dfe9f9a78e45272c20547a94e0270ef711febe
+cand_000155,Quel pourcentage de communes présente un résultat net négatif en 2024 ?,"WITH net AS (SELECT d.city_name, (SUM(CASE WHEN er.safir_field_id = 'D002' THEN CAST(er.value AS REAL) END) - SUM(CASE WHEN er.safir_field_id = 'D001' THEN CAST(er.value AS REAL) END)) AS net_result FROM extraction_results er JOIN documents d ON er.document_id = d.document_id WHERE d.document_year = '2024' AND er.safir_field_id IN ('D001','D002') GROUP BY d.city_name) SELECT (SUM(CASE WHEN net_result < 0 THEN 1 ELSE 0 END) * 100.0) / COUNT(*) AS negative_net_percentage FROM net;",medium,"[""extraction_results"", ""documents""]","[""negative_net_percentage"", ""year_2024""]",True,[],True,,False,3,1,1,3c549e69fd4ca894155c4304c2dfe9f9a78e45272c20547a94e0270ef711febe
+cand_000156,Combien de documents ont été déposés chaque année ?,"SELECT document_year AS annee, COUNT(*) AS nb_documents
+FROM documents
+GROUP BY document_year
+ORDER BY document_year;",easy,"[""documents""]","[""count"", ""documents"", ""year""]",True,[],True,,False,0,2,2,f275e8aa01aa160cfc60881387f207879b453a423de7c7ce22ac6738ea753501
+cand_000157,Quelle est la moyenne du nombre de pages selon le type de budget ?,"SELECT budget_type, AVG(nb_pages) AS pages_moyennes
+FROM documents
+WHERE nb_pages IS NOT NULL
+GROUP BY budget_type;",easy,"[""documents""]","[""average"", ""pages"", ""budget_type""]",True,[],True,,False,0,2,2,4ed53363282e090715e4077e8a85ebf66b66978afbaaa25c25b31f34ab222451
+cand_000158,Combien de documents contiennent au moins un message d'avertissement chaque année ?,"SELECT document_year AS annee, COUNT(*) AS nb_avec_avertissement
+FROM documents
+WHERE warning_message IS NOT NULL AND TRIM(warning_message) <> ''
+GROUP BY document_year
+ORDER BY document_year;",easy,"[""documents""]","[""warning"", ""documents"", ""year"", ""count""]",True,[],True,,False,0,2,2,a67d6bc5952d55cdb5b811d73c14dc362edc4dc80c8f6a73e2d43121f797e512
+cand_000159,Quel est le pourcentage de documents en état SUCCESS chaque année ?,"SELECT d.document_year AS annee,
+       100.0 * SUM(CASE WHEN s.code = 'SUCCESS' THEN 1 ELSE 0 END) / COUNT(*) AS pourcentage_success
+FROM documents d
+JOIN states s ON d.state_id = s.state_id
+GROUP BY d.document_year
+ORDER BY d.document_year;",easy,"[""documents"", ""states""]","[""percentage"", ""state"", ""success"", ""year""]",True,[],True,,False,1,2,2,a14f50c104605b59e827fb4e4ae34a247741d2515e02187a4ce5bfefdcce9c8d
+cand_000160,Quelles sont les 5 communes avec les recettes (champ D002) les plus élevées en 2023 ?,"SELECT d.city_name AS commune, SUM(CAST(er.value AS REAL)) AS total_D002
+FROM extraction_results er
+JOIN documents d ON er.document_id = d.document_id
+WHERE er.safir_field_id = 'D002'
+  AND d.document_year = '2023'
+GROUP BY d.city_name
+ORDER BY total_D002 DESC
+LIMIT 5;",easy,"[""extraction_results"", ""documents""]","[""top"", ""revenues"", ""d002"", ""year"", ""commune""]",True,[],True,,False,3,5,2,4fd9053897162781b14c9778df992d64d4be1aac3097072c57078e8330907e83
+cand_000161,"Quel est le taux de croissance des dépenses D001 entre 2023 et 2024 par commune, pour les communes dont la hausse dépasse 10 % ?","WITH sums AS (
+  SELECT d.city_name AS commune,
+         d.document_year AS annee,
+         SUM(CAST(er.value AS REAL)) AS total_D001
+  FROM extraction_results er
+  JOIN documents d ON er.document_id = d.document_id
+  WHERE er.safir_field_id = 'D001'
+    AND d.document_year IN ('2023','2024')
+  GROUP BY d.city_name, d.document_year
+)
+SELECT s2024.commune,
+       ((s2024.total_D001 - s2023.total_D001) / NULLIF(s2023.total_D001,0)) * 100.0 AS taux_croissance_pct
+FROM sums s2023
+JOIN sums s2024 ON s2023.commune = s2024.commune
+WHERE s2023.annee = '2023' AND s2024.annee = '2024'
+  AND ((s2024.total_D001 - s2023.total_D001) / NULLIF(s2023.total_D001,0)) * 100.0 > 10
+ORDER BY taux_croissance_pct DESC;",medium,"[""extraction_results"", ""documents""]","[""growth"", ""expenses"", ""d001"", ""year"", ""commune""]",True,[],True,,False,3,0,2,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+cand_000162,"Quel est le ratio dépenses D001 / recettes D002 par commune pour 2024, et quelles sont les 10 meilleures ?","WITH sums AS (
+  SELECT d.city_name AS commune,
+         er.safir_field_id AS champ,
+         SUM(CAST(er.value AS REAL)) AS total_val
+  FROM extraction_results er
+  JOIN documents d ON er.document_id = d.document_id
+  WHERE d.document_year = '2024' AND er.safir_field_id IN ('D001','D002')
+  GROUP BY d.city_name, er.safir_field_id
+)
+SELECT d1.commune,
+       (d1.total_val / NULLIF(d2.total_val,0)) AS ratio_D001_D002
+FROM sums d1
+JOIN sums d2 ON d1.commune = d2.commune
+WHERE d1.champ = 'D001' AND d2.champ = 'D002'
+ORDER BY ratio_D001_D002 DESC
+LIMIT 10;",medium,"[""extraction_results"", ""documents""]","[""ratio"", ""expenses"", ""revenues"", ""d001"", ""d002"", ""year"", ""commune""]",True,[],True,,False,3,10,2,8709c57d3f274e741e98b3e14cdd52494a5584ff3cb800d041f79e85488b9853
+cand_000163,"Quelle est la moyenne du nombre de pages pour les documents contenant au moins un message d'erreur, selon le masque ?","SELECT d.mask,
+       AVG(d.nb_pages) AS pages_moyennes
+FROM documents d
+WHERE d.error_message IS NOT NULL AND TRIM(d.error_message) <> ''
+GROUP BY d.mask
+ORDER BY pages_moyennes DESC;",medium,"[""documents""]","[""average"", ""pages"", ""error"", ""mask""]",True,[],True,,False,0,2,2,aba16b48cf15e05709eb3aedf4886339a1b70e3bed6552a755e67416c96a6412
+cand_000164,Quels documents présentent un écart entre la somme des champs D001 et D002 et le champ Total déclaré ?,"WITH sums AS (
+  SELECT er.document_id,
+         SUM(CASE WHEN er.safir_field_id = 'D001' THEN CAST(er.value AS REAL) ELSE 0 END) AS sum_D001,
+         SUM(CASE WHEN er.safir_field_id = 'D002' THEN CAST(er.value AS REAL) ELSE 0 END) AS sum_D002,
+         MAX(CASE WHEN er.safir_field_id = 'Total' THEN CAST(er.value AS REAL) END) AS total_field
+  FROM extraction_results er
+  GROUP BY er.document_id
+)
+SELECT d.document_id, d.city_name, d.document_year,
+       (s.sum_D001 + s.sum_D002) AS somme_D001_D002,
+       s.total_field,
+       ((s.sum_D001 + s.sum_D002) - s.total_field) AS ecart
+FROM sums s
+JOIN documents d ON s.document_id = d.document_id
+WHERE s.total_field IS NOT NULL
+  AND ABS((s.sum_D001 + s.sum_D002) - s.total_field) > 0.01
+ORDER BY ecart DESC
+LIMIT 10;",medium,"[""extraction_results"", ""documents""]","[""difference"", ""total"", ""d001"", ""d002"", ""validation""]",True,[],True,,False,7,0,6,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+cand_000165,"Combien de documents par ville comportent au moins un résultat d'extraction avec avertissement, ventilés par type de budget ?","WITH warned_docs AS (
+  SELECT DISTINCT er.document_id
+  FROM extraction_results er
+  WHERE er.message_warning IS NOT NULL AND TRIM(er.message_warning) <> ''
+)
+SELECT d.city_name AS commune,
+       d.budget_type,
+       COUNT(*) AS nb_documents_avec_avertissement
+FROM documents d
+JOIN warned_docs w ON d.document_id = w.document_id
+GROUP BY d.city_name, d.budget_type
+ORDER BY nb_documents_avec_avertissement DESC
+LIMIT 20;",medium,"[""documents"", ""extraction_results""]","[""warning"", ""documents"", ""budget_type"", ""city""]",True,[],True,,False,6,20,3,77c0fe75a859eb585281712ed325f03f11895d2ba56294bb82d16aa699e12ff3
+cand_000166,Quel est le pourcentage d'erreurs (message_error non vide) dans les résultats d'extraction pour chaque année ?,"SELECT d.document_year AS annee,
+       100.0 * SUM(CASE WHEN er.message_error IS NOT NULL AND TRIM(er.message_error) <> '' THEN 1 ELSE 0 END) / COUNT(*) AS pourcentage_erreurs
+FROM extraction_results er
+JOIN documents d ON er.document_id = d.document_id
+GROUP BY d.document_year
+ORDER BY d.document_year;",medium,"[""extraction_results"", ""documents""]","[""error"", ""extraction_results"", ""year"", ""percentage""]",True,[],True,,False,8,2,2,c1eb5335cf61bf81cd6213763c2c7ea6b27792341863f5b59dbd346b65ae6bdd
+cand_000167,Quels sont les 3 masques avec le plus grand nombre moyen de résultats d'extraction par document ?,"WITH doc_counts AS (
+  SELECT d.document_id, d.mask, COUNT(er.result_id) AS nb_results
+  FROM documents d
+  JOIN extraction_results er ON d.document_id = er.document_id
+  GROUP BY d.document_id, d.mask
+)
+SELECT mask,
+       AVG(nb_results) AS avg_results_par_doc
+FROM doc_counts
+GROUP BY mask
+ORDER BY avg_results_par_doc DESC
+LIMIT 3;",medium,"[""documents"", ""extraction_results""]","[""average"", ""extraction_results"", ""mask"", ""documents""]",True,[],True,,False,10,3,2,29506e267f84f3b332d1bcb283891ff7a98e0fe26c425eedaed9ca512b3ba4c3
+cand_000168,"Pour chaque commune, comment évoluent les dépenses D001 d'une année à l'autre (augmentation, diminution, stable) ?","WITH yearly AS (
+  SELECT d.city_name AS commune,
+         d.document_year AS annee,
+         SUM(CAST(er.value AS REAL)) AS total_D001
+  FROM extraction_results er
+  JOIN documents d ON er.document_id = d.document_id
+  WHERE er.safir_field_id = 'D001'
+  GROUP BY d.city_name, d.document_year
+),
+trend AS (
+  SELECT commune,
+         annee,
+         total_D001,
+         LAG(total_D001) OVER (PARTITION BY commune ORDER BY annee) AS prev_total
+  FROM yearly
+)
+SELECT commune,
+       annee,
+       total_D001,
+       CASE
+         WHEN prev_total IS NULL THEN 'N/A'
+         WHEN total_D001 > prev_total THEN 'increase'
+         WHEN total_D001 < prev_total THEN 'decrease'
+         ELSE 'stable'
+       END AS trend
+FROM trend
+ORDER BY commune, annee;",medium,"[""extraction_results"", ""documents""]","[""trend"", ""expenses"", ""d001"", ""window_function"", ""year"", ""commune""]",True,[],True,,False,3,24,4,394ab55ee3161b6303575088d0a62036cbef646abc9875434bcbd231964c6bba
+cand_000169,"Quel score de risque par commune, combinant la croissance des dépenses D001 (2023‑2024) et le taux d'avertissements en 2024, et quelles sont les 10 communes les plus à risque ?","WITH sums AS (
+  SELECT d.city_name AS commune,
+         d.document_year AS annee,
+         SUM(CAST(er.value AS REAL)) AS total_D001
+  FROM extraction_results er
+  JOIN documents d ON er.document_id = d.document_id
+  WHERE er.safir_field_id = 'D001' AND d.document_year IN ('2023','2024')
+  GROUP BY d.city_name, d.document_year
+),
+growth AS (
+  SELECT s2024.commune,
+         ((s2024.total_D001 - s2023.total_D001) / NULLIF(s2023.total_D001,0)) * 100.0 AS growth_pct
+  FROM sums s2023
+  JOIN sums s2024 ON s2023.commune = s2024.commune
+  WHERE s2023.annee = '2023' AND s2024.annee = '2024'
+),
+warnings AS (
+  SELECT d.city_name AS commune,
+         SUM(CASE WHEN er.message_warning IS NOT NULL AND TRIM(er.message_warning) <> '' THEN 1 ELSE 0 END) AS nb_warn,
+         COUNT(*) AS nb_total
+  FROM extraction_results er
+  JOIN documents d ON er.document_id = d.document_id
+  WHERE d.document_year = '2024'
+  GROUP BY d.city_name
+),
+risk AS (
+  SELECT g.commune,
+         g.growth_pct,
+         (w.nb_warn * 100.0 / NULLIF(w.nb_total,0)) AS warning_rate_pct,
+         (0.6 * g.growth_pct) + (0.4 * (w.nb_warn * 100.0 / NULLIF(w.nb_total,0))) AS risk_score
+  FROM growth g
+  JOIN warnings w ON g.commune = w.commune
+)
+SELECT commune,
+       growth_pct,
+       warning_rate_pct,
+       risk_score
+FROM risk
+ORDER BY risk_score DESC
+LIMIT 10;",hard,"[""extraction_results"", ""documents""]","[""risk_score"", ""growth"", ""warning_rate"", ""d001"", ""year"", ""commune""]",True,[],True,,False,3,0,4,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+cand_000170,"Quelles communes ont des dépenses D001 supérieures à 120 % des recettes D002 pour une année donnée, et quel est le pourcentage d'excès ?","WITH sums AS (
+  SELECT d.city_name AS commune,
+         d.document_year AS annee,
+         SUM(CASE WHEN er.safir_field_id = 'D001' THEN CAST(er.value AS REAL) ELSE 0 END) AS total_D001,
+         SUM(CASE WHEN er.safir_field_id = 'D002' THEN CAST(er.value AS REAL) ELSE 0 END) AS total_D002
+  FROM extraction_results er
+  JOIN documents d ON er.document_id = d.document_id
+  WHERE er.safir_field_id IN ('D001','D002')
+  GROUP BY d.city_name, d.document_year
+)
+SELECT commune,
+       annee,
+       total_D001,
+       total_D002,
+       (total_D001 / NULLIF(total_D002,0)) * 100.0 AS pourcentage_D001_sur_D002,
+       ((total_D001 / NULLIF(total_D002,0)) * 100.0 - 120) AS excess_pct
+FROM sums
+WHERE total_D002 > 0
+  AND (total_D001 / total_D002) > 1.20
+ORDER BY pourcentage_D001_sur_D002 DESC;",hard,"[""extraction_results"", ""documents""]","[""excess"", ""expenses"", ""revenues"", ""d001"", ""d002"", ""percentage"", ""commune"", ""year""]",True,[],True,,False,3,0,6,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+cand_000171,Quelle est la médiane des dépenses D001 par commune pour l'année 2024 ?,"WITH vals AS (
+  SELECT d.city_name AS commune,
+         CAST(er.value AS REAL) AS val,
+         ROW_NUMBER() OVER (PARTITION BY d.city_name ORDER BY CAST(er.value AS REAL)) AS rn,
+         COUNT(*) OVER (PARTITION BY d.city_name) AS cnt
+  FROM extraction_results er
+  JOIN documents d ON er.document_id = d.document_id
+  WHERE er.safir_field_id = 'D001' AND d.document_year = '2024'
+)
+SELECT commune,
+       CASE
+         WHEN cnt % 2 = 1 THEN
+           MAX(CASE WHEN rn = (cnt/2)+1 THEN val END)
+         ELSE
+           (MAX(CASE WHEN rn = cnt/2 THEN val END) + MAX(CASE WHEN rn = cnt/2 + 1 THEN val END)) / 2.0
+       END AS median_D001
+FROM vals
+GROUP BY commune
+HAVING cnt > 0
+ORDER BY median_D001 DESC
+LIMIT 20;",hard,"[""extraction_results"", ""documents""]","[""median"", ""expenses"", ""d001"", ""year"", ""commune"", ""window_function""]",True,[],True,,False,3,18,2,3bdd2f3e6fde302c560152fd6c77e58fbf989601a7485a6e8c3f8e44086a5569
+cand_000172,"Quel est le délai moyen, en heures, entre la création du document et le lancement de l'extraction, selon le masque, et quels masques affichent le plus grand délai moyen ?","WITH delays AS (
+  SELECT d.mask,
+         (JULIANDAY(er.start_time) - JULIANDAY(d.created_at)) * 24.0 AS delay_hours
+  FROM documents d
+  JOIN extraction_runs er ON d.document_id = er.document_id
+  WHERE er.start_time IS NOT NULL AND d.created_at IS NOT NULL
+)
+SELECT mask,
+       AVG(delay_hours) AS moyenne_delai_heures
+FROM delays
+GROUP BY mask
+ORDER BY moyenne_delai_heures DESC;",hard,"[""documents"", ""extraction_runs""]","[""delay"", ""average"", ""mask"", ""hours"", ""extraction_run""]",True,[],True,,False,0,3,2,2c772db3b6072f9251e1c8562d6bf49dcbc2ffef6a8e3cc2b945e7fe391f052f
+cand_000173,"Quelle est la répartition du nombre de documents par type de masque (M57_CA, M57_CFU, etc.) ?","SELECT d.mask AS masque,
+       COUNT(*) AS nb_documents
+FROM documents d
+GROUP BY d.mask
+ORDER BY nb_documents DESC;",easy,"[""documents""]","[""count"", ""documents"", ""mask""]",True,[],True,,False,0,3,2,00c806ff28680160d19f3856a3b33be58ff72c84fe2a11c70d13abea9c243f76
+cand_000174,Quel est le nombre moyen de pages des documents dont le type de budget est BP ?,"SELECT AVG(d.nb_pages) AS moyenne_pages
+FROM documents d
+WHERE d.budget_type = 'BP';",easy,"[""documents""]","[""average"", ""pages"", ""budget_type""]",True,[],True,,False,0,1,1,b02739fee4c1f0b3996565e3704f7eab91e01c002cc52424783062d5252d148d
+cand_000175,"Combien de résultats d'extraction contiennent un message d'erreur non vide, par année ?","SELECT d.document_year AS annee,
+       COUNT(*) AS nb_erreurs
+FROM extraction_results er
+JOIN documents d ON er.document_id = d.document_id
+WHERE er.message_error IS NOT NULL AND TRIM(er.message_error) <> ''
+GROUP BY d.document_year
+ORDER BY d.document_year;",easy,"[""extraction_results"", ""documents""]","[""count"", ""errors"", ""extraction_results"", ""year""]",True,[],True,,False,8,2,2,c03171e8b13cb9bc3bcdd299e4c8749ba9355b9e47933940abcd64eab0488fc5
+cand_000176,Quelles sont les 5 communes avec les dépenses totales (champ D001) les plus élevées en 2023 ?,"SELECT d.city_name AS commune,
+       SUM(CAST(er.value AS REAL)) AS total_depenses
+FROM extraction_results er
+JOIN documents d ON er.document_id = d.document_id
+WHERE er.safir_field_id = 'D001' AND d.document_year = '2023'
+GROUP BY d.city_name
+ORDER BY total_depenses DESC
+LIMIT 5;",easy,"[""extraction_results"", ""documents""]","[""top"", ""expenses"", ""commune"", ""year""]",True,[],True,,False,3,5,2,efc9a658777cd9af2f2d8f41a5a02251b4535c4bca723da5c048082a09f5e891
+cand_000177,Quelle est la moyenne des recettes (champ D002) par type de budget pour l'année 2024 ?,"SELECT d.budget_type,
+       AVG(CAST(er.value AS REAL)) AS moyenne_recettes
+FROM extraction_results er
+JOIN documents d ON er.document_id = d.document_id
+WHERE er.safir_field_id = 'D002' AND d.document_year = '2024'
+GROUP BY d.budget_type;",easy,"[""extraction_results"", ""documents""]","[""average"", ""revenues"", ""budget_type"", ""year""]",True,[],True,,False,3,2,2,a896fa94be148776a9b666dc7373ff0df8ff69c85d1458b363773f46d429b09f
+cand_000178,Quelles communes ont vu leurs dépenses (D001) croître de plus de 15 % entre 2023 et 2024 ?,"WITH dep AS (
+  SELECT d.city_name AS commune,
+         d.document_year AS annee,
+         SUM(CAST(er.value AS REAL)) AS total_dep
+  FROM extraction_results er
+  JOIN documents d ON er.document_id = d.document_id
+  WHERE er.safir_field_id = 'D001' AND d.document_year IN ('2023','2024')
+  GROUP BY d.city_name, d.document_year
+)
+SELECT c2024.commune,
+       ((c2024.total_dep - c2023.total_dep) / NULLIF(c2023.total_dep,0)) * 100.0 AS croissance_pct
+FROM dep c2023
+JOIN dep c2024 ON c2023.commune = c2024.commune
+WHERE c2023.annee = '2023' AND c2024.annee = '2024'
+  AND ((c2024.total_dep - c2023.total_dep) / NULLIF(c2023.total_dep,0)) * 100.0 > 15.0
+ORDER BY croissance_pct DESC;",medium,"[""extraction_results"", ""documents""]","[""growth"", ""expenses"", ""commune"", ""year""]",True,[],True,,False,3,0,2,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+cand_000179,"Combien de documents comportent au moins un avertissement d'extraction, ventilés par masque ?","SELECT d.mask,
+       COUNT(DISTINCT d.document_id) AS nb_documents_avec_avertissement
+FROM extraction_results er
+JOIN documents d ON er.document_id = d.document_id
+WHERE er.message_warning IS NOT NULL AND TRIM(er.message_warning) <> ''
+GROUP BY d.mask
+ORDER BY nb_documents_avec_avertissement DESC;",medium,"[""extraction_results"", ""documents""]","[""count"", ""warning"", ""mask"", ""documents""]",True,[],True,,False,10,3,2,22ba4c3cdff8c8019c0eee08a89101032a285f64582b061cc9044dffa983e179
+cand_000180,"Quel est le résultat net (recettes – dépenses) par commune en 2024, et quelles sont les 5 communes les plus positives ?","WITH agg AS (
+  SELECT d.city_name AS commune,
+         SUM(CASE WHEN er.safir_field_id = 'D002' THEN CAST(er.value AS REAL) ELSE 0 END) -
+         SUM(CASE WHEN er.safir_field_id = 'D001' THEN CAST(er.value AS REAL) ELSE 0 END) AS net_resultat,
+         SUM(CASE WHEN er.safir_field_id = 'D002' THEN CAST(er.value AS REAL) ELSE 0 END) AS recettes,
+         SUM(CASE WHEN er.safir_field_id = 'D001' THEN CAST(er.value AS REAL) ELSE 0 END) AS depenses
+  FROM extraction_results er
+  JOIN documents d ON er.document_id = d.document_id
+  WHERE d.document_year = '2024'
+  GROUP BY d.city_name
+)
+SELECT commune, net_resultat, recettes, depenses
+FROM agg
+ORDER BY net_resultat DESC
+LIMIT 5;",medium,"[""extraction_results"", ""documents""]","[""net_result"", ""commune"", ""year"", ""top""]",True,[],True,,False,8,5,4,12758b34ec9e252a9ac7412a805b04355619b40787cd68402d8fc587c8229125
+cand_000181,Quelles communes ont des dépenses supérieures à 110 % de leurs recettes en 2024 ?,"WITH agg AS (
+  SELECT d.city_name AS commune,
+         SUM(CASE WHEN er.safir_field_id = 'D001' THEN CAST(er.value AS REAL) ELSE 0 END) AS depenses,
+         SUM(CASE WHEN er.safir_field_id = 'D002' THEN CAST(er.value AS REAL) ELSE 0 END) AS recettes
+  FROM extraction_results er
+  JOIN documents d ON er.document_id = d.document_id
+  WHERE d.document_year = '2024'
+  GROUP BY d.city_name
+)
+SELECT commune, depenses, recettes,
+       ROUND(100.0 * depenses / NULLIF(recettes,0),2) AS pct_dep_rec
+FROM agg
+WHERE recettes > 0 AND depenses > 1.10 * recettes
+ORDER BY pct_dep_rec DESC;",medium,"[""extraction_results"", ""documents""]","[""exceed"", ""expenses"", ""revenues"", ""percentage"", ""year""]",True,[],True,,False,8,0,4,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+cand_000182,Combien de runs d'extraction sont en état ERROR chaque année ?,"SELECT d.document_year AS annee,
+       COUNT(*) AS nb_runs_error
+FROM extraction_runs erun
+JOIN documents d ON erun.document_id = d.document_id
+JOIN states s ON erun.state_id = s.state_id
+WHERE s.code = 'ERROR'
+GROUP BY d.document_year
+ORDER BY annee;",medium,"[""extraction_runs"", ""documents"", ""states""]","[""count"", ""runs"", ""error"", ""year""]",True,[],True,,False,1,1,2,0708c4163e1429f9b559a2144b31f2d87c5cb6da900f03131cc5a07f2522c1ed
+cand_000183,"Quel est le score de risque composite (0,6 × croissance dépenses + 0,4 × taux d'avertissements) par commune, et quelles sont les 5 communes les plus à risque ?","WITH dep AS (
+  SELECT d.city_name AS commune,
+         d.document_year AS annee,
+         SUM(CAST(er.value AS REAL)) AS total_dep
+  FROM extraction_results er
+  JOIN documents d ON er.document_id = d.document_id
+  WHERE er.safir_field_id = 'D001' AND d.document_year IN ('2023','2024')
+  GROUP BY d.city_name, d.document_year
+),
+growth AS (
+  SELECT c2024.commune,
+         ((c2024.total_dep - c2023.total_dep) / NULLIF(c2023.total_dep,0)) * 100.0 AS croissance_pct
+  FROM dep c2023
+  JOIN dep c2024 ON c2023.commune = c2024.commune
+  WHERE c2023.annee = '2023' AND c2024.annee = '2024'
+),
+warnings AS (
+  SELECT d.city_name AS commune,
+         COUNT(*) AS nb_warn,
+         COUNT(DISTINCT er.result_id) AS nb_total
+  FROM extraction_results er
+  JOIN documents d ON er.document_id = d.document_id
+  WHERE er.message_warning IS NOT NULL AND TRIM(er.message_warning) <> ''
+    AND d.document_year = '2024'
+  GROUP BY d.city_name
+),
+score AS (
+  SELECT g.commune,
+         g.croissance_pct,
+         w.nb_warn,
+         w.nb_total,
+         (0.6 * g.croissance_pct) + (0.4 * (w.nb_warn * 100.0 / NULLIF(w.nb_total,0))) AS risk_score
+  FROM growth g
+  LEFT JOIN warnings w ON g.commune = w.commune
+)
+SELECT commune,
+       ROUND(croissance_pct,2) AS croissance_pct,
+       ROUND(nb_warn * 100.0 / NULLIF(nb_total,0),2) AS taux_avertissements_pct,
+       ROUND(risk_score,2) AS score_risque
+FROM score
+ORDER BY risk_score DESC
+LIMIT 5;",hard,"[""extraction_results"", ""documents""]","[""risk_score"", ""growth"", ""warnings"", ""commune""]",True,[],True,,False,3,0,4,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+cand_000184,Quelles anomalies existent où la somme dépenses (D001) + recettes (D002) diffère de plus de 5 % du total déclaré (champ Total) pour l'année 2024 ?,"WITH sums AS (
+  SELECT d.document_id,
+         SUM(CASE WHEN er.safir_field_id = 'D001' THEN CAST(er.value AS REAL) ELSE 0 END) AS dep,
+         SUM(CASE WHEN er.safir_field_id = 'D002' THEN CAST(er.value AS REAL) ELSE 0 END) AS rec,
+         MAX(CASE WHEN er.safir_field_id = 'Total' THEN CAST(er.value AS REAL) END) AS total_declared
+  FROM extraction_results er
+  JOIN documents d ON er.document_id = d.document_id
+  WHERE d.document_year = '2024'
+  GROUP BY d.document_id
+)
+SELECT document_id,
+       dep, rec, total_declared,
+       ROUND(100.0 * ABS((dep + rec) - total_declared) / NULLIF(total_declared,0),2) AS ecart_pct
+FROM sums
+WHERE total_declared IS NOT NULL
+  AND ABS((dep + rec) - total_declared) > 0.05 * total_declared
+ORDER BY ecart_pct DESC
+LIMIT 10;",hard,"[""extraction_results"", ""documents""]","[""anomaly"", ""total"", ""expenses"", ""revenues"", ""percentage""]",True,[],True,,False,6,0,5,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+cand_000185,Quelles communes ont vu leurs dépenses augmenter chaque année de 2022 à 2024 ?,"WITH dep AS (
+  SELECT d.city_name AS commune,
+         d.document_year AS annee,
+         SUM(CAST(er.value AS REAL)) AS total_dep
+  FROM extraction_results er
+  JOIN documents d ON er.document_id = d.document_id
+  WHERE er.safir_field_id = 'D001' AND d.document_year IN ('2022','2023','2024')
+  GROUP BY d.city_name, d.document_year
+)
+SELECT c.commune
+FROM dep c
+JOIN dep c2 ON c.commune = c2.commune AND c2.annee = '2023'
+JOIN dep c3 ON c.commune = c3.commune AND c3.annee = '2024'
+WHERE c.annee = '2022'
+  AND c2.total_dep > c.total_dep
+  AND c3.total_dep > c2.total_dep
+ORDER BY c.commune;",hard,"[""extraction_results"", ""documents""]","[""trend"", ""expenses"", ""consecutive"", ""year""]",True,[],True,,False,3,0,1,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+cand_000186,Quel est le montant médian des dépenses (champ D001) par masque pour l'année 2024 ?,"WITH vals AS (
+  SELECT d.mask,
+         CAST(er.value AS REAL) AS dep,
+         ROW_NUMBER() OVER (PARTITION BY d.mask ORDER BY CAST(er.value AS REAL)) AS rn,
+         COUNT(*) OVER (PARTITION BY d.mask) AS cnt
+  FROM extraction_results er
+  JOIN documents d ON er.document_id = d.document_id
+  WHERE er.safir_field_id = 'D001' AND d.document_year = '2024'
+)
+SELECT mask,
+       AVG(dep) AS median_dep
+FROM vals
+WHERE rn IN ((cnt+1)/2, (cnt+2)/2)
+GROUP BY mask;",hard,"[""extraction_results"", ""documents""]","[""median"", ""expenses"", ""mask"", ""year""]",True,[],True,,False,3,2,2,7dda3838531cbdeffa8b8367c49b4350813d2b3898e1d15053e47918334ab9f5
+cand_000187,"Combien de documents ont été déposés par commune, par année et par type de budget ?","SELECT d.city_name,
+       d.document_year,
+       d.budget_type,
+       COUNT(*) AS nb_documents
+FROM documents d
+GROUP BY d.city_name, d.document_year, d.budget_type
+ORDER BY d.city_name, d.document_year;",easy,"[""documents""]","[""count"", ""documents"", ""city"", ""year"", ""budget_type""]",True,[],True,,False,0,26,4,df0191f52ecf0345f671d201527eba88241c40d84783dee3327950507bd4c33d
+cand_000188,"Quelle est la moyenne du nombre de pages des documents contenant au moins un avertissement d'extraction, ventilée par type de masque ?","SELECT d.mask,
+       AVG(d.nb_pages) AS avg_pages
+FROM documents d
+WHERE EXISTS (
+    SELECT 1
+    FROM extraction_results er
+    WHERE er.document_id = d.document_id
+      AND er.message_warning IS NOT NULL
+      AND TRIM(er.message_warning) <> ''
+)
+GROUP BY d.mask
+ORDER BY avg_pages DESC;",medium,"[""documents"", ""extraction_results""]","[""average"", ""pages"", ""warning"", ""mask""]",True,[],True,,False,1,3,2,1613cdbad05a45e3d62bef145f09502c38c7a2dc76d68b990cf9d8ec3de792cd
+cand_000189,"Quel pourcentage des résultats d'extraction comporte un message d'erreur, par année ?","WITH yearly AS (
+    SELECT d.document_year AS year,
+           COUNT(*) AS total,
+           SUM(CASE WHEN er.message_error IS NOT NULL AND TRIM(er.message_error) <> '' THEN 1 ELSE 0 END) AS with_error
+    FROM extraction_results er
+    JOIN documents d ON er.document_id = d.document_id
+    GROUP BY d.document_year
+)
+SELECT year,
+       ROUND(100.0 * with_error / total, 2) AS error_percentage
+FROM yearly
+ORDER BY year;",medium,"[""extraction_results"", ""documents""]","[""error_percentage"", ""extraction_results"", ""year""]",True,[],True,,False,8,2,2,aa278b778de3ddce85bbb95509d570c7125f928d59325130d66eb071a5c72f98
+cand_000190,"Quel est le résultat net (recettes D002 – dépenses D001) par commune pour 2023 et 2024, et comment a‑t‑il évolué entre ces deux années ?","WITH sums AS (
+    SELECT d.city_name,
+           d.document_year,
+           SUM(CASE WHEN er.safir_field_id = 'D001' THEN CAST(er.value AS REAL) ELSE 0 END) AS sum_d001,
+           SUM(CASE WHEN er.safir_field_id = 'D002' THEN CAST(er.value AS REAL) ELSE 0 END) AS sum_d002
+    FROM extraction_results er
+    JOIN documents d ON er.document_id = d.document_id
+    WHERE d.document_year IN ('2023','2024')
+      AND er.safir_field_id IN ('D001','D002')
+    GROUP BY d.city_name, d.document_year
+),
+net AS (
+    SELECT city_name,
+           document_year,
+           sum_d002 - sum_d001 AS net_result
+    FROM sums
+)
+SELECT n2024.city_name,
+       n2023.net_result AS net_2023,
+       n2024.net_result AS net_2024,
+       (n2024.net_result - n2023.net_result) AS change
+FROM net n2024
+JOIN net n2023 ON n2024.city_name = n2023.city_name
+WHERE n2024.document_year = '2024' AND n2023.document_year = '2023'
+ORDER BY change DESC;",hard,"[""extraction_results"", ""documents""]","[""net_result"", ""year_comparison"", ""city"", ""d001"", ""d002""]",True,[],True,,False,4,0,4,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+cand_000191,Quelles communes ont vu le nombre d'avertissements d'extraction augmenter de plus de 20 % entre 2023 et 2024 ?,"WITH warnings AS (
+    SELECT d.city_name,
+           d.document_year,
+           COUNT(*) AS warning_cnt
+    FROM extraction_results er
+    JOIN documents d ON er.document_id = d.document_id
+    WHERE er.message_warning IS NOT NULL
+      AND TRIM(er.message_warning) <> ''
+      AND d.document_year IN ('2023','2024')
+    GROUP BY d.city_name, d.document_year
+),
+pivot AS (
+    SELECT w2024.city_name,
+           w2023.warning_cnt AS cnt_2023,
+           w2024.warning_cnt AS cnt_2024
+    FROM warnings w2024
+    JOIN warnings w2023 ON w2024.city_name = w2023.city_name
+    WHERE w2024.document_year = '2024' AND w2023.document_year = '2023'
+)
+SELECT city_name,
+       cnt_2023,
+       cnt_2024,
+       ROUND(100.0 * (cnt_2024 - cnt_2023) / NULLIF(cnt_2023,0), 2) AS pct_increase
+FROM pivot
+WHERE cnt_2023 > 0
+  AND (cnt_2024 - cnt_2023) * 100.0 / cnt_2023 > 20
+ORDER BY pct_increase DESC;",medium,"[""extraction_results"", ""documents""]","[""warning_increase"", ""city"", ""year"", ""percentage""]",True,[],True,,False,11,0,4,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+cand_000192,Quels sont les 5 masques qui affichent la plus grande moyenne de résultats d'extraction par document ?,"WITH doc_counts AS (
+    SELECT d.document_id,
+           d.mask,
+           COUNT(er.result_id) AS result_cnt
+    FROM documents d
+    LEFT JOIN extraction_results er ON er.document_id = d.document_id
+    GROUP BY d.document_id, d.mask
+),
+mask_avg AS (
+    SELECT mask,
+           AVG(result_cnt) AS avg_results_per_doc
+    FROM doc_counts
+    GROUP BY mask
+)
+SELECT mask,
+       ROUND(avg_results_per_doc,2) AS avg_results_per_doc
+FROM mask_avg
+ORDER BY avg_results_per_doc DESC
+LIMIT 5;",hard,"[""documents"", ""extraction_results""]","[""average"", ""results_per_document"", ""mask""]",True,[],True,,False,10,3,2,87191d68f48b5273227f1278e55b65e96f128626c663b87558d46b99fe07bc94
+cand_000193,"Quel est le délai moyen, en heures, entre la création du document et le lancement de l'extraction, par commune pour l'année 2024 ?","SELECT d.city_name,
+       ROUND(AVG(julianday(er.start_time) - julianday(d.created_at)) * 24, 2) AS avg_hours_delay
+FROM documents d
+JOIN extraction_runs er ON er.document_id = d.document_id
+WHERE d.document_year = '2024'
+  AND er.start_time IS NOT NULL
+GROUP BY d.city_name
+ORDER BY avg_hours_delay DESC;",medium,"[""documents"", ""extraction_runs""]","[""average_delay"", ""city"", ""year"", ""extraction_run""]",True,[],True,,False,0,18,2,6616aa29a4545bce213f03cf6f55d05c46c0e05d2e011bd9b4778c71fd83a016
+cand_000194,Combien de champs SAFIR différents ont été extraits pour chaque document dont l'état est SUCCESS ?,"SELECT d.document_id,
+       COUNT(DISTINCT er.safir_field_id) AS distinct_fields
+FROM documents d
+JOIN states s ON d.state_id = s.state_id
+JOIN extraction_results er ON er.document_id = d.document_id
+WHERE s.code = 'SUCCESS'
+GROUP BY d.document_id
+ORDER BY distinct_fields DESC;",easy,"[""documents"", ""states"", ""extraction_results""]","[""distinct_fields"", ""document"", ""success_state""]",True,[],True,,False,10,109,2,2e43b52eea989fd5bc387b7995f707b44c09b0f6062c82843a04a12bf15869df
+cand_000195,"Pour chaque type de budget, quel est le total des pages des documents où au moins un résultat d'extraction comporte un message d'erreur ?","WITH docs_with_error AS (
+    SELECT DISTINCT d.document_id, d.budget_type, d.nb_pages
+    FROM documents d
+    JOIN extraction_results er ON er.document_id = d.document_id
+    WHERE er.message_error IS NOT NULL
+      AND TRIM(er.message_error) <> ''
+)
+SELECT budget_type,
+       SUM(nb_pages) AS total_pages
+FROM docs_with_error
+GROUP BY budget_type
+ORDER BY total_pages DESC;",hard,"[""documents"", ""extraction_results""]","[""total_pages"", ""budget_type"", ""error""]",True,[],True,,False,8,2,2,e9013b54038efced2e164bac960a5c356ed73b37d49f49f546cb2edfb9c5cfe7
+cand_000196,Quelles communes ont des dépenses (D001) supérieures à 110 % de leurs recettes (D002) en 2024 ?,"WITH sums AS (
+    SELECT d.city_name,
+           SUM(CASE WHEN er.safir_field_id = 'D001' THEN CAST(er.value AS REAL) ELSE 0 END) AS sum_d001,
+           SUM(CASE WHEN er.safir_field_id = 'D002' THEN CAST(er.value AS REAL) ELSE 0 END) AS sum_d002
+    FROM extraction_results er
+    JOIN documents d ON er.document_id = d.document_id
+    WHERE d.document_year = '2024'
+      AND er.safir_field_id IN ('D001','D002')
+    GROUP BY d.city_name
+)
+SELECT city_name,
+       sum_d001,
+       sum_d002,
+       ROUND(100.0 * sum_d001 / NULLIF(sum_d002,0),2) AS pct_of_revenue
+FROM sums
+WHERE sum_d002 > 0
+  AND sum_d001 > 1.10 * sum_d002
+ORDER BY pct_of_revenue DESC;",medium,"[""extraction_results"", ""documents""]","[""expense_over_revenue"", ""city"", ""year"", ""d001"", ""d002""]",True,[],True,,False,4,0,4,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+cand_000197,Quel pourcentage des documents est en état VALIDATED chaque année ?,"WITH yearly_counts AS (
+    SELECT d.document_year AS year,
+           COUNT(*) AS total_docs,
+           SUM(CASE WHEN s.code = 'VALIDATED' THEN 1 ELSE 0 END) AS validated_docs
+    FROM documents d
+    LEFT JOIN states s ON d.state_id = s.state_id
+    GROUP BY d.document_year
+)
+SELECT year,
+       ROUND(100.0 * validated_docs / total_docs, 2) AS validated_percentage
+FROM yearly_counts
+ORDER BY year;",easy,"[""documents"", ""states""]","[""validated_ratio"", ""year"", ""documents""]",True,[],True,,False,1,2,2,c00e9ed4b775639cc3091d150b5dee936f61fc98beb273faddf3f7e61d7e6354
+cand_000198,"Pour chaque commune, quel est l'état du dernier run d'extraction en 2024 ?","SELECT d.city_name,
+       s.code AS latest_run_state,
+       MAX(er.start_time) AS latest_start_time
+FROM documents d
+JOIN extraction_runs er ON er.document_id = d.document_id
+JOIN states s ON er.state_id = s.state_id
+WHERE d.document_year = '2024'
+GROUP BY d.city_name
+ORDER BY latest_start_time DESC;",medium,"[""documents"", ""extraction_runs"", ""states""]","[""latest_run_state"", ""city"", ""year""]",True,[],True,,False,1,18,3,583db1e43d6597f97cc1177ff35f85d53a7e20ff9cea97c4da95dc75c2aefc73
+cand_000199,Combien de runs d'extraction ont été exécutés par état et par année ?,"SELECT d.document_year AS year,
+       s.code AS run_state,
+       COUNT(*) AS run_count
+FROM extraction_runs er
+JOIN documents d ON er.document_id = d.document_id
+JOIN states s ON er.state_id = s.state_id
+GROUP BY d.document_year, s.code
+ORDER BY d.document_year, run_count DESC;",easy,"[""extraction_runs"", ""documents"", ""states""]","[""run_counts"", ""state"", ""year""]",True,[],True,,False,0,5,3,1a72af33b84535086295082846df6f73ed3540d9c6f0ad6ed2ce92da9ee24a51
+cand_000200,"Quelles communes affichent une hausse de leurs dépenses (champ D001) supérieure à 10 % entre 2023 et 2024, tout en ayant au moins un avertissement dans les documents de 2024 ?","WITH success_docs AS (
+    SELECT d.document_id, d.city_name, d.document_year, d.warning_message
+    FROM documents d
+    JOIN states s ON d.state_id = s.state_id
+    WHERE s.code = 'SUCCESS'
+),
+expenses AS (
+    SELECT sd.city_name,
+           sd.document_year,
+           CAST(er.value AS REAL) AS expense,
+           sd.warning_message
+    FROM success_docs sd
+    JOIN extraction_results er ON er.document_id = sd.document_id
+    WHERE er.safir_field_id = 'D001' AND er.value <> ''
+),
+warnings_2024 AS (
+    SELECT sd.city_name,
+           sd.document_year,
+           SUM(CASE WHEN sd.warning_message <> '' THEN 1 ELSE 0 END) AS warning_cnt
+    FROM success_docs sd
+    WHERE sd.document_year = '2024'
+    GROUP BY sd.city_name, sd.document_year
+)
+SELECT e2024.city_name,
+       e2024.expense AS expense_2024,
+       e2023.expense AS expense_2023,
+       ROUND((e2024.expense - e2023.expense) / NULLIF(e2023.expense, 0) * 100, 2) AS growth_percent,
+       w.warning_cnt AS warnings_2024
+FROM expenses e2024
+JOIN expenses e2023
+  ON e2023.city_name = e2024.city_name
+ AND e2023.document_year = '2023'
+JOIN warnings_2024 w
+  ON w.city_name = e2024.city_name
+WHERE e2024.document_year = '2024'
+GROUP BY e2024.city_name, e2024.expense, e2023.expense, w.warning_cnt
+HAVING growth_percent > 10
+ORDER BY growth_percent DESC
+LIMIT 10;",medium,"[""documents"", ""extraction_results"", ""states""]","[""growth"", ""expenses"", ""warnings"", ""financial_analysis""]",True,[],True,,False,13,0,5,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855

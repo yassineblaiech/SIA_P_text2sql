@@ -1,0 +1,33 @@
+{
+  "generated_at_utc": "2026-03-11T01:36:51.519904+00:00",
+  "input_path": "C:\\Users\\hamza\\Desktop\\Projet SIA\\data\\intermediate\\by_model\\gpt_oss_120b\\ttsql_candidates_clean.jsonl",
+  "db_path": "C:\\Users\\hamza\\Desktop\\Projet SIA\\data\\raw\\db.sqlite",
+  "judge_model": "deepseek-chat",
+  "base_url": "https://api.deepseek.com/v1",
+  "total_rows": 200,
+  "pass_rows": 129,
+  "pass_rate": 0.645,
+  "pass_score_threshold": 4.0,
+  "verdict_counts": {
+    "pass": 129,
+    "needs_fix": 70,
+    "fail": 1
+  },
+  "score_bucket_counts": {
+    "5": 118,
+    "4": 59,
+    "3": 12,
+    "2": 11
+  },
+  "judge_errors": 0,
+  "difficulty_total": {
+    "easy": 70,
+    "medium": 86,
+    "hard": 44
+  },
+  "difficulty_pass": {
+    "easy": 59,
+    "medium": 53,
+    "hard": 17
+  }
+}

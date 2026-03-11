@@ -1,0 +1,33 @@
+{
+  "generated_at_utc": "2026-03-10T16:56:53.619349+00:00",
+  "base_url": "https://api.deepinfra.com/v1/openai",
+  "api_key_env": "DEEPINFRA_API_KEY",
+  "num_questions_per_model": 200,
+  "models": [
+    {
+      "alias": "mistral_small_24b",
+      "model": "mistralai/Mistral-Small-3.2-24B-Instruct-2506",
+      "paths": {
+        "root": "C:\\Users\\hamza\\Desktop\\Projet SIA\\data\\intermediate\\by_model\\mistral_small_24b",
+        "raw_jsonl": "C:\\Users\\hamza\\Desktop\\Projet SIA\\data\\intermediate\\by_model\\mistral_small_24b\\ttsql_candidates_raw.jsonl",
+        "raw_csv": "C:\\Users\\hamza\\Desktop\\Projet SIA\\data\\intermediate\\by_model\\mistral_small_24b\\ttsql_candidates_raw.csv",
+        "validated_jsonl": "C:\\Users\\hamza\\Desktop\\Projet SIA\\data\\intermediate\\by_model\\mistral_small_24b\\ttsql_candidates_validated.jsonl",
+        "validated_csv": "C:\\Users\\hamza\\Desktop\\Projet SIA\\data\\intermediate\\by_model\\mistral_small_24b\\ttsql_candidates_validated.csv",
+        "clean_jsonl": "C:\\Users\\hamza\\Desktop\\Projet SIA\\data\\intermediate\\by_model\\mistral_small_24b\\ttsql_candidates_clean.jsonl",
+        "clean_csv": "C:\\Users\\hamza\\Desktop\\Projet SIA\\data\\intermediate\\by_model\\mistral_small_24b\\ttsql_candidates_clean.csv",
+        "report_json": "C:\\Users\\hamza\\Desktop\\Projet SIA\\data\\intermediate\\by_model\\mistral_small_24b\\ttsql_candidates_validation_report.json"
+      },
+      "generation_return_code": 0,
+      "validation_return_code": 0,
+      "generation_metrics": {
+        "generation_elapsed_seconds": 6302.907,
+        "raw_rows_before": 0,
+        "raw_rows_after": 200,
+        "raw_rows_added": 200,
+        "avg_generation_latency_seconds_per_query": 31.515,
+        "avg_generation_latency_ms_per_query": 31514.5
+      },
+      "status": "ok"
+    }
+  ]
+}

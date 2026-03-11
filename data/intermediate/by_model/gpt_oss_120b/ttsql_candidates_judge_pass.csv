@@ -1,0 +1,881 @@
+id,question_fr,sql,difficulty,tables_used,runtime_ok,runtime_error,result_row_count,judge_score,judge_verdict,judge_reason,judge_pass,judge_fix_sql,judge_dimension_scores,judge_flags,judge_model,judged_at_utc
+cand_000001,Combien de documents ont été ingérés chaque année ?,"SELECT d.document_year AS annee, COUNT(*) AS nb_documents FROM documents d GROUP BY d.document_year ORDER BY d.document_year;",easy,"[""documents""]",True,,2,5.0,pass,"SQL perfectly matches the French question intent, uses correct schema, and is clear and efficient.",True,,"{""intent_alignment"": 5.0, ""schema_correctness"": 5.0, ""query_quality"": 5.0}",[],deepseek-chat,2026-03-11T01:18:49.709935+00:00
+cand_000002,Quel est le nombre de documents contenant une erreur d’ingestion par année ?,"SELECT d.document_year AS annee, COUNT(*) AS nb_erreurs FROM documents d WHERE TRIM(d.error_message) <> '' GROUP BY d.document_year ORDER BY d.document_year;",easy,"[""documents""]",True,,1,5.0,pass,"SQL perfectly matches the French question intent, uses correct schema, and produces clear, analyst-grade results.",True,,"{""intent_alignment"": 5.0, ""schema_correctness"": 5.0, ""query_quality"": 5.0}",[],deepseek-chat,2026-03-11T01:18:53.389087+00:00
+cand_000003,Quelle est la moyenne du nombre de pages selon le type de budget (BP ou BA) ?,"SELECT d.budget_type, AVG(d.nb_pages) AS pages_moyenne FROM documents d GROUP BY d.budget_type;",easy,"[""documents""]",True,,2,5.0,pass,"SQL perfectly matches the French question intent, uses correct schema, and produces clear, analyst-grade results.",True,,"{""intent_alignment"": 5.0, ""schema_correctness"": 5.0, ""query_quality"": 5.0}",[],deepseek-chat,2026-03-11T01:18:57.179004+00:00
+cand_000004,Quelles sont les 5 communes avec le plus grand nombre de documents traités ?,"SELECT d.city_name AS commune, COUNT(*) AS nb_documents FROM documents d GROUP BY d.city_name ORDER BY nb_documents DESC LIMIT 5;",easy,"[""documents""]",True,,5,5.0,pass,"SQL perfectly matches the French question intent, uses correct schema with valid columns and joins, and produces a clear, efficient query that returns meaningful analyst-grade results.",True,,"{""intent_alignment"": 5.0, ""schema_correctness"": 5.0, ""query_quality"": 5.0}",[],deepseek-chat,2026-03-11T01:19:00.766081+00:00
+cand_000005,Quel pourcentage de documents est en état SUCCESS ?,"SELECT ROUND(100.0 * SUM(CASE WHEN s.code = 'SUCCESS' THEN 1 ELSE 0 END) / COUNT(*), 2) AS pourcentage_success FROM documents d JOIN states s ON d.state_id = s.state_id;",easy,"[""documents"", ""states""]",True,,1,5.0,pass,"SQL perfectly matches the French question intent, uses correct schema with valid join, produces a clear percentage result, and is business-relevant without technical jargon.",True,,"{""intent_alignment"": 5.0, ""schema_correctness"": 5.0, ""query_quality"": 5.0}",[],deepseek-chat,2026-03-11T01:19:04.468436+00:00
+cand_000007,Combien de résultats d’extraction sont associés à chaque état du processus ?,"SELECT s.code AS etat, COUNT(*) AS nb_resultats FROM extraction_results r JOIN states s ON r.state_id = s.state_id GROUP BY s.code ORDER BY nb_resultats DESC;",easy,"[""extraction_results"", ""states""]",True,,4,5.0,pass,"SQL perfectly matches the French question intent, uses correct schema joins, and produces a clear, analyst-friendly output.",True,,"{""intent_alignment"": 5.0, ""schema_correctness"": 5.0, ""query_quality"": 5.0}",[],deepseek-chat,2026-03-11T01:19:13.686479+00:00
+cand_000008,"Quelle est la répartition des documents selon le type de masque (M57_CA, M57_CFU, etc.) ?","SELECT d.mask, COUNT(*) AS nb_documents FROM documents d GROUP BY d.mask ORDER BY nb_documents DESC;",easy,"[""documents""]",True,,3,5.0,pass,"SQL perfectly matches the French question intent, uses correct schema, and produces a clear, business-relevant output.",True,,"{""intent_alignment"": 5.0, ""schema_correctness"": 5.0, ""query_quality"": 5.0}",[],deepseek-chat,2026-03-11T01:19:17.558739+00:00
+cand_000010,Comment évoluent les recettes totales de la commune 'Ville de Concarneau' au fil des années ?,"SELECT d.document_year AS annee, SUM(CAST(r.value AS REAL)) AS total_recettes FROM extraction_results r JOIN documents d ON r.document_id = d.document_id WHERE d.city_name = 'Ville de Concarneau' AND r.safir_field_id = 'Recettes' GROUP BY d.document_year ORDER BY d.document_year;",medium,"[""extraction_results"", ""documents""]",True,,0,4.0,pass,"SQL correctly addresses the business question about revenue trends for a specific municipality over years, with proper joins, aggregation, and filtering. Minor improvements possible for clarity and robustness.",True,"SELECT d.document_year AS annee, SUM(CAST(r.value AS REAL)) AS total_recettes FROM extraction_results r JOIN documents d ON r.document_id = d.document_id WHERE d.city_name = 'Ville de Concarneau' AND r.safir_field_id LIKE '%Recettes%' AND r.value IS NOT NULL AND r.value != '' GROUP BY d.document_year ORDER BY d.document_year;","{""intent_alignment"": 5.0, ""schema_correctness"": 4.0, ""query_quality"": 3.0}","[""assumes_safir_field_id_exists"", ""potential_null_values""]",deepseek-chat,2026-03-11T01:19:29.593313+00:00
+cand_000011,Quel est le ratio dépenses / recettes pour chaque document de l'année 2024 ?,"WITH rec AS ( SELECT document_id, SUM(CAST(value AS REAL)) AS recettes FROM extraction_results WHERE safir_field_id = 'Recettes' GROUP BY document_id ), dep AS ( SELECT document_id, SUM(CAST(value AS REAL)) AS depenses FROM extraction_results WHERE safir_field_id = 'Depenses' GROUP BY document_id ) SELECT d.document_id, d.city_name, d.document_year, CASE WHEN rec.recettes = 0 THEN NULL ELSE dep.depenses / rec.recettes END AS ratio_dep_rec FROM documents d LEFT JOIN rec ON d.document_id = rec.document_id LEFT JOIN dep ON d.document_id = dep.document_id WHERE d.document_year = '2024';",medium,"[""documents"", ""extraction_results""]",True,,108,5.0,pass,"SQL perfectly matches the French question intent, uses correct schema joins, and produces meaningful financial analysis output.",True,,"{""intent_alignment"": 5.0, ""schema_correctness"": 5.0, ""query_quality"": 5.0}",[],deepseek-chat,2026-03-11T01:19:33.531929+00:00
+cand_000012,"Quel est le délai moyen entre la création du document et le lancement de l’extraction, par année ?","SELECT d.document_year AS annee, AVG(strftime('%s', er.start_time) - strftime('%s', d.created_at)) / 3600.0 AS delai_moyen_heures FROM documents d JOIN extraction_runs er ON d.document_id = er.document_id GROUP BY d.document_year;",medium,"[""documents"", ""extraction_runs""]",True,,2,5.0,pass,"SQL perfectly matches the French question intent, uses correct schema with valid joins, and produces a clear, analyst-friendly output.",True,,"{""intent_alignment"": 5.0, ""schema_correctness"": 5.0, ""query_quality"": 5.0}",[],deepseek-chat,2026-03-11T01:19:37.155280+00:00
+cand_000013,Combien de documents sont en état ERROR et possèdent un message d’erreur non vide ?,SELECT COUNT(*) AS nb_documents FROM documents d JOIN states s ON d.state_id = s.state_id WHERE s.code = 'ERROR' AND TRIM(d.error_message) <> '';,medium,"[""documents"", ""states""]",True,,1,5.0,pass,"SQL perfectly matches the French question intent, uses correct schema with valid joins, and produces a clear, executable query that returns meaningful analyst-grade results.",True,,"{""intent_alignment"": 5.0, ""schema_correctness"": 5.0, ""query_quality"": 5.0}",[],deepseek-chat,2026-03-11T01:19:41.092811+00:00
+cand_000014,Quel est le nombre moyen de résultats d’extraction par document selon le type de budget ?,"SELECT d.budget_type, AVG(cnt) AS moyenne_resultats FROM ( SELECT document_id, COUNT(*) AS cnt FROM extraction_results GROUP BY document_id ) er_cnt JOIN documents d ON er_cnt.document_id = d.document_id GROUP BY d.budget_type;",medium,"[""extraction_results"", ""documents""]",True,,2,5.0,pass,"SQL perfectly matches the French question intent, uses correct schema with valid joins, and produces a clear, analyst-friendly result.",True,,"{""intent_alignment"": 5.0, ""schema_correctness"": 5.0, ""query_quality"": 5.0}",[],deepseek-chat,2026-03-11T01:19:45.326522+00:00
+cand_000015,Quelles communes ont vu leur dette totale augmenter de plus de 10 % entre 2023 et 2024 ?,"WITH dette_2023 AS ( SELECT d.city_name, SUM(CAST(r.value AS REAL)) AS dette FROM extraction_results r JOIN documents d ON r.document_id = d.document_id WHERE d.document_year = '2023' AND r.safir_field_id = 'Dette' GROUP BY d.city_name ), dette_2024 AS ( SELECT d.city_name, SUM(CAST(r.value AS REAL)) AS dette FROM extraction_results r JOIN documents d ON r.document_id = d.document_id WHERE d.document_year = '2024' AND r.safir_field_id = 'Dette' GROUP BY d.city_name ) SELECT d23.city_name FROM dette_2023 d23 JOIN dette_2024 d24 ON d23.city_name = d24.city_name WHERE d23.dette > 0 AND (d24.dette - d23.dette) / d23.dette > 0.10;",medium,"[""extraction_results"", ""documents""]",True,,0,4.0,pass,"SQL correctly identifies municipalities with >10% debt increase between 2023-2024 using appropriate financial analysis logic, but has minor robustness issues with potential division by zero.",True,"WITH dette_2023 AS ( SELECT d.city_name, SUM(CAST(r.value AS REAL)) AS dette FROM extraction_results r JOIN documents d ON r.document_id = d.document_id WHERE d.document_year = '2023' AND r.safir_field_id = 'Dette' GROUP BY d.city_name ), dette_2024 AS ( SELECT d.city_name, SUM(CAST(r.value AS REAL)) AS dette FROM extraction_results r JOIN documents d ON r.document_id = d.document_id WHERE d.document_year = '2024' AND r.safir_field_id = 'Dette' GROUP BY d.city_name ) SELECT d23.city_name FROM dette_2023 d23 JOIN dette_2024 d24 ON d23.city_name = d24.city_name WHERE d23.dette > 0 AND (d24.dette - d23.dette) / d23.dette > 0.10;","{""intent_alignment"": 5.0, ""schema_correctness"": 5.0, ""query_quality"": 3.0}","[""division_by_zero_risk""]",deepseek-chat,2026-03-11T01:19:52.886960+00:00
+cand_000016,Combien de retours techniques (is_technical_error = 1) ont été enregistrés par commune ?,"SELECT d.city_name AS commune, COUNT(*) AS nb_retours FROM resultfeedbacks rf JOIN extraction_results r ON rf.result_id = r.result_id JOIN documents d ON r.document_id = d.document_id WHERE rf.is_technical_error = 1 GROUP BY d.city_name ORDER BY nb_retours DESC;",medium,"[""resultfeedbacks"", ""extraction_results"", ""documents""]",True,,0,5.0,pass,"SQL perfectly matches the French question intent, uses correct schema joins, and produces a clear, analyst-friendly output.",True,,"{""intent_alignment"": 5.0, ""schema_correctness"": 5.0, ""query_quality"": 5.0}",[],deepseek-chat,2026-03-11T01:19:56.592190+00:00
+cand_000017,"Quelle proportion de documents possède au moins un résultat d’extraction avec un message d’erreur, par année ?","WITH docs_err AS ( SELECT DISTINCT d.document_id FROM extraction_results r JOIN documents d ON r.document_id = d.document_id WHERE r.message_error IS NOT NULL AND TRIM(r.message_error) <> '' ) SELECT d.document_year AS annee, ROUND(100.0 * COUNT(DISTINCT docs_err.document_id) / COUNT(DISTINCT d.document_id), 2) AS pourcentage FROM documents d LEFT JOIN docs_err ON d.document_id = docs_err.document_id GROUP BY d.document_year;",medium,"[""documents"", ""extraction_results""]",True,,2,5.0,pass,"SQL perfectly matches the French question intent, uses correct schema with valid joins, and produces a clear percentage calculation by year.",True,,"{""intent_alignment"": 5.0, ""schema_correctness"": 5.0, ""query_quality"": 5.0}",[],deepseek-chat,2026-03-11T01:20:00.361312+00:00
+cand_000020,Quel est le nombre de documents selon le type de budget (BP ou BA) ?,"SELECT d.budget_type, COUNT(*) AS nb_documents FROM documents d GROUP BY d.budget_type;",easy,"[""documents""]",True,,2,5.0,pass,"SQL perfectly matches the French question intent, uses correct schema, and is clear and efficient.",True,,"{""intent_alignment"": 5.0, ""schema_correctness"": 5.0, ""query_quality"": 5.0}",[],deepseek-chat,2026-03-11T01:20:19.203941+00:00
+cand_000021,Quelles sont les 5 communes qui possèdent le plus grand nombre de documents ?,"SELECT d.city_name, COUNT(*) AS nb_documents FROM documents d GROUP BY d.city_name ORDER BY nb_documents DESC LIMIT 5;",easy,"[""documents""]",True,,5,5.0,pass,"SQL perfectly matches the French question intent, uses correct schema, and is clear and efficient.",True,,"{""intent_alignment"": 5.0, ""schema_correctness"": 5.0, ""query_quality"": 5.0}",[],deepseek-chat,2026-03-11T01:20:23.197037+00:00
+cand_000022,Quelle est la moyenne du nombre de pages par document pour chaque année ?,"SELECT d.document_year, AVG(d.nb_pages) AS moyenne_pages FROM documents d GROUP BY d.document_year;",easy,"[""documents""]",True,,2,5.0,pass,"SQL perfectly matches the French question intent, uses correct schema, and is clear and efficient.",True,,"{""intent_alignment"": 5.0, ""schema_correctness"": 5.0, ""query_quality"": 5.0}",[],deepseek-chat,2026-03-11T01:20:26.582487+00:00
+cand_000023,Quel pourcentage des documents est en état SUCCESS ?,SELECT (COUNT(*) * 100.0 / (SELECT COUNT(*) FROM documents)) AS pct_success FROM documents d JOIN states s ON d.state_id = s.state_id WHERE s.code = 'SUCCESS';,easy,"[""documents"", ""states""]",True,,1,5.0,pass,"SQL perfectly matches the French question intent, uses correct schema joins, and is clear and efficient.",True,,"{""intent_alignment"": 5.0, ""schema_correctness"": 5.0, ""query_quality"": 5.0}",[],deepseek-chat,2026-03-11T01:20:30.239308+00:00
+cand_000029,Quel est le nombre moyen d'erreurs d'extraction par état du document ?,"WITH err_counts AS (SELECT d.state_id, COUNT(*) AS nb_erreurs FROM extraction_results r JOIN documents d ON r.document_id = d.document_id WHERE r.message_error IS NOT NULL AND r.message_error <> '' GROUP BY d.state_id), doc_counts AS (SELECT state_id, COUNT(*) AS nb_documents FROM documents GROUP BY state_id) SELECT s.code AS etat, COALESCE(err_counts.nb_erreurs, 0) * 1.0 / doc_counts.nb_documents AS moyenne_erreurs_par_document FROM doc_counts LEFT JOIN err_counts ON doc_counts.state_id = err_counts.state_id JOIN states s ON doc_counts.state_id = s.state_id;",medium,"[""extraction_results"", ""documents"", ""states""]",True,,126,4.0,pass,"SQL correctly calculates average extraction errors per document state with proper joins and handling of nulls, though question wording is slightly technical.",True,,"{""intent_alignment"": 5.0, ""schema_correctness"": 5.0, ""query_quality"": 4.0}","[""question_technical""]",deepseek-chat,2026-03-11T01:21:09.077588+00:00
+cand_000033,Combien de retours techniques (is_technical_error = 1) sont enregistrés par commune ?,"SELECT d.city_name, COUNT(*) AS nb_retours_techniques FROM resultfeedbacks f JOIN extraction_results r ON f.result_id = r.result_id JOIN documents d ON r.document_id = d.document_id WHERE f.is_technical_error = 1 GROUP BY d.city_name;",medium,"[""resultfeedbacks"", ""extraction_results"", ""documents""]",True,,0,5.0,pass,"SQL perfectly matches the French question intent, uses correct schema joins, and produces a clear, analyst-friendly output.",True,,"{""intent_alignment"": 5.0, ""schema_correctness"": 5.0, ""query_quality"": 5.0}",[],deepseek-chat,2026-03-11T01:21:33.547762+00:00
+cand_000040,Quel pourcentage des documents est en état « SUCCESS » ?,"SELECT ROUND(100.0 * SUM(CASE WHEN s.code = 'SUCCESS' THEN 1 ELSE 0 END) / COUNT(*), 2) AS pct_success
+FROM documents d
+JOIN states s ON s.state_id = d.state_id;",easy,"[""documents"", ""states""]",True,,1,5.0,pass,"SQL perfectly matches the French question intent, uses correct schema joins, and is clear and efficient.",True,,"{""intent_alignment"": 5.0, ""schema_correctness"": 5.0, ""query_quality"": 5.0}",[],deepseek-chat,2026-03-11T01:22:26.802647+00:00
+cand_000042,"Combien d’extractions ont été exécutées selon leur état (PENDING, SUCCESS, etc.) ?","SELECT s.code AS etat,
+       COUNT(*) AS nb_runs
+FROM extraction_runs er
+JOIN states s ON s.state_id = er.state_id
+GROUP BY s.code
+ORDER BY nb_runs DESC;",easy,"[""extraction_runs"", ""states""]",True,,3,5.0,pass,"SQL perfectly matches the French question intent, uses correct schema with valid joins, and produces a clear, analyst-friendly output.",True,,"{""intent_alignment"": 5.0, ""schema_correctness"": 5.0, ""query_quality"": 5.0}",[],deepseek-chat,2026-03-11T01:22:35.092135+00:00
+cand_000047,Quels documents contiennent plus de 5 résultats d’extraction avec un message d’erreur ?,"SELECT d.document_id,
+       d.city_name,
+       COUNT(*) AS nb_errors
+FROM extraction_results er
+JOIN documents d ON d.document_id = er.document_id
+WHERE er.message_error IS NOT NULL
+  AND TRIM(er.message_error) <> ''
+GROUP BY d.document_id, d.city_name
+HAVING COUNT(*) > 5
+ORDER BY nb_errors DESC;",medium,"[""extraction_results"", ""documents""]",True,,109,5.0,pass,"SQL perfectly matches the French question intent, uses correct schema joins, and produces meaningful financial analyst output.",True,,"{""intent_alignment"": 5.0, ""schema_correctness"": 5.0, ""query_quality"": 5.0}",[],deepseek-chat,2026-03-11T01:23:14.560375+00:00
+cand_000052,"Quel est le pourcentage de documents contenant au moins un avertissement, ventilé par type de masque ?","WITH total_per_mask AS (
+  SELECT mask, COUNT(*) AS total_cnt
+  FROM documents
+  GROUP BY mask
+),
+with_warning AS (
+  SELECT mask, COUNT(*) AS warning_cnt
+  FROM documents
+  WHERE warning_message IS NOT NULL AND TRIM(warning_message) <> ''
+  GROUP BY mask
+)
+SELECT t.mask,
+       t.total_cnt,
+       COALESCE(w.warning_cnt,0) AS warning_cnt,
+       ROUND(100.0 * COALESCE(w.warning_cnt,0) / t.total_cnt,2) AS pct_with_warning
+FROM total_per_mask t
+LEFT JOIN with_warning w ON w.mask = t.mask
+ORDER BY pct_with_warning DESC;",hard,"[""documents""]",True,,3,5.0,pass,"SQL perfectly matches the French question intent, uses correct schema, and produces clear analytical output.",True,,"{""intent_alignment"": 5.0, ""schema_correctness"": 5.0, ""query_quality"": 5.0}",[],deepseek-chat,2026-03-11T01:23:43.048693+00:00
+cand_000053,Quelles communes présentent des documents où plusieurs années différentes ont été extraites (incohérence du champ Année) ?,"SELECT d.city_name,
+       d.document_id,
+       GROUP_CONCAT(DISTINCT er.value) AS years_found,
+       COUNT(DISTINCT er.value) AS nb_distinct_years
+FROM extraction_results er
+JOIN documents d ON d.document_id = er.document_id
+WHERE er.safir_field_id = 'Année'
+GROUP BY d.document_id, d.city_name
+HAVING COUNT(DISTINCT er.value) > 1
+ORDER BY nb_distinct_years DESC
+LIMIT 10;",hard,"[""extraction_results"", ""documents""]",True,,0,5.0,pass,"SQL perfectly matches the French question intent, uses correct schema joins, and produces a clear, actionable result for financial analysts.",True,,"{""intent_alignment"": 5.0, ""schema_correctness"": 5.0, ""query_quality"": 5.0}",[],deepseek-chat,2026-03-11T01:23:46.462379+00:00
+cand_000054,Quel est le nombre total de documents par année ?,"SELECT document_year, COUNT(*) AS nb_documents FROM documents GROUP BY document_year ORDER BY document_year;",easy,"[""documents""]",True,,2,5.0,pass,"SQL perfectly matches the French question intent, uses correct schema, and produces a clear, business-relevant output.",True,,"{""intent_alignment"": 5.0, ""schema_correctness"": 5.0, ""query_quality"": 5.0}",[],deepseek-chat,2026-03-11T01:23:49.638888+00:00
+cand_000055,Combien de documents sont classés par type de budget (BP ou BA) ?,"SELECT budget_type, COUNT(*) AS nb FROM documents GROUP BY budget_type;",easy,"[""documents""]",True,,2,5.0,pass,"SQL perfectly matches the French question intent, uses correct schema, and is simple and efficient.",True,,"{""intent_alignment"": 5.0, ""schema_correctness"": 5.0, ""query_quality"": 5.0}",[],deepseek-chat,2026-03-11T01:23:53.420353+00:00
+cand_000056,Quelles sont les 5 communes avec le plus grand nombre de documents ?,"SELECT city_name, COUNT(*) AS nb_docs FROM documents GROUP BY city_name ORDER BY nb_docs DESC LIMIT 5;",easy,"[""documents""]",True,,5,5.0,pass,"SQL perfectly matches the French question intent, uses correct schema, and is clear and efficient.",True,,"{""intent_alignment"": 5.0, ""schema_correctness"": 5.0, ""query_quality"": 5.0}",[],deepseek-chat,2026-03-11T01:23:56.649931+00:00
+cand_000057,Quel est le total des dépenses (champ D001) par commune pour l'année 2024 ?,"SELECT d.city_name, SUM(CAST(r.value AS REAL)) AS total_dep FROM extraction_results r JOIN documents d ON r.document_id = d.document_id WHERE r.safir_field_id = 'D001' AND d.document_year = '2024' GROUP BY d.city_name ORDER BY total_dep DESC;",medium,"[""extraction_results"", ""documents""]",True,,18,5.0,pass,"SQL perfectly matches the French question intent, uses correct schema relationships, and produces meaningful financial analysis output.",True,,"{""intent_alignment"": 5.0, ""schema_correctness"": 5.0, ""query_quality"": 5.0}",[],deepseek-chat,2026-03-11T01:23:59.771923+00:00
+cand_000060,Quel est le nombre moyen de résultats d'extraction par document selon le type de budget ?,"SELECT d.budget_type, AVG(cnt) AS avg_results FROM (SELECT document_id, COUNT(*) AS cnt FROM extraction_results GROUP BY document_id) er JOIN documents d ON er.document_id = d.document_id GROUP BY d.budget_type;",medium,"[""extraction_results"", ""documents""]",True,,2,5.0,pass,"SQL perfectly matches the French question intent, uses correct schema with valid joins, and produces clear, analyst-grade results without technical artifacts.",True,,"{""intent_alignment"": 5.0, ""schema_correctness"": 5.0, ""query_quality"": 5.0}",[],deepseek-chat,2026-03-11T01:24:20.256408+00:00
+cand_000061,Combien de documents contiennent au moins une erreur d'extraction par année ?,"SELECT d.document_year, COUNT(DISTINCT d.document_id) AS docs_with_error FROM documents d JOIN extraction_results r ON d.document_id = r.document_id WHERE r.message_error IS NOT NULL AND r.message_error <> '' GROUP BY d.document_year;",medium,"[""documents"", ""extraction_results""]",True,,2,4.0,pass,"SQL correctly counts documents with extraction errors per year, aligning with business intent and schema. Minor improvements possible for clarity and robustness.",True,"SELECT d.document_year, COUNT(DISTINCT d.document_id) AS nombre_documents_avec_erreur FROM documents d JOIN extraction_results r ON d.document_id = r.document_id WHERE r.message_error IS NOT NULL AND TRIM(r.message_error) != '' GROUP BY d.document_year ORDER BY d.document_year;","{""intent_alignment"": 5.0, ""schema_correctness"": 5.0, ""query_quality"": 3.0}","[""business_realism_ok""]",deepseek-chat,2026-03-11T01:24:25.274122+00:00
+cand_000064,"Quel est le nombre moyen de pages par document pour chaque commune en 2023 et 2024, et quelles communes ont vu une hausse de plus de 20 % en 2024 ?","WITH pages2023 AS (SELECT d.city_name, AVG(d.nb_pages) AS avg_pages FROM documents d WHERE d.document_year = '2023' GROUP BY d.city_name), pages2024 AS (SELECT d.city_name, AVG(d.nb_pages) AS avg_pages FROM documents d WHERE d.document_year = '2024' GROUP BY d.city_name) SELECT p2024.city_name, p2023.avg_pages AS avg_2023, p2024.avg_pages AS avg_2024, ((p2024.avg_pages - p2023.avg_pages) * 100.0 / p2023.avg_pages) AS pct_change FROM pages2023 p2023 JOIN pages2024 p2024 ON p2023.city_name = p2024.city_name WHERE ((p2024.avg_pages - p2023.avg_pages) * 100.0 / p2023.avg_pages) > 20 ORDER BY pct_change DESC;",hard,"[""documents""]",True,,0,5.0,pass,"SQL perfectly matches the French question intent, uses correct schema, and produces meaningful financial analysis output.",True,,"{""intent_alignment"": 5.0, ""schema_correctness"": 5.0, ""query_quality"": 5.0}",[],deepseek-chat,2026-03-11T01:24:42.781000+00:00
+cand_000065,"Quel est le nombre de documents par masque (M57_CA, M57_CFU, etc.) ?","SELECT mask, COUNT(*) AS nb FROM documents GROUP BY mask ORDER BY nb DESC;",easy,"[""documents""]",True,,3,5.0,pass,"SQL perfectly matches the French question intent, uses correct schema, and produces a clear, business-relevant output.",True,,"{""intent_alignment"": 5.0, ""schema_correctness"": 5.0, ""query_quality"": 5.0}",[],deepseek-chat,2026-03-11T01:24:46.474276+00:00
+cand_000066,Comment se répartissent les documents par état et par année ?,"SELECT d.document_year, s.code AS state_code, COUNT(*) AS nb FROM documents d JOIN states s ON d.state_id = s.state_id GROUP BY d.document_year, s.code ORDER BY d.document_year, nb DESC;",medium,"[""documents"", ""states""]",True,,5,5.0,pass,"SQL perfectly matches the French question intent, uses correct schema joins, and produces a clear, analyst-friendly output.",True,,"{""intent_alignment"": 5.0, ""schema_correctness"": 5.0, ""query_quality"": 5.0}",[],deepseek-chat,2026-03-11T01:24:50.459476+00:00
+cand_000068,Quel est le nombre moyen de champs extraits par document selon le type de masque ?,"SELECT d.mask, AVG(cnt) AS avg_fields FROM (SELECT document_id, COUNT(*) AS cnt FROM extraction_results GROUP BY document_id) er JOIN documents d ON er.document_id = d.document_id GROUP BY d.mask ORDER BY avg_fields DESC;",medium,"[""extraction_results"", ""documents""]",True,,3,5.0,pass,"SQL perfectly matches the French question intent, uses correct schema joins, and produces a clear, analyst-friendly output.",True,,"{""intent_alignment"": 5.0, ""schema_correctness"": 5.0, ""query_quality"": 5.0}",[],deepseek-chat,2026-03-11T01:24:59.058956+00:00
+cand_000069,Quelles sont les 5 communes avec le plus grand nombre de documents dont le type de budget est BP ?,"SELECT d.city_name, COUNT(*) AS nb_bp_docs FROM documents d WHERE d.budget_type = 'BP' GROUP BY d.city_name ORDER BY nb_bp_docs DESC LIMIT 5;",easy,"[""documents""]",True,,5,5.0,pass,"SQL perfectly matches the French question intent, uses correct schema, and produces a clear, business-relevant result.",True,,"{""intent_alignment"": 5.0, ""schema_correctness"": 5.0, ""query_quality"": 5.0}",[],deepseek-chat,2026-03-11T01:25:02.239343+00:00
+cand_000070,Quels documents présentent une incohérence : la somme des dépenses D001 et D002 diffère de plus de 5 % du total déclaré (champ TotalDepenses) ?,"WITH dep AS (SELECT r.document_id, SUM(CAST(r.value AS REAL)) AS sum_dep FROM extraction_results r WHERE r.safir_field_id IN ('D001','D002') GROUP BY r.document_id), total AS (SELECT r.document_id, CAST(r.value AS REAL) AS total_dep FROM extraction_results r WHERE r.safir_field_id = 'TotalDepenses') SELECT d.document_id, d.city_name, d.document_year, dep.sum_dep, total.total_dep, ((dep.sum_dep - total.total_dep) * 100.0 / total.total_dep) AS pct_diff FROM dep JOIN total ON dep.document_id = total.document_id JOIN documents d ON dep.document_id = d.document_id WHERE ABS((dep.sum_dep - total.total_dep) * 100.0 / total.total_dep) > 5 ORDER BY pct_diff DESC LIMIT 10;",hard,"[""extraction_results"", ""documents""]",True,,0,5.0,pass,"SQL perfectly matches the French question intent, uses correct schema with valid joins, and produces a clear, analyst-focused result.",True,,"{""intent_alignment"": 5.0, ""schema_correctness"": 5.0, ""query_quality"": 5.0}",[],deepseek-chat,2026-03-11T01:25:05.919939+00:00
+cand_000072,Quel est le nombre de documents déposés chaque année ?,"SELECT d.document_year,
+       COUNT(*) AS nb_documents
+FROM documents d
+GROUP BY d.document_year;",easy,"[""documents""]",True,,2,5.0,pass,"SQL perfectly matches the French question intent, uses correct schema, and produces a clear, business-relevant result.",True,,"{""intent_alignment"": 5.0, ""schema_correctness"": 5.0, ""query_quality"": 5.0}",[],deepseek-chat,2026-03-11T01:25:21.717335+00:00
+cand_000073,Combien de communes différentes sont couvertes chaque année ?,"SELECT d.document_year,
+       COUNT(DISTINCT d.city_name) AS nb_communes
+FROM documents d
+GROUP BY d.document_year;",easy,"[""documents""]",True,,2,5.0,pass,"SQL perfectly matches the French question intent, uses correct schema with valid columns and joins, and produces clear, analyst-grade results without unnecessary complexity.",True,,"{""intent_alignment"": 5.0, ""schema_correctness"": 5.0, ""query_quality"": 5.0}",[],deepseek-chat,2026-03-11T01:25:25.689454+00:00
+cand_000074,Quel est le pourcentage de documents en état « SUCCESS » par année ?,"SELECT d.document_year,
+       ROUND(100.0 * SUM(CASE WHEN s.code = 'SUCCESS' THEN 1 ELSE 0 END) / COUNT(*), 2) AS pct_success
+FROM documents d
+JOIN states s ON d.state_id = s.state_id
+GROUP BY d.document_year;",easy,"[""documents"", ""states""]",True,,2,5.0,pass,"SQL perfectly matches the French question intent, uses correct schema joins, and produces a clear percentage calculation by year.",True,,"{""intent_alignment"": 5.0, ""schema_correctness"": 5.0, ""query_quality"": 5.0}",[],deepseek-chat,2026-03-11T01:25:28.966739+00:00
+cand_000075,Quelle est la moyenne des dépenses (D001) par type de budget (BP/BA) pour l'année 2023 ?,"SELECT d.budget_type,
+       AVG(CAST(er.value AS REAL)) AS moyenne_D001
+FROM documents d
+JOIN extraction_results er ON er.document_id = d.document_id
+WHERE d.document_year = '2023'
+  AND er.safir_field_id = 'D001'
+GROUP BY d.budget_type;",easy,"[""documents"", ""extraction_results""]",True,,2,5.0,pass,"SQL perfectly matches the French question intent, uses correct schema with valid joins, and produces a clear, analyst-grade result.",True,,"{""intent_alignment"": 5.0, ""schema_correctness"": 5.0, ""query_quality"": 5.0}",[],deepseek-chat,2026-03-11T01:25:32.549724+00:00
+cand_000076,Combien d'extractions ont échoué (état ERROR) ?,"SELECT COUNT(*) AS nb_extractions_error
+FROM extraction_runs er
+JOIN states s ON er.state_id = s.state_id
+WHERE s.code = 'ERROR';",easy,"[""extraction_runs"", ""states""]",True,,1,5.0,pass,"SQL perfectly matches the French question intent, uses correct schema with valid joins, and produces a clear, business-relevant result for financial analysts monitoring extraction quality.",True,,"{""intent_alignment"": 5.0, ""schema_correctness"": 5.0, ""query_quality"": 5.0}",[],deepseek-chat,2026-03-11T01:25:36.339286+00:00
+cand_000077,"Quel est le ratio dépenses (D001) / recettes (D002) par commune pour 2024, classé du plus élevé au plus bas ?","SELECT d.city_name,
+       SUM(CASE WHEN er.safir_field_id = 'D001' THEN CAST(er.value AS REAL) ELSE 0 END) AS total_D001,
+       SUM(CASE WHEN er.safir_field_id = 'D002' THEN CAST(er.value AS REAL) ELSE 0 END) AS total_D002,
+       ROUND(SUM(CASE WHEN er.safir_field_id = 'D001' THEN CAST(er.value AS REAL) END) / NULLIF(SUM(CASE WHEN er.safir_field_id = 'D002' THEN CAST(er.value AS REAL) END), 0), 4) AS ratio_D001_D002
+FROM documents d
+JOIN extraction_results er ON er.document_id = d.document_id
+WHERE d.document_year = '2024'
+  AND er.safir_field_id IN ('D001','D002')
+GROUP BY d.city_name
+HAVING total_D002 > 0
+ORDER BY ratio_D001_D002 DESC;",medium,"[""documents"", ""extraction_results""]",True,,0,5.0,pass,"SQL perfectly matches the French question intent, uses correct schema with valid joins, and produces a clear, business-relevant output for financial analysis.",True,,"{""intent_alignment"": 5.0, ""schema_correctness"": 5.0, ""query_quality"": 5.0}",[],deepseek-chat,2026-03-11T01:25:39.714740+00:00
+cand_000080,"Quelle est la moyenne des dépenses (D001) par type de masque (M57_CA, M57_CFU, …) pour l'année 2024 ?","SELECT d.mask,
+       AVG(CAST(er.value AS REAL)) AS moyenne_D001
+FROM documents d
+JOIN extraction_results er ON er.document_id = d.document_id
+WHERE d.document_year = '2024'
+  AND er.safir_field_id = 'D001'
+GROUP BY d.mask;",medium,"[""documents"", ""extraction_results""]",True,,2,4.0,pass,"SQL correctly calculates average expenses by mask type for 2024, aligns with business intent, uses valid schema, and produces meaningful output. Minor improvements possible for clarity.",True,"SELECT d.mask, AVG(CAST(er.value AS REAL)) AS moyenne_depenses_D001 FROM documents d JOIN extraction_results er ON er.document_id = d.document_id WHERE d.document_year = '2024' AND er.safir_field_id = 'D001' GROUP BY d.mask ORDER BY d.mask;","{""intent_alignment"": 5.0, ""schema_correctness"": 5.0, ""query_quality"": 3.0}","[""implicit_cast_warning""]",deepseek-chat,2026-03-11T01:26:03.679690+00:00
+cand_000083,"Pour chaque type de budget, quelles sont les moyennes des dépenses (D001) et des recettes (D002) en 2023 et 2024 ?","SELECT d.budget_type,
+       d.document_year,
+       AVG(CASE WHEN er.safir_field_id = 'D001' THEN CAST(er.value AS REAL) END) AS moyenne_D001,
+       AVG(CASE WHEN er.safir_field_id = 'D002' THEN CAST(er.value AS REAL) END) AS moyenne_D002
+FROM documents d
+JOIN extraction_results er ON er.document_id = d.document_id
+WHERE er.safir_field_id IN ('D001','D002')
+  AND d.document_year IN ('2023','2024')
+GROUP BY d.budget_type, d.document_year;",medium,"[""documents"", ""extraction_results""]",True,,4,4.0,pass,"SQL correctly calculates average expenses (D001) and revenues (D002) per budget type for 2023 and 2024, aligning with the business question. It uses valid schema joins and SQLite syntax, though it could be slightly improved for clarity.",True,"SELECT d.budget_type,
+       d.document_year,
+       AVG(CASE WHEN er.safir_field_id = 'D001' THEN CAST(er.value AS REAL) END) AS moyenne_depenses,
+       AVG(CASE WHEN er.safir_field_id = 'D002' THEN CAST(er.value AS REAL) END) AS moyenne_recettes
+FROM documents d
+JOIN extraction_results er ON er.document_id = d.document_id
+WHERE er.safir_field_id IN ('D001', 'D002')
+  AND d.document_year IN ('2023', '2024')
+GROUP BY d.budget_type, d.document_year
+ORDER BY d.budget_type, d.document_year;","{""intent_alignment"": 5.0, ""schema_correctness"": 5.0, ""query_quality"": 3.0}",[],deepseek-chat,2026-03-11T01:26:25.389730+00:00
+cand_000084,Quelles communes ont vu leurs dépenses (D001) en 2024 dépasser 150 % de celles de 2023 ?,"WITH d2023 AS (
+    SELECT d.city_name,
+           CAST(er.value AS REAL) AS d001_2023
+    FROM documents d
+    JOIN extraction_results er ON er.document_id = d.document_id
+    WHERE d.document_year = '2023'
+      AND er.safir_field_id = 'D001'
+),
+     d2024 AS (
+    SELECT d.city_name,
+           CAST(er.value AS REAL) AS d001_2024
+    FROM documents d
+    JOIN extraction_results er ON er.document_id = d.document_id
+    WHERE d.document_year = '2024'
+      AND er.safir_field_id = 'D001'
+)
+SELECT d2023.city_name,
+       d2023.d001_2023,
+       d2024.d001_2024,
+       ROUND(d2024.d001_2024 * 100.0 / NULLIF(d2023.d001_2023, 0), 2) AS ratio_pct
+FROM d2023
+JOIN d2024 USING (city_name)
+WHERE d2024.d001_2024 > 1.5 * d2023.d001_2023;",medium,"[""documents"", ""extraction_results""]",True,,0,5.0,pass,"SQL perfectly matches the French question intent, uses correct schema joins, and produces meaningful financial analysis output.",True,,"{""intent_alignment"": 5.0, ""schema_correctness"": 5.0, ""query_quality"": 5.0}",[],deepseek-chat,2026-03-11T01:26:28.768462+00:00
+cand_000088,Combien de documents sont déposés chaque année ?,"SELECT d.document_year AS annee, COUNT(*) AS nb_documents FROM documents d GROUP BY d.document_year ORDER BY annee;",easy,"[""documents""]",True,,2,5.0,pass,"SQL perfectly matches the French question intent, uses correct schema, and produces a clear, business-relevant output for financial analysis.",True,,"{""intent_alignment"": 5.0, ""schema_correctness"": 5.0, ""query_quality"": 5.0}",[],deepseek-chat,2026-03-11T01:27:03.894171+00:00
+cand_000089,Quel pourcentage des documents est en état « SUCCESS » chaque année ?,"SELECT d.document_year AS annee,
+       ROUND(100.0 * SUM(CASE WHEN s.code = 'SUCCESS' THEN 1 ELSE 0 END) / COUNT(*), 2) AS pct_success
+FROM documents d
+JOIN states s ON d.state_id = s.state_id
+GROUP BY d.document_year
+ORDER BY annee;",easy,"[""documents"", ""states""]",True,,2,5.0,pass,"SQL perfectly matches the French question intent, uses correct schema joins, and produces meaningful analyst-grade results.",True,,"{""intent_alignment"": 5.0, ""schema_correctness"": 5.0, ""query_quality"": 5.0}",[],deepseek-chat,2026-03-11T01:27:07.580075+00:00
+cand_000090,Quel est le nombre moyen de résultats d'extraction par document pour chaque type de masque ?,"SELECT sub.mask,
+       ROUND(AVG(sub.cnt), 2) AS avg_results_par_doc
+FROM (
+    SELECT d.document_id, d.mask, COUNT(r.result_id) AS cnt
+    FROM documents d
+    LEFT JOIN extraction_results r ON r.document_id = d.document_id
+    GROUP BY d.document_id
+) sub
+GROUP BY sub.mask
+ORDER BY sub.mask;",easy,"[""documents"", ""extraction_results""]",True,,3,4.0,pass,"SQL correctly calculates average extraction results per document by mask type, aligning with business intent and schema constraints. Minor improvements possible for clarity.",True,"SELECT d.mask, ROUND(AVG(result_count), 2) AS avg_results_par_doc FROM (SELECT d.document_id, d.mask, COUNT(r.result_id) AS result_count FROM documents d LEFT JOIN extraction_results r ON d.document_id = r.document_id GROUP BY d.document_id, d.mask) AS doc_counts GROUP BY d.mask ORDER BY d.mask;","{""intent_alignment"": 5.0, ""schema_correctness"": 5.0, ""query_quality"": 3.0}",[],deepseek-chat,2026-03-11T01:27:13.314382+00:00
+cand_000091,Quelles sont les 5 communes qui ont le plus de dépenses (champ D001) en 2024 ?,"SELECT d.city_name,
+       SUM(CAST(r.value AS REAL)) AS total_depenses
+FROM documents d
+JOIN extraction_results r ON r.document_id = d.document_id
+WHERE d.document_year = '2024' AND r.safir_field_id = 'D001'
+GROUP BY d.city_name
+ORDER BY total_depenses DESC
+LIMIT 5;",easy,"[""documents"", ""extraction_results""]",True,,5,5.0,pass,"SQL perfectly matches the French question intent, uses correct schema relationships, and produces a clear, analyst-friendly result.",True,,"{""intent_alignment"": 5.0, ""schema_correctness"": 5.0, ""query_quality"": 5.0}",[],deepseek-chat,2026-03-11T01:27:17.103735+00:00
+cand_000092,Quel pourcentage des documents comporte un message d’erreur chaque année ?,"SELECT d.document_year AS annee,
+       ROUND(100.0 * SUM(CASE WHEN TRIM(d.error_message) <> '' THEN 1 ELSE 0 END) / COUNT(*), 2) AS pct_avec_erreur
+FROM documents d
+GROUP BY d.document_year
+ORDER BY annee;",easy,"[""documents""]",True,,2,4.0,pass,"SQL correctly calculates annual error percentages with proper grouping and formatting, aligning with business intent. Minor improvements possible for clarity.",True,,"{""intent_alignment"": 5.0, ""schema_correctness"": 5.0, ""query_quality"": 3.0}","[""business_realism_penalty""]",deepseek-chat,2026-03-11T01:27:21.303161+00:00
+cand_000093,"Combien de résultats d’extraction contiennent un message d’erreur, ventilés par type de masque ?","SELECT d.mask,
+       COUNT(r.result_id) AS nb_erreurs
+FROM documents d
+JOIN extraction_results r ON r.document_id = d.document_id
+WHERE r.message_error IS NOT NULL AND TRIM(r.message_error) <> ''
+GROUP BY d.mask
+ORDER BY nb_erreurs DESC;",easy,"[""documents"", ""extraction_results""]",True,,3,5.0,pass,"SQL perfectly matches the French question intent, uses correct schema joins, and produces a clear, analyst-friendly output.",True,,"{""intent_alignment"": 5.0, ""schema_correctness"": 5.0, ""query_quality"": 5.0}",[],deepseek-chat,2026-03-11T01:27:24.680313+00:00
+cand_000094,Combien d’extractions ont été exécutées selon leur état (code) ?,"SELECT s.code AS etat,
+       COUNT(*) AS nb_extractions
+FROM extraction_runs er
+JOIN states s ON er.state_id = s.state_id
+GROUP BY s.code
+ORDER BY nb_extractions DESC;",easy,"[""extraction_runs"", ""states""]",True,,3,5.0,pass,"SQL perfectly matches the French question intent, uses correct schema joins, and produces a clear, analyst-friendly output.",True,,"{""intent_alignment"": 5.0, ""schema_correctness"": 5.0, ""query_quality"": 5.0}",[],deepseek-chat,2026-03-11T01:27:29.493737+00:00
+cand_000096,Quelle est la moyenne des dépenses D001 par type de budget (BP ou BA) pour l’année 2023 ?,"SELECT d.budget_type,
+       ROUND(AVG(CAST(r.value AS REAL)), 2) AS moyenne_depenses
+FROM documents d
+JOIN extraction_results r ON r.document_id = d.document_id
+WHERE d.document_year = '2023' AND r.safir_field_id = 'D001'
+GROUP BY d.budget_type
+ORDER BY d.budget_type;",medium,"[""documents"", ""extraction_results""]",True,,2,5.0,pass,"SQL perfectly matches the French question intent, uses correct schema joins, and produces meaningful financial analysis output.",True,,"{""intent_alignment"": 5.0, ""schema_correctness"": 5.0, ""query_quality"": 5.0}",[],deepseek-chat,2026-03-11T01:27:40.553343+00:00
+cand_000097,"Quel est le résultat net (recettes D002 – dépenses D001) de chaque commune en 2024, et quelles sont les 5 meilleures performances ?","WITH sums AS (
+  SELECT d.city_name,
+         r.safir_field_id,
+         SUM(CAST(r.value AS REAL)) AS total_val
+  FROM documents d
+  JOIN extraction_results r ON r.document_id = d.document_id
+  WHERE d.document_year = '2024' AND r.safir_field_id IN ('D001','D002')
+  GROUP BY d.city_name, r.safir_field_id
+)
+SELECT city_name,
+       ROUND(revenues - expenses, 2) AS resultat_net
+FROM (
+    SELECT city_name,
+           MAX(CASE WHEN safir_field_id = 'D001' THEN total_val END) AS expenses,
+           MAX(CASE WHEN safir_field_id = 'D002' THEN total_val END) AS revenues
+    FROM sums
+    GROUP BY city_name
+) sub
+ORDER BY resultat_net DESC
+LIMIT 5;",medium,"[""documents"", ""extraction_results""]",True,,5,5.0,pass,"SQL perfectly matches the business question intent, uses correct schema with valid joins, and produces a clear, analyst-friendly output ranking top 5 municipalities by net result.",True,,"{""intent_alignment"": 5.0, ""schema_correctness"": 5.0, ""query_quality"": 5.0}",[],deepseek-chat,2026-03-11T01:27:44.137269+00:00
+cand_000098,"Combien de documents contiennent au moins un résultat d’extraction avec un message d’erreur, ventilés par type de masque ?","SELECT d.mask,
+       COUNT(DISTINCT d.document_id) AS nb_documents_avec_erreur
+FROM documents d
+JOIN extraction_results r ON r.document_id = d.document_id
+WHERE r.message_error IS NOT NULL AND TRIM(r.message_error) <> ''
+GROUP BY d.mask
+ORDER BY nb_documents_avec_erreur DESC;",medium,"[""documents"", ""extraction_results""]",True,,3,5.0,pass,"SQL perfectly matches the French question intent, uses correct schema joins, and produces meaningful financial analysis output.",True,,"{""intent_alignment"": 5.0, ""schema_correctness"": 5.0, ""query_quality"": 5.0}",[],deepseek-chat,2026-03-11T01:27:47.822966+00:00
+cand_000100,"Quel est le délai moyen, en heures, entre la création du document et le lancement de l’extraction pour chaque année ?","SELECT d.document_year AS annee,
+       ROUND(AVG( (julianday(er.start_time) - julianday(d.created_at)) * 24 ), 2) AS délai_moyen_heures
+FROM documents d
+JOIN extraction_runs er ON er.document_id = d.document_id
+GROUP BY d.document_year
+ORDER BY annee;",medium,"[""documents"", ""extraction_runs""]",True,,2,5.0,pass,"SQL perfectly matches the French question intent, uses correct schema joins, and produces a meaningful business metric about extraction efficiency.",True,,"{""intent_alignment"": 5.0, ""schema_correctness"": 5.0, ""query_quality"": 5.0}",[],deepseek-chat,2026-03-11T01:28:03.389398+00:00
+cand_000101,"Quelles communes présentent, en 2024, un écart supérieur à 5 % entre la somme des dépenses D001 et des recettes D002 et le champ total déclaré (safir_field_id = 'Total') ?","WITH sums AS (
+  SELECT d.city_name,
+         r.safir_field_id,
+         SUM(CAST(r.value AS REAL)) AS total_val
+  FROM documents d
+  JOIN extraction_results r ON r.document_id = d.document_id
+  WHERE d.document_year = '2024' AND r.safir_field_id IN ('D001','D002','Total')
+  GROUP BY d.city_name, r.safir_field_id
+),
+combined AS (
+  SELECT city_name,
+         MAX(CASE WHEN safir_field_id = 'D001' THEN total_val END) AS dep,
+         MAX(CASE WHEN safir_field_id = 'D002' THEN total_val END) AS rec,
+         MAX(CASE WHEN safir_field_id = 'Total' THEN total_val END) AS total_declared
+  FROM sums
+  GROUP BY city_name
+)
+SELECT city_name,
+       ROUND(((dep + rec) - total_declared) / NULLIF(total_declared,0) * 100.0, 2) AS ecart_pct
+FROM combined
+WHERE total_declared IS NOT NULL
+  AND ABS(((dep + rec) - total_declared) / NULLIF(total_declared,0) * 100.0) > 5
+ORDER BY ecart_pct DESC;",hard,"[""documents"", ""extraction_results""]",True,,0,5.0,pass,"SQL perfectly matches the French question intent, uses correct schema with valid joins, and produces a clear, robust query for financial analysis.",True,,"{""intent_alignment"": 5.0, ""schema_correctness"": 5.0, ""query_quality"": 5.0}",[],deepseek-chat,2026-03-11T01:28:07.178051+00:00
+cand_000104,"Pour chaque commune, quel pourcentage des résultats d’extraction possède un avertissement (message_warning non vide) en 2024 ?","SELECT d.city_name,
+       ROUND(100.0 * SUM(CASE WHEN r.message_warning IS NOT NULL AND TRIM(r.message_warning) <> '' THEN 1 ELSE 0 END) / COUNT(r.result_id), 2) AS pct_avertissements
+FROM documents d
+JOIN extraction_results r ON r.document_id = d.document_id
+WHERE d.document_year = '2024'
+GROUP BY d.city_name
+ORDER BY pct_avertissements DESC;",hard,"[""documents"", ""extraction_results""]",True,,18,5.0,pass,"SQL perfectly matches the French question intent, uses correct schema joins, and produces meaningful analyst-grade results.",True,,"{""intent_alignment"": 5.0, ""schema_correctness"": 5.0, ""query_quality"": 5.0}",[],deepseek-chat,2026-03-11T01:28:26.019919+00:00
+cand_000105,Quelle est la moyenne du nombre de pages par document selon le masque ?,"SELECT mask,
+       ROUND(AVG(nb_pages), 2) AS avg_pages
+FROM documents
+GROUP BY mask
+ORDER BY avg_pages DESC;",easy,"[""documents""]",True,,3,5.0,pass,"SQL perfectly matches the French question intent, uses correct schema, and produces meaningful financial analysis output.",True,,"{""intent_alignment"": 5.0, ""schema_correctness"": 5.0, ""query_quality"": 5.0}",[],deepseek-chat,2026-03-11T01:28:29.500731+00:00
+cand_000106,"Combien de documents ont été déposés en 2024, répartis par type de budget (BP/BA) ?","SELECT budget_type,
+       COUNT(*) AS nb_documents
+FROM documents
+WHERE document_year = '2024'
+GROUP BY budget_type;",easy,"[""documents""]",True,,2,5.0,pass,"SQL perfectly matches the French question intent, uses correct schema, and produces a clear, analyst-friendly result.",True,,"{""intent_alignment"": 5.0, ""schema_correctness"": 5.0, ""query_quality"": 5.0}",[],deepseek-chat,2026-03-11T01:28:34.007857+00:00
+cand_000107,Quelles sont les 5 communes qui ont le plus grand nombre de documents en 2023 ?,"SELECT city_name,
+       COUNT(*) AS nb_documents
+FROM documents
+WHERE document_year = '2023'
+GROUP BY city_name
+ORDER BY nb_documents DESC
+LIMIT 5;",easy,"[""documents""]",True,,5,5.0,pass,"SQL perfectly matches the French question intent, uses correct schema, and produces a clear, business-relevant result.",True,,"{""intent_alignment"": 5.0, ""schema_correctness"": 5.0, ""query_quality"": 5.0}",[],deepseek-chat,2026-03-11T01:28:37.692665+00:00
+cand_000108,Combien d'extractions ont été exécutées selon leur état (code) ?,"SELECT s.code AS state_code,
+       COUNT(*) AS nb_runs
+FROM extraction_runs er
+JOIN states s ON er.state_id = s.state_id
+GROUP BY s.code
+ORDER BY nb_runs DESC;",easy,"[""extraction_runs"", ""states""]",True,,3,5.0,pass,"SQL perfectly matches the French question intent, uses correct schema joins, and produces a clear, analyst-friendly output.",True,,"{""intent_alignment"": 5.0, ""schema_correctness"": 5.0, ""query_quality"": 5.0}",[],deepseek-chat,2026-03-11T01:28:41.175622+00:00
+cand_000109,Combien de champs SAFIR différents ont été extraits pour chaque masque ?,"SELECT d.mask,
+       COUNT(DISTINCT er.safir_field_id) AS nb_fields
+FROM extraction_results er
+JOIN documents d ON er.document_id = d.document_id
+GROUP BY d.mask
+ORDER BY nb_fields DESC;",easy,"[""extraction_results"", ""documents""]",True,,3,5.0,pass,"SQL perfectly matches the French question intent, uses correct schema joins, and produces a clear, analyst-friendly result.",True,,"{""intent_alignment"": 5.0, ""schema_correctness"": 5.0, ""query_quality"": 5.0}",[],deepseek-chat,2026-03-11T01:28:44.861906+00:00
+cand_000111,"Quel est le ratio dépenses D001 / recettes D002 par commune pour 2023, et quelles sont les 10 meilleures ?","SELECT d.city_name,
+       ROUND(SUM(CASE WHEN er.safir_field_id = 'D001' THEN CAST(er.value AS REAL) END) /
+             NULLIF(SUM(CASE WHEN er.safir_field_id = 'D002' THEN CAST(er.value AS REAL) END),0), 4) AS ratio_D001_D002
+FROM extraction_results er
+JOIN documents d ON er.document_id = d.document_id
+WHERE d.document_year = '2023' AND er.safir_field_id IN ('D001','D002')
+GROUP BY d.city_name
+HAVING SUM(CASE WHEN er.safir_field_id = 'D002' THEN 1 END) > 0
+ORDER BY ratio_D001_D002 DESC
+LIMIT 10;",medium,"[""extraction_results"", ""documents""]",True,,6,5.0,pass,"SQL perfectly matches the French question intent, uses correct schema relationships, and produces a meaningful financial analysis output.",True,,"{""intent_alignment"": 5.0, ""schema_correctness"": 5.0, ""query_quality"": 5.0}",[],deepseek-chat,2026-03-11T01:28:56.944703+00:00
+cand_000113,Quelles communes ont des dépenses D001 supérieures à 120 % des recettes D002 en 2024 ?,"SELECT d.city_name,
+       SUM(CASE WHEN er.safir_field_id = 'D001' THEN CAST(er.value AS REAL) END) AS total_D001,
+       SUM(CASE WHEN er.safir_field_id = 'D002' THEN CAST(er.value AS REAL) END) AS total_D002
+FROM extraction_results er
+JOIN documents d ON er.document_id = d.document_id
+WHERE d.document_year = '2024' AND er.safir_field_id IN ('D001','D002')
+GROUP BY d.city_name
+HAVING total_D001 > 1.2 * total_D002
+ORDER BY total_D001 DESC;",medium,"[""extraction_results"", ""documents""]",True,,15,4.0,pass,"SQL correctly answers the business question about municipalities with D001 expenses exceeding 120% of D002 revenues in 2024, using valid schema joins and appropriate aggregation. Minor improvements possible for clarity and robustness.",True,"SELECT d.city_name,
+       SUM(CASE WHEN er.safir_field_id = 'D001' THEN CAST(er.value AS REAL) ELSE 0 END) AS total_D001,
+       SUM(CASE WHEN er.safir_field_id = 'D002' THEN CAST(er.value AS REAL) ELSE 0 END) AS total_D002
+FROM extraction_results er
+JOIN documents d ON er.document_id = d.document_id
+WHERE d.document_year = '2024' AND er.safir_field_id IN ('D001', 'D002')
+GROUP BY d.city_name
+HAVING total_D001 > 1.2 * total_D002 AND total_D002 > 0
+ORDER BY total_D001 DESC;","{""intent_alignment"": 5.0, ""schema_correctness"": 4.0, ""query_quality"": 3.0}","[""potential_null_handling"", ""implicit_cast_risk""]",deepseek-chat,2026-03-11T01:29:15.274434+00:00
+cand_000114,"Quel est le temps moyen (en heures) entre la création du document et le lancement de l'extraction, selon le code d'état du document ?","SELECT s.code AS state_code,
+       ROUND(AVG((julianday(er.start_time) - julianday(d.created_at)) * 24.0), 2) AS avg_hours
+FROM extraction_runs er
+JOIN documents d ON er.document_id = d.document_id
+JOIN states s ON d.state_id = s.state_id
+WHERE er.start_time IS NOT NULL
+GROUP BY s.code
+ORDER BY avg_hours DESC;",medium,"[""extraction_runs"", ""documents"", ""states""]",True,,3,5.0,pass,"SQL perfectly matches the French question intent, uses correct schema joins, and produces a meaningful financial analysis metric.",True,,"{""intent_alignment"": 5.0, ""schema_correctness"": 5.0, ""query_quality"": 5.0}",[],deepseek-chat,2026-03-11T01:29:18.857720+00:00
+cand_000115,"Quel est le résultat net (recettes D002 – dépenses D001) par commune pour 2024, et quelles sont les 5 meilleures performances ?","SELECT d.city_name,
+       ROUND(SUM(CASE WHEN er.safir_field_id = 'D002' THEN CAST(er.value AS REAL) END) -
+             SUM(CASE WHEN er.safir_field_id = 'D001' THEN CAST(er.value AS REAL) END), 2) AS net_result
+FROM extraction_results er
+JOIN documents d ON er.document_id = d.document_id
+WHERE d.document_year = '2024' AND er.safir_field_id IN ('D001','D002')
+GROUP BY d.city_name
+ORDER BY net_result DESC
+LIMIT 5;",medium,"[""extraction_results"", ""documents""]",True,,5,5.0,pass,"SQL perfectly matches the French question intent, uses correct schema relationships, and produces a meaningful financial analysis output.",True,,"{""intent_alignment"": 5.0, ""schema_correctness"": 5.0, ""query_quality"": 5.0}",[],deepseek-chat,2026-03-11T01:29:22.544152+00:00
+cand_000116,"Combien de documents contiennent au moins un résultat d'extraction avec un message d'erreur, par année ?","SELECT d.document_year,
+       COUNT(DISTINCT d.document_id) AS nb_documents_with_error
+FROM documents d
+JOIN extraction_results er ON er.document_id = d.document_id
+WHERE TRIM(er.message_error) <> ''
+GROUP BY d.document_year
+ORDER BY d.document_year;",medium,"[""documents"", ""extraction_results""]",True,,2,5.0,pass,"SQL perfectly matches the French question intent, uses correct schema joins, and produces a clear, analyst-friendly output.",True,,"{""intent_alignment"": 5.0, ""schema_correctness"": 5.0, ""query_quality"": 5.0}",[],deepseek-chat,2026-03-11T01:29:26.132266+00:00
+cand_000117,Quels documents présentent une différence supérieure à 5 % entre la somme des dépenses D001 et des recettes D002 et le champ total déclaré ?,"SELECT d.document_id,
+       d.city_name,
+       d.document_year,
+       ROUND( (COALESCE(sum_D001,0) + COALESCE(sum_D002,0) - COALESCE(sum_Total,0)) / NULLIF(COALESCE(sum_Total,0),0) * 100.0, 2) AS diff_pct
+FROM (
+  SELECT er.document_id,
+         SUM(CASE WHEN er.safir_field_id = 'D001' THEN CAST(er.value AS REAL) END) AS sum_D001,
+         SUM(CASE WHEN er.safir_field_id = 'D002' THEN CAST(er.value AS REAL) END) AS sum_D002,
+         SUM(CASE WHEN er.safir_field_id = 'Total' THEN CAST(er.value AS REAL) END) AS sum_Total
+  FROM extraction_results er
+  GROUP BY er.document_id
+) agg
+JOIN documents d ON d.document_id = agg.document_id
+WHERE sum_Total IS NOT NULL AND ABS((COALESCE(sum_D001,0) + COALESCE(sum_D002,0) - sum_Total)) > 0.05 * sum_Total
+ORDER BY diff_pct DESC;",hard,"[""extraction_results"", ""documents""]",True,,0,5.0,pass,"SQL perfectly matches the French question intent, uses correct schema with valid joins, and produces a clear, analyst-grade output for detecting significant financial discrepancies.",True,,"{""intent_alignment"": 5.0, ""schema_correctness"": 5.0, ""query_quality"": 5.0}",[],deepseek-chat,2026-03-11T01:29:29.921347+00:00
+cand_000120,Quel pourcentage de résultats d'extraction comporte un avertissement pour chaque commune en 2024 ?,"SELECT d.city_name,
+       ROUND(100.0 * SUM(CASE WHEN TRIM(er.message_warning) <> '' THEN 1 ELSE 0 END) / COUNT(*), 2) AS pct_warning_results
+FROM extraction_results er
+JOIN documents d ON er.document_id = d.document_id
+WHERE d.document_year = '2024'
+GROUP BY d.city_name
+ORDER BY pct_warning_results DESC;",hard,"[""extraction_results"", ""documents""]",True,,18,5.0,pass,"SQL perfectly matches the French question intent, uses correct schema joins, and produces meaningful financial analysis output.",True,,"{""intent_alignment"": 5.0, ""schema_correctness"": 5.0, ""query_quality"": 5.0}",[],deepseek-chat,2026-03-11T01:29:50.602500+00:00
+cand_000121,Quel est le nombre total de résultats d'extraction obtenus par champ SAFIR ?,"SELECT er.safir_field_id, COUNT(*) AS nb_results
+FROM extraction_results er
+GROUP BY er.safir_field_id
+ORDER BY nb_results DESC;",easy,"[""extraction_results""]",True,,141,5.0,pass,"SQL perfectly matches the French question intent, uses correct schema, and produces a clear, business-relevant output.",True,,"{""intent_alignment"": 5.0, ""schema_correctness"": 5.0, ""query_quality"": 5.0}",[],deepseek-chat,2026-03-11T01:29:54.322742+00:00
+cand_000122,Quelle est la moyenne du nombre de pages par type de masque ?,"SELECT d.mask, AVG(d.nb_pages) AS avg_pages
+FROM documents d
+GROUP BY d.mask;",easy,"[""documents""]",True,,3,5.0,pass,"SQL perfectly matches the French question intent, uses correct schema, and is clear and efficient.",True,,"{""intent_alignment"": 5.0, ""schema_correctness"": 5.0, ""query_quality"": 5.0}",[],deepseek-chat,2026-03-11T01:29:58.590076+00:00
+cand_000123,"Quel est le total des dépenses (champ D001) pour la commune ""BAGNOLET VILLE - VILLE"" en 2024 ?","SELECT d.city_name,
+       SUM(CAST(er.value AS REAL)) AS total_expenses
+FROM extraction_results er
+JOIN documents d ON er.document_id = d.document_id
+WHERE er.safir_field_id = 'D001' AND d.document_year = '2024' AND d.city_name = 'BAGNOLET VILLE - VILLE'
+GROUP BY d.city_name;",easy,"[""extraction_results"", ""documents""]",True,,1,5.0,pass,"SQL perfectly matches the French question intent, uses correct schema joins, and produces a clear financial analysis result.",True,,"{""intent_alignment"": 5.0, ""schema_correctness"": 5.0, ""query_quality"": 5.0}",[],deepseek-chat,2026-03-11T01:30:02.378701+00:00
+cand_000125,Quelle est la moyenne des dépenses (D001) par type de budget (BP ou BA) pour l'année 2023 ?,"SELECT d.budget_type,
+       AVG(CAST(er.value AS REAL)) AS avg_expense
+FROM extraction_results er
+JOIN documents d ON er.document_id = d.document_id
+WHERE er.safir_field_id = 'D001' AND d.document_year = '2023'
+GROUP BY d.budget_type;",easy,"[""extraction_results"", ""documents""]",True,,2,5.0,pass,"SQL perfectly matches the French question intent, uses correct schema with valid joins, and produces a clear, business-relevant result for financial analysis.",True,,"{""intent_alignment"": 5.0, ""schema_correctness"": 5.0, ""query_quality"": 5.0}",[],deepseek-chat,2026-03-11T01:30:13.949602+00:00
+cand_000126,Combien de champs SAFIR différents ont été extraits pour le masque M57_CA ?,"SELECT COUNT(DISTINCT er.safir_field_id) AS nb_fields
+FROM extraction_results er
+JOIN documents d ON er.document_id = d.document_id
+WHERE d.mask = 'M57_CA';",easy,"[""extraction_results"", ""documents""]",True,,1,5.0,pass,"SQL perfectly matches the French question intent, uses correct schema joins, and is clear and efficient.",True,,"{""intent_alignment"": 5.0, ""schema_correctness"": 5.0, ""query_quality"": 5.0}",[],deepseek-chat,2026-03-11T01:30:17.627892+00:00
+cand_000127,"Quel est le ratio dépenses (D001) / recettes (D002) par commune en 2024, classé du plus élevé au plus bas, top 10 ?","SELECT d.city_name,
+       SUM(CASE WHEN er.safir_field_id = 'D001' THEN CAST(er.value AS REAL) ELSE 0 END) /
+       NULLIF(SUM(CASE WHEN er.safir_field_id = 'D002' THEN CAST(er.value AS REAL) END),0) AS expense_rev_ratio
+FROM extraction_results er
+JOIN documents d ON er.document_id = d.document_id
+WHERE d.document_year = '2024'
+GROUP BY d.city_name
+HAVING SUM(CASE WHEN er.safir_field_id = 'D002' THEN 1 ELSE 0 END) > 0
+ORDER BY expense_rev_ratio DESC
+LIMIT 10;",medium,"[""extraction_results"", ""documents""]",True,,10,5.0,pass,"SQL perfectly matches the French question intent, uses correct schema with proper joins, and produces a clear, business-relevant output for financial analysis.",True,,"{""intent_alignment"": 5.0, ""schema_correctness"": 5.0, ""query_quality"": 5.0}",[],deepseek-chat,2026-03-11T01:30:21.527426+00:00
+cand_000128,Quelles communes ont vu leurs dépenses (D001) croître de plus de 20 % entre 2023 et 2024 ?,"WITH exp AS (
+  SELECT d.city_name,
+         d.document_year,
+         SUM(CAST(er.value AS REAL)) AS total_exp
+  FROM extraction_results er
+  JOIN documents d ON er.document_id = d.document_id
+  WHERE er.safir_field_id = 'D001' AND d.document_year IN ('2023','2024')
+  GROUP BY d.city_name, d.document_year
+)
+SELECT e2024.city_name,
+       ((e2024.total_exp - e2023.total_exp) / NULLIF(e2023.total_exp,0)) * 100.0 AS growth_pct
+FROM exp e2024
+JOIN exp e2023 ON e2024.city_name = e2023.city_name
+WHERE e2024.document_year = '2024' AND e2023.document_year = '2023'
+  AND e2023.total_exp > 0
+  AND ((e2024.total_exp - e2023.total_exp) / e2023.total_exp) * 100.0 > 20
+ORDER BY growth_pct DESC;",medium,"[""extraction_results"", ""documents""]",True,,0,5.0,pass,"SQL perfectly matches the French question intent, uses correct schema with valid joins, and produces a clear, analyst-grade result for identifying municipalities with expense growth over 20% between 2023 and 2024.",True,,"{""intent_alignment"": 5.0, ""schema_correctness"": 5.0, ""query_quality"": 5.0}",[],deepseek-chat,2026-03-11T01:30:25.828435+00:00
+cand_000130,"Quel est le pourcentage de résultats d'extraction contenant un avertissement, par champ SAFIR, pour l'année 2024 ?","SELECT er.safir_field_id,
+       ROUND(100.0 * SUM(CASE WHEN er.message_warning IS NOT NULL AND er.message_warning <> '' THEN 1 ELSE 0 END) / COUNT(*),2) AS pct_warning
+FROM extraction_results er
+JOIN documents d ON er.document_id = d.document_id
+WHERE d.document_year = '2024'
+GROUP BY er.safir_field_id
+ORDER BY pct_warning DESC;",medium,"[""extraction_results"", ""documents""]",True,,126,5.0,pass,"SQL perfectly matches the French question intent, uses correct schema joins, and produces meaningful analyst-grade results.",True,,"{""intent_alignment"": 5.0, ""schema_correctness"": 5.0, ""query_quality"": 5.0}",[],deepseek-chat,2026-03-11T01:30:35.353788+00:00
+cand_000131,"Quelles sont les 5 communes avec les recettes (D002) les plus élevées en 2023, et comment leurs recettes se répartissent‑elles selon le type de budget ?","WITH rev AS (
+  SELECT d.city_name,
+         d.budget_type,
+         SUM(CAST(er.value AS REAL)) AS total_rev
+  FROM extraction_results er
+  JOIN documents d ON er.document_id = d.document_id
+  WHERE er.safir_field_id = 'D002' AND d.document_year = '2023'
+  GROUP BY d.city_name, d.budget_type
+), city_total AS (
+  SELECT city_name,
+         SUM(total_rev) AS city_rev
+  FROM rev
+  GROUP BY city_name
+  ORDER BY city_rev DESC
+  LIMIT 5
+)
+SELECT ct.city_name,
+       ct.city_rev,
+       r.budget_type,
+       r.total_rev AS rev_by_budget_type
+FROM city_total ct
+JOIN rev r ON ct.city_name = r.city_name
+ORDER BY ct.city_rev DESC, r.budget_type;",medium,"[""extraction_results"", ""documents""]",True,,5,5.0,pass,"SQL perfectly matches the French question intent, uses correct schema joins, and produces a clear, analyst-friendly output showing top 5 communes by revenue with budget type breakdown.",True,,"{""intent_alignment"": 5.0, ""schema_correctness"": 5.0, ""query_quality"": 5.0}",[],deepseek-chat,2026-03-11T01:30:39.447606+00:00
+cand_000132,"Quel est le délai moyen, en heures, entre la création du document et le lancement de l'extraction, par année ?","SELECT d.document_year,
+       ROUND(AVG((julianday(erun.start_time) - julianday(d.created_at)) * 24),2) AS avg_hours_delay
+FROM documents d
+JOIN extraction_runs erun ON erun.document_id = d.document_id
+GROUP BY d.document_year;",medium,"[""documents"", ""extraction_runs""]",True,,2,5.0,pass,"SQL perfectly matches the French question intent, uses correct schema joins, and produces meaningful analyst-grade results.",True,,"{""intent_alignment"": 5.0, ""schema_correctness"": 5.0, ""query_quality"": 5.0}",[],deepseek-chat,2026-03-11T01:30:43.543413+00:00
+cand_000135,"Quelles communes présentent, pour une année donnée, des dépenses supérieures à 120 % des recettes, et quel est le pourcentage d'excès ?","WITH sums AS (
+  SELECT d.city_name,
+         d.document_year,
+         SUM(CASE WHEN er.safir_field_id = 'D001' THEN CAST(er.value AS REAL) ELSE 0 END) AS total_exp,
+         SUM(CASE WHEN er.safir_field_id = 'D002' THEN CAST(er.value AS REAL) ELSE 0 END) AS total_rev
+  FROM extraction_results er
+  JOIN documents d ON er.document_id = d.document_id
+  GROUP BY d.city_name, d.document_year
+)
+SELECT city_name,
+       document_year,
+       total_exp,
+       total_rev,
+       ROUND((total_exp / NULLIF(total_rev,0) - 1) * 100.0,2) AS excess_pct
+FROM sums
+WHERE total_rev > 0 AND total_exp > 1.2 * total_rev
+ORDER BY excess_pct DESC;",hard,"[""extraction_results"", ""documents""]",True,,0,5.0,pass,"SQL perfectly matches the French question intent, uses correct schema joins, and produces a clear, analyst-friendly output with proper financial calculations.",True,,"{""intent_alignment"": 5.0, ""schema_correctness"": 5.0, ""query_quality"": 5.0}",[],deepseek-chat,2026-03-11T01:31:08.528968+00:00
+cand_000137,Quelles sont les 5 communes où le nombre d'avertissements d'extraction a le plus augmenté entre 2023 et 2024 ?,"WITH warn_counts AS (
+  SELECT d.city_name,
+         d.document_year,
+         SUM(CASE WHEN er.message_warning IS NOT NULL AND er.message_warning <> '' THEN 1 ELSE 0 END) AS warn_cnt
+  FROM extraction_results er
+  JOIN documents d ON er.document_id = d.document_id
+  WHERE d.document_year IN ('2023','2024')
+  GROUP BY d.city_name, d.document_year
+), diff AS (
+  SELECT w2024.city_name,
+         w2024.warn_cnt - COALESCE(w2023.warn_cnt,0) AS warning_increase
+  FROM warn_counts w2024
+  LEFT JOIN warn_counts w2023
+    ON w2024.city_name = w2023.city_name AND w2023.document_year = '2023'
+  WHERE w2024.document_year = '2024'
+)
+SELECT city_name,
+       warning_increase
+FROM diff
+WHERE warning_increase > 0
+ORDER BY warning_increase DESC
+LIMIT 5;",hard,"[""extraction_results"", ""documents""]",True,,5,5.0,pass,"SQL perfectly matches the French question intent, uses correct schema with valid joins, and produces a clear, business-relevant result for financial analysts.",True,,"{""intent_alignment"": 5.0, ""schema_correctness"": 5.0, ""query_quality"": 5.0}",[],deepseek-chat,2026-03-11T01:31:20.409760+00:00
+cand_000139,Quel est le montant total des dépenses (champ D001) pour l'année 2024 ?,SELECT SUM(CAST(er.value AS REAL)) AS total_expenses_2024 FROM extraction_results er JOIN documents d ON er.document_id = d.document_id WHERE er.safir_field_id = 'D001' AND d.document_year = '2024';,easy,"[""extraction_results"", ""documents""]",True,,1,5.0,pass,"SQL perfectly matches the French question intent, uses correct schema joins, and produces a clear financial analysis result.",True,,"{""intent_alignment"": 5.0, ""schema_correctness"": 5.0, ""query_quality"": 5.0}",[],deepseek-chat,2026-03-11T01:31:32.490879+00:00
+cand_000140,"Combien de documents ont été déposés en 2023, ventilés par type de budget (BP ou BA) ?","SELECT d.budget_type, COUNT(*) AS doc_count FROM documents d WHERE d.document_year = '2023' GROUP BY d.budget_type;",easy,"[""documents""]",True,,2,5.0,pass,"SQL perfectly matches the French question intent, uses correct schema, and produces clear, analyst-grade results.",True,,"{""intent_alignment"": 5.0, ""schema_correctness"": 5.0, ""query_quality"": 5.0}",[],deepseek-chat,2026-03-11T01:31:36.178978+00:00
+cand_000141,Quel est le nombre de documents en état « SUCCESS » pour chaque année ?,"SELECT d.document_year, COUNT(*) AS success_docs FROM documents d JOIN states s ON d.state_id = s.state_id WHERE s.code = 'SUCCESS' GROUP BY d.document_year;",easy,"[""documents"", ""states""]",True,,2,5.0,pass,"SQL perfectly matches the French question intent, uses correct schema joins, and produces a clear, analyst-friendly output.",True,,"{""intent_alignment"": 5.0, ""schema_correctness"": 5.0, ""query_quality"": 5.0}",[],deepseek-chat,2026-03-11T01:31:39.961585+00:00
+cand_000142,Quelles sont les 5 communes présentant les recettes les plus élevées (champ D002) en 2024 ?,"SELECT d.city_name, SUM(CAST(er.value AS REAL)) AS total_revenue FROM extraction_results er JOIN documents d ON er.document_id = d.document_id WHERE er.safir_field_id = 'D002' AND d.document_year = '2024' GROUP BY d.city_name ORDER BY total_revenue DESC LIMIT 5;",easy,"[""extraction_results"", ""documents""]",True,,5,5.0,pass,"SQL perfectly matches the French question intent, uses correct schema joins, and produces a clear, actionable result for financial analysis.",True,,"{""intent_alignment"": 5.0, ""schema_correctness"": 5.0, ""query_quality"": 5.0}",[],deepseek-chat,2026-03-11T01:31:43.448401+00:00
+cand_000143,Quel pourcentage des résultats d'extraction comporte un avertissement (message_warning) en 2024 ?,"WITH total AS (SELECT COUNT(*) AS cnt FROM extraction_results er JOIN documents d ON er.document_id = d.document_id WHERE d.document_year = '2024'), with_warning AS (SELECT COUNT(*) AS cnt FROM extraction_results er JOIN documents d ON er.document_id = d.document_id WHERE d.document_year = '2024' AND er.message_warning IS NOT NULL AND TRIM(er.message_warning) <> '') SELECT (with_warning.cnt * 100.0) / total.cnt AS warning_percentage FROM total, with_warning;",easy,"[""extraction_results"", ""documents""]",True,,1,5.0,pass,"SQL perfectly matches the French question intent, uses correct schema joins, and produces a clear percentage result for financial analysis.",True,,"{""intent_alignment"": 5.0, ""schema_correctness"": 5.0, ""query_quality"": 5.0}",[],deepseek-chat,2026-03-11T01:31:47.238891+00:00
+cand_000144,"Quel est le ratio dépenses / recettes (D001 / D002) par commune en 2024, et quelles sont les 10 meilleures ?","SELECT d.city_name, SUM(CASE WHEN er.safir_field_id = 'D001' THEN CAST(er.value AS REAL) END) AS total_expense, SUM(CASE WHEN er.safir_field_id = 'D002' THEN CAST(er.value AS REAL) END) AS total_revenue, (SUM(CASE WHEN er.safir_field_id = 'D001' THEN CAST(er.value AS REAL) END) / NULLIF(SUM(CASE WHEN er.safir_field_id = 'D002' THEN CAST(er.value AS REAL) END),0)) AS expense_revenue_ratio FROM extraction_results er JOIN documents d ON er.document_id = d.document_id WHERE d.document_year = '2024' AND er.safir_field_id IN ('D001','D002') GROUP BY d.city_name HAVING total_revenue > 0 ORDER BY expense_revenue_ratio DESC LIMIT 10;",medium,"[""extraction_results"", ""documents""]",True,,0,4.0,pass,"SQL correctly calculates expense/revenue ratio per municipality for 2024 and returns top 10, with proper business alignment and schema usage. Minor improvements possible for clarity.",True,,"{""intent_alignment"": 5.0, ""schema_correctness"": 5.0, ""query_quality"": 3.0}","[""business_realistic""]",deepseek-chat,2026-03-11T01:31:51.009225+00:00
+cand_000145,"Quel est le taux de croissance des dépenses (D001) entre 2023 et 2024 par commune, pour les communes dont la croissance dépasse 10 % ?","WITH expenses AS (SELECT d.city_name, d.document_year, SUM(CAST(er.value AS REAL)) AS expense_sum FROM extraction_results er JOIN documents d ON er.document_id = d.document_id WHERE er.safir_field_id = 'D001' AND d.document_year IN ('2023','2024') GROUP BY d.city_name, d.document_year) SELECT e2024.city_name, e2023.expense_sum AS expense_2023, e2024.expense_sum AS expense_2024, ((e2024.expense_sum - e2023.expense_sum) / NULLIF(e2023.expense_sum,0)) * 100.0 AS growth_percent FROM expenses e2023 JOIN expenses e2024 ON e2023.city_name = e2024.city_name WHERE e2023.document_year = '2023' AND e2024.document_year = '2024' AND e2023.expense_sum > 0 AND ((e2024.expense_sum - e2023.expense_sum) / e2023.expense_sum) * 100.0 > 10.0 ORDER BY growth_percent DESC;",medium,"[""extraction_results"", ""documents""]",True,,0,5.0,pass,"SQL perfectly matches the French question intent, uses correct schema with valid joins, and produces a clear, analyst-grade output for financial analysis.",True,,"{""intent_alignment"": 5.0, ""schema_correctness"": 5.0, ""query_quality"": 5.0}",[],deepseek-chat,2026-03-11T01:31:55.326637+00:00
+cand_000147,"Quel est le résultat net (recettes D002 – dépenses D001) de chaque commune en 2024, classé du plus élevé au plus bas ?","SELECT d.city_name, (SUM(CASE WHEN er.safir_field_id = 'D002' THEN CAST(er.value AS REAL) END) - SUM(CASE WHEN er.safir_field_id = 'D001' THEN CAST(er.value AS REAL) END)) AS net_result FROM extraction_results er JOIN documents d ON er.document_id = d.document_id WHERE d.document_year = '2024' AND er.safir_field_id IN ('D001','D002') GROUP BY d.city_name ORDER BY net_result DESC;",medium,"[""extraction_results"", ""documents""]",True,,18,5.0,pass,"SQL perfectly matches the French question intent, uses correct schema relationships, and produces a clear, analyst-friendly result.",True,,"{""intent_alignment"": 5.0, ""schema_correctness"": 5.0, ""query_quality"": 5.0}",[],deepseek-chat,2026-03-11T01:32:06.532759+00:00
+cand_000148,"Combien de résultats d'extraction contiennent un message d'erreur en 2024, ventilés par type de masque ?","SELECT d.mask, COUNT(*) AS error_count FROM extraction_results er JOIN documents d ON er.document_id = d.document_id WHERE d.document_year = '2024' AND er.message_error IS NOT NULL AND TRIM(er.message_error) <> '' GROUP BY d.mask;",medium,"[""extraction_results"", ""documents""]",True,,2,5.0,pass,"SQL perfectly matches the French question intent, uses correct schema joins, and produces meaningful financial analysis output.",True,,"{""intent_alignment"": 5.0, ""schema_correctness"": 5.0, ""query_quality"": 5.0}",[],deepseek-chat,2026-03-11T01:32:09.970376+00:00
+cand_000151,Quelle est la médiane des dépenses (champ D001) par commune pour l'année 2024 ?,"WITH ordered AS (SELECT d.city_name, CAST(er.value AS REAL) AS expense, ROW_NUMBER() OVER (PARTITION BY d.city_name ORDER BY CAST(er.value AS REAL)) AS rn, COUNT(*) OVER (PARTITION BY d.city_name) AS cnt FROM extraction_results er JOIN documents d ON er.document_id = d.document_id WHERE d.document_year = '2024' AND er.safir_field_id = 'D001') SELECT city_name, AVG(expense) AS median_expense FROM ordered WHERE rn IN ((cnt+1)/2, (cnt+2)/2) GROUP BY city_name ORDER BY median_expense DESC;",hard,"[""extraction_results"", ""documents""]",True,,18,5.0,pass,"SQL perfectly matches the French question intent, correctly uses schema with valid joins, and produces a meaningful median calculation per municipality for 2024 expenses.",True,,"{""intent_alignment"": 5.0, ""schema_correctness"": 5.0, ""query_quality"": 5.0}",[],deepseek-chat,2026-03-11T01:32:35.060648+00:00
+cand_000152,"Quel est le délai moyen, en heures, entre la création du document et le lancement de l'extraction pour chaque commune en 2024, et quelles sont les 5 plus longues ?","SELECT d.city_name, AVG(strftime('%s', erun.start_time) - strftime('%s', d.created_at)) / 3600.0 AS avg_delay_hours FROM documents d JOIN extraction_runs erun ON erun.document_id = d.document_id WHERE d.document_year = '2024' GROUP BY d.city_name ORDER BY avg_delay_hours DESC LIMIT 5;",hard,"[""documents"", ""extraction_runs""]",True,,5,5.0,pass,"SQL perfectly matches the French question intent, uses correct schema joins, and produces a clear, analyst-focused result.",True,,"{""intent_alignment"": 5.0, ""schema_correctness"": 5.0, ""query_quality"": 5.0}",[],deepseek-chat,2026-03-11T01:32:38.437346+00:00
+cand_000153,Combien de champs SAFIR différents ont été extraits en 2024 ?,SELECT COUNT(DISTINCT er.safir_field_id) AS distinct_fields_2024 FROM extraction_results er JOIN documents d ON er.document_id = d.document_id WHERE d.document_year = '2024';,easy,"[""extraction_results"", ""documents""]",True,,1,5.0,pass,"SQL perfectly matches the French question intent, uses correct schema joins, and produces a clear, business-relevant result.",True,,"{""intent_alignment"": 5.0, ""schema_correctness"": 5.0, ""query_quality"": 5.0}",[],deepseek-chat,2026-03-11T01:32:42.431182+00:00
+cand_000154,Quel est le nombre total de pages des documents de type de masque M57_CA en 2023 ?,SELECT SUM(d.nb_pages) AS total_pages_2023 FROM documents d WHERE d.mask = 'M57_CA' AND d.document_year = '2023';,easy,"[""documents""]",True,,1,5.0,pass,"SQL perfectly matches the French question intent, uses correct schema, and is well-structured for business analysis.",True,,"{""intent_alignment"": 5.0, ""schema_correctness"": 5.0, ""query_quality"": 5.0}",[],deepseek-chat,2026-03-11T01:32:46.117771+00:00
+cand_000155,Quel pourcentage de communes présente un résultat net négatif en 2024 ?,"WITH net AS (SELECT d.city_name, (SUM(CASE WHEN er.safir_field_id = 'D002' THEN CAST(er.value AS REAL) END) - SUM(CASE WHEN er.safir_field_id = 'D001' THEN CAST(er.value AS REAL) END)) AS net_result FROM extraction_results er JOIN documents d ON er.document_id = d.document_id WHERE d.document_year = '2024' AND er.safir_field_id IN ('D001','D002') GROUP BY d.city_name) SELECT (SUM(CASE WHEN net_result < 0 THEN 1 ELSE 0 END) * 100.0) / COUNT(*) AS negative_net_percentage FROM net;",medium,"[""extraction_results"", ""documents""]",True,,1,5.0,pass,"SQL perfectly matches the French question intent, uses correct schema joins, and produces a meaningful financial indicator for municipal analysis.",True,,"{""intent_alignment"": 5.0, ""schema_correctness"": 5.0, ""query_quality"": 5.0}",[],deepseek-chat,2026-03-11T01:32:50.626525+00:00
+cand_000156,Combien de documents ont été déposés chaque année ?,"SELECT document_year AS annee, COUNT(*) AS nb_documents
+FROM documents
+GROUP BY document_year
+ORDER BY document_year;",easy,"[""documents""]",True,,2,5.0,pass,"SQL perfectly matches the French question intent, uses correct schema, and produces clear, analyst-friendly output.",True,,"{""intent_alignment"": 5.0, ""schema_correctness"": 5.0, ""query_quality"": 5.0}",[],deepseek-chat,2026-03-11T01:32:54.617607+00:00
+cand_000157,Quelle est la moyenne du nombre de pages selon le type de budget ?,"SELECT budget_type, AVG(nb_pages) AS pages_moyennes
+FROM documents
+WHERE nb_pages IS NOT NULL
+GROUP BY budget_type;",easy,"[""documents""]",True,,2,5.0,pass,"SQL perfectly matches the French question intent, uses correct schema, and is clear and efficient.",True,,"{""intent_alignment"": 5.0, ""schema_correctness"": 5.0, ""query_quality"": 5.0}",[],deepseek-chat,2026-03-11T01:32:58.406907+00:00
+cand_000159,Quel est le pourcentage de documents en état SUCCESS chaque année ?,"SELECT d.document_year AS annee,
+       100.0 * SUM(CASE WHEN s.code = 'SUCCESS' THEN 1 ELSE 0 END) / COUNT(*) AS pourcentage_success
+FROM documents d
+JOIN states s ON d.state_id = s.state_id
+GROUP BY d.document_year
+ORDER BY d.document_year;",easy,"[""documents"", ""states""]",True,,2,5.0,pass,"SQL perfectly matches the French question intent, uses correct schema joins, and produces a clear percentage calculation by year.",True,,"{""intent_alignment"": 5.0, ""schema_correctness"": 5.0, ""query_quality"": 5.0}",[],deepseek-chat,2026-03-11T01:33:08.339664+00:00
+cand_000160,Quelles sont les 5 communes avec les recettes (champ D002) les plus élevées en 2023 ?,"SELECT d.city_name AS commune, SUM(CAST(er.value AS REAL)) AS total_D002
+FROM extraction_results er
+JOIN documents d ON er.document_id = d.document_id
+WHERE er.safir_field_id = 'D002'
+  AND d.document_year = '2023'
+GROUP BY d.city_name
+ORDER BY total_D002 DESC
+LIMIT 5;",easy,"[""extraction_results"", ""documents""]",True,,5,5.0,pass,"SQL perfectly matches the French question intent, uses correct schema relationships, and produces a clear, business-relevant result for financial analysis.",True,,"{""intent_alignment"": 5.0, ""schema_correctness"": 5.0, ""query_quality"": 5.0}",[],deepseek-chat,2026-03-11T01:33:11.787286+00:00
+cand_000161,"Quel est le taux de croissance des dépenses D001 entre 2023 et 2024 par commune, pour les communes dont la hausse dépasse 10 % ?","WITH sums AS (
+  SELECT d.city_name AS commune,
+         d.document_year AS annee,
+         SUM(CAST(er.value AS REAL)) AS total_D001
+  FROM extraction_results er
+  JOIN documents d ON er.document_id = d.document_id
+  WHERE er.safir_field_id = 'D001'
+    AND d.document_year IN ('2023','2024')
+  GROUP BY d.city_name, d.document_year
+)
+SELECT s2024.commune,
+       ((s2024.total_D001 - s2023.total_D001) / NULLIF(s2023.total_D001,0)) * 100.0 AS taux_croissance_pct
+FROM sums s2023
+JOIN sums s2024 ON s2023.commune = s2024.commune
+WHERE s2023.annee = '2023' AND s2024.annee = '2024'
+  AND ((s2024.total_D001 - s2023.total_D001) / NULLIF(s2023.total_D001,0)) * 100.0 > 10
+ORDER BY taux_croissance_pct DESC;",medium,"[""extraction_results"", ""documents""]",True,,0,5.0,pass,"SQL perfectly matches the French question intent, uses correct schema joins, handles edge cases, and produces meaningful financial analysis output.",True,,"{""intent_alignment"": 5.0, ""schema_correctness"": 5.0, ""query_quality"": 5.0}",[],deepseek-chat,2026-03-11T01:33:15.098480+00:00
+cand_000162,"Quel est le ratio dépenses D001 / recettes D002 par commune pour 2024, et quelles sont les 10 meilleures ?","WITH sums AS (
+  SELECT d.city_name AS commune,
+         er.safir_field_id AS champ,
+         SUM(CAST(er.value AS REAL)) AS total_val
+  FROM extraction_results er
+  JOIN documents d ON er.document_id = d.document_id
+  WHERE d.document_year = '2024' AND er.safir_field_id IN ('D001','D002')
+  GROUP BY d.city_name, er.safir_field_id
+)
+SELECT d1.commune,
+       (d1.total_val / NULLIF(d2.total_val,0)) AS ratio_D001_D002
+FROM sums d1
+JOIN sums d2 ON d1.commune = d2.commune
+WHERE d1.champ = 'D001' AND d2.champ = 'D002'
+ORDER BY ratio_D001_D002 DESC
+LIMIT 10;",medium,"[""extraction_results"", ""documents""]",True,,10,4.0,pass,"SQL correctly calculates the D001/D002 expense-to-revenue ratio per municipality for 2024 and returns top 10, aligning with business intent. Minor improvements possible for clarity and robustness.",True,,"{""intent_alignment"": 5.0, ""schema_correctness"": 4.0, ""query_quality"": 4.0}","[""business_realistic""]",deepseek-chat,2026-03-11T01:33:19.398201+00:00
+cand_000165,"Combien de documents par ville comportent au moins un résultat d'extraction avec avertissement, ventilés par type de budget ?","WITH warned_docs AS (
+  SELECT DISTINCT er.document_id
+  FROM extraction_results er
+  WHERE er.message_warning IS NOT NULL AND TRIM(er.message_warning) <> ''
+)
+SELECT d.city_name AS commune,
+       d.budget_type,
+       COUNT(*) AS nb_documents_avec_avertissement
+FROM documents d
+JOIN warned_docs w ON d.document_id = w.document_id
+GROUP BY d.city_name, d.budget_type
+ORDER BY nb_documents_avec_avertissement DESC
+LIMIT 20;",medium,"[""documents"", ""extraction_results""]",True,,20,5.0,pass,"SQL perfectly matches the French question intent, uses correct schema with valid joins, and produces clear, analyst-grade results.",True,,"{""intent_alignment"": 5.0, ""schema_correctness"": 5.0, ""query_quality"": 5.0}",[],deepseek-chat,2026-03-11T01:33:38.445543+00:00
+cand_000166,Quel est le pourcentage d'erreurs (message_error non vide) dans les résultats d'extraction pour chaque année ?,"SELECT d.document_year AS annee,
+       100.0 * SUM(CASE WHEN er.message_error IS NOT NULL AND TRIM(er.message_error) <> '' THEN 1 ELSE 0 END) / COUNT(*) AS pourcentage_erreurs
+FROM extraction_results er
+JOIN documents d ON er.document_id = d.document_id
+GROUP BY d.document_year
+ORDER BY d.document_year;",medium,"[""extraction_results"", ""documents""]",True,,2,5.0,pass,"SQL perfectly matches the French question intent, uses correct schema joins, and produces meaningful analyst-grade results.",True,,"{""intent_alignment"": 5.0, ""schema_correctness"": 5.0, ""query_quality"": 5.0}",[],deepseek-chat,2026-03-11T01:33:42.109175+00:00
+cand_000168,"Pour chaque commune, comment évoluent les dépenses D001 d'une année à l'autre (augmentation, diminution, stable) ?","WITH yearly AS (
+  SELECT d.city_name AS commune,
+         d.document_year AS annee,
+         SUM(CAST(er.value AS REAL)) AS total_D001
+  FROM extraction_results er
+  JOIN documents d ON er.document_id = d.document_id
+  WHERE er.safir_field_id = 'D001'
+  GROUP BY d.city_name, d.document_year
+),
+trend AS (
+  SELECT commune,
+         annee,
+         total_D001,
+         LAG(total_D001) OVER (PARTITION BY commune ORDER BY annee) AS prev_total
+  FROM yearly
+)
+SELECT commune,
+       annee,
+       total_D001,
+       CASE
+         WHEN prev_total IS NULL THEN 'N/A'
+         WHEN total_D001 > prev_total THEN 'increase'
+         WHEN total_D001 < prev_total THEN 'decrease'
+         ELSE 'stable'
+       END AS trend
+FROM trend
+ORDER BY commune, annee;",medium,"[""extraction_results"", ""documents""]",True,,24,5.0,pass,"SQL perfectly matches the French question intent, uses correct schema with proper joins, and produces clear financial trend analysis.",True,,"{""intent_alignment"": 5.0, ""schema_correctness"": 5.0, ""query_quality"": 5.0}",[],deepseek-chat,2026-03-11T01:33:52.680759+00:00
+cand_000170,"Quelles communes ont des dépenses D001 supérieures à 120 % des recettes D002 pour une année donnée, et quel est le pourcentage d'excès ?","WITH sums AS (
+  SELECT d.city_name AS commune,
+         d.document_year AS annee,
+         SUM(CASE WHEN er.safir_field_id = 'D001' THEN CAST(er.value AS REAL) ELSE 0 END) AS total_D001,
+         SUM(CASE WHEN er.safir_field_id = 'D002' THEN CAST(er.value AS REAL) ELSE 0 END) AS total_D002
+  FROM extraction_results er
+  JOIN documents d ON er.document_id = d.document_id
+  WHERE er.safir_field_id IN ('D001','D002')
+  GROUP BY d.city_name, d.document_year
+)
+SELECT commune,
+       annee,
+       total_D001,
+       total_D002,
+       (total_D001 / NULLIF(total_D002,0)) * 100.0 AS pourcentage_D001_sur_D002,
+       ((total_D001 / NULLIF(total_D002,0)) * 100.0 - 120) AS excess_pct
+FROM sums
+WHERE total_D002 > 0
+  AND (total_D001 / total_D002) > 1.20
+ORDER BY pourcentage_D001_sur_D002 DESC;",hard,"[""extraction_results"", ""documents""]",True,,0,5.0,pass,"SQL perfectly matches the French question intent, uses correct schema joins, and produces meaningful financial analysis output.",True,,"{""intent_alignment"": 5.0, ""schema_correctness"": 5.0, ""query_quality"": 5.0}",[],deepseek-chat,2026-03-11T01:34:09.983523+00:00
+cand_000171,Quelle est la médiane des dépenses D001 par commune pour l'année 2024 ?,"WITH vals AS (
+  SELECT d.city_name AS commune,
+         CAST(er.value AS REAL) AS val,
+         ROW_NUMBER() OVER (PARTITION BY d.city_name ORDER BY CAST(er.value AS REAL)) AS rn,
+         COUNT(*) OVER (PARTITION BY d.city_name) AS cnt
+  FROM extraction_results er
+  JOIN documents d ON er.document_id = d.document_id
+  WHERE er.safir_field_id = 'D001' AND d.document_year = '2024'
+)
+SELECT commune,
+       CASE
+         WHEN cnt % 2 = 1 THEN
+           MAX(CASE WHEN rn = (cnt/2)+1 THEN val END)
+         ELSE
+           (MAX(CASE WHEN rn = cnt/2 THEN val END) + MAX(CASE WHEN rn = cnt/2 + 1 THEN val END)) / 2.0
+       END AS median_D001
+FROM vals
+GROUP BY commune
+HAVING cnt > 0
+ORDER BY median_D001 DESC
+LIMIT 20;",hard,"[""extraction_results"", ""documents""]",True,,18,5.0,pass,"SQL perfectly matches the French question intent, uses correct schema with valid joins, and produces meaningful financial analysis output.",True,,"{""intent_alignment"": 5.0, ""schema_correctness"": 5.0, ""query_quality"": 5.0}",[],deepseek-chat,2026-03-11T01:34:13.774849+00:00
+cand_000173,"Quelle est la répartition du nombre de documents par type de masque (M57_CA, M57_CFU, etc.) ?","SELECT d.mask AS masque,
+       COUNT(*) AS nb_documents
+FROM documents d
+GROUP BY d.mask
+ORDER BY nb_documents DESC;",easy,"[""documents""]",True,,3,5.0,pass,"SQL perfectly matches the French question intent, uses correct schema, and produces a clear, business-relevant result.",True,,"{""intent_alignment"": 5.0, ""schema_correctness"": 5.0, ""query_quality"": 5.0}",[],deepseek-chat,2026-03-11T01:34:24.935645+00:00
+cand_000174,Quel est le nombre moyen de pages des documents dont le type de budget est BP ?,"SELECT AVG(d.nb_pages) AS moyenne_pages
+FROM documents d
+WHERE d.budget_type = 'BP';",easy,"[""documents""]",True,,1,5.0,pass,"SQL perfectly matches the French question intent, uses correct schema, and is simple and efficient.",True,,"{""intent_alignment"": 5.0, ""schema_correctness"": 5.0, ""query_quality"": 5.0}",[],deepseek-chat,2026-03-11T01:34:28.519342+00:00
+cand_000175,"Combien de résultats d'extraction contiennent un message d'erreur non vide, par année ?","SELECT d.document_year AS annee,
+       COUNT(*) AS nb_erreurs
+FROM extraction_results er
+JOIN documents d ON er.document_id = d.document_id
+WHERE er.message_error IS NOT NULL AND TRIM(er.message_error) <> ''
+GROUP BY d.document_year
+ORDER BY d.document_year;",easy,"[""extraction_results"", ""documents""]",True,,2,5.0,pass,"SQL perfectly matches the French question intent, uses correct schema joins, and produces a clear, analyst-friendly output.",True,,"{""intent_alignment"": 5.0, ""schema_correctness"": 5.0, ""query_quality"": 5.0}",[],deepseek-chat,2026-03-11T01:34:32.726361+00:00
+cand_000176,Quelles sont les 5 communes avec les dépenses totales (champ D001) les plus élevées en 2023 ?,"SELECT d.city_name AS commune,
+       SUM(CAST(er.value AS REAL)) AS total_depenses
+FROM extraction_results er
+JOIN documents d ON er.document_id = d.document_id
+WHERE er.safir_field_id = 'D001' AND d.document_year = '2023'
+GROUP BY d.city_name
+ORDER BY total_depenses DESC
+LIMIT 5;",easy,"[""extraction_results"", ""documents""]",True,,5,5.0,pass,"SQL perfectly matches the French question intent, uses correct schema with valid joins, and produces a clear, analyst-grade result.",True,,"{""intent_alignment"": 5.0, ""schema_correctness"": 5.0, ""query_quality"": 5.0}",[],deepseek-chat,2026-03-11T01:34:36.304372+00:00
+cand_000177,Quelle est la moyenne des recettes (champ D002) par type de budget pour l'année 2024 ?,"SELECT d.budget_type,
+       AVG(CAST(er.value AS REAL)) AS moyenne_recettes
+FROM extraction_results er
+JOIN documents d ON er.document_id = d.document_id
+WHERE er.safir_field_id = 'D002' AND d.document_year = '2024'
+GROUP BY d.budget_type;",easy,"[""extraction_results"", ""documents""]",True,,2,5.0,pass,"SQL perfectly matches the French question intent, uses correct schema with valid joins, and produces meaningful financial analysis output.",True,,"{""intent_alignment"": 5.0, ""schema_correctness"": 5.0, ""query_quality"": 5.0}",[],deepseek-chat,2026-03-11T01:34:40.395958+00:00
+cand_000178,Quelles communes ont vu leurs dépenses (D001) croître de plus de 15 % entre 2023 et 2024 ?,"WITH dep AS (
+  SELECT d.city_name AS commune,
+         d.document_year AS annee,
+         SUM(CAST(er.value AS REAL)) AS total_dep
+  FROM extraction_results er
+  JOIN documents d ON er.document_id = d.document_id
+  WHERE er.safir_field_id = 'D001' AND d.document_year IN ('2023','2024')
+  GROUP BY d.city_name, d.document_year
+)
+SELECT c2024.commune,
+       ((c2024.total_dep - c2023.total_dep) / NULLIF(c2023.total_dep,0)) * 100.0 AS croissance_pct
+FROM dep c2023
+JOIN dep c2024 ON c2023.commune = c2024.commune
+WHERE c2023.annee = '2023' AND c2024.annee = '2024'
+  AND ((c2024.total_dep - c2023.total_dep) / NULLIF(c2023.total_dep,0)) * 100.0 > 15.0
+ORDER BY croissance_pct DESC;",medium,"[""extraction_results"", ""documents""]",True,,0,5.0,pass,"SQL perfectly matches the business question intent, uses correct schema relationships, and produces meaningful financial analysis output.",True,,"{""intent_alignment"": 5.0, ""schema_correctness"": 5.0, ""query_quality"": 5.0}",[],deepseek-chat,2026-03-11T01:34:44.085927+00:00
+cand_000179,"Combien de documents comportent au moins un avertissement d'extraction, ventilés par masque ?","SELECT d.mask,
+       COUNT(DISTINCT d.document_id) AS nb_documents_avec_avertissement
+FROM extraction_results er
+JOIN documents d ON er.document_id = d.document_id
+WHERE er.message_warning IS NOT NULL AND TRIM(er.message_warning) <> ''
+GROUP BY d.mask
+ORDER BY nb_documents_avec_avertissement DESC;",medium,"[""extraction_results"", ""documents""]",True,,3,5.0,pass,"SQL perfectly matches the French question intent, uses correct schema with valid joins, and produces clear, analyst-grade results without technical artifacts.",True,,"{""intent_alignment"": 5.0, ""schema_correctness"": 5.0, ""query_quality"": 5.0}",[],deepseek-chat,2026-03-11T01:34:47.565363+00:00
+cand_000180,"Quel est le résultat net (recettes – dépenses) par commune en 2024, et quelles sont les 5 communes les plus positives ?","WITH agg AS (
+  SELECT d.city_name AS commune,
+         SUM(CASE WHEN er.safir_field_id = 'D002' THEN CAST(er.value AS REAL) ELSE 0 END) -
+         SUM(CASE WHEN er.safir_field_id = 'D001' THEN CAST(er.value AS REAL) ELSE 0 END) AS net_resultat,
+         SUM(CASE WHEN er.safir_field_id = 'D002' THEN CAST(er.value AS REAL) ELSE 0 END) AS recettes,
+         SUM(CASE WHEN er.safir_field_id = 'D001' THEN CAST(er.value AS REAL) ELSE 0 END) AS depenses
+  FROM extraction_results er
+  JOIN documents d ON er.document_id = d.document_id
+  WHERE d.document_year = '2024'
+  GROUP BY d.city_name
+)
+SELECT commune, net_resultat, recettes, depenses
+FROM agg
+ORDER BY net_resultat DESC
+LIMIT 5;",medium,"[""extraction_results"", ""documents""]",True,,5,5.0,pass,"SQL perfectly matches the French question intent, uses correct schema with valid joins, and produces clear, analyst-grade results.",True,,"{""intent_alignment"": 5.0, ""schema_correctness"": 5.0, ""query_quality"": 5.0}",[],deepseek-chat,2026-03-11T01:34:51.411289+00:00
+cand_000181,Quelles communes ont des dépenses supérieures à 110 % de leurs recettes en 2024 ?,"WITH agg AS (
+  SELECT d.city_name AS commune,
+         SUM(CASE WHEN er.safir_field_id = 'D001' THEN CAST(er.value AS REAL) ELSE 0 END) AS depenses,
+         SUM(CASE WHEN er.safir_field_id = 'D002' THEN CAST(er.value AS REAL) ELSE 0 END) AS recettes
+  FROM extraction_results er
+  JOIN documents d ON er.document_id = d.document_id
+  WHERE d.document_year = '2024'
+  GROUP BY d.city_name
+)
+SELECT commune, depenses, recettes,
+       ROUND(100.0 * depenses / NULLIF(recettes,0),2) AS pct_dep_rec
+FROM agg
+WHERE recettes > 0 AND depenses > 1.10 * recettes
+ORDER BY pct_dep_rec DESC;",medium,"[""extraction_results"", ""documents""]",True,,0,5.0,pass,"SQL perfectly matches the French question intent, uses correct schema with valid joins, and produces meaningful financial analysis output.",True,,"{""intent_alignment"": 5.0, ""schema_correctness"": 5.0, ""query_quality"": 5.0}",[],deepseek-chat,2026-03-11T01:34:55.244081+00:00
+cand_000182,Combien de runs d'extraction sont en état ERROR chaque année ?,"SELECT d.document_year AS annee,
+       COUNT(*) AS nb_runs_error
+FROM extraction_runs erun
+JOIN documents d ON erun.document_id = d.document_id
+JOIN states s ON erun.state_id = s.state_id
+WHERE s.code = 'ERROR'
+GROUP BY d.document_year
+ORDER BY annee;",medium,"[""extraction_runs"", ""documents"", ""states""]",True,,1,5.0,pass,"SQL perfectly matches the French question intent, uses correct schema joins, and produces a clear analytical result for financial analysts.",True,,"{""intent_alignment"": 5.0, ""schema_correctness"": 5.0, ""query_quality"": 5.0}",[],deepseek-chat,2026-03-11T01:34:59.241697+00:00
+cand_000184,Quelles anomalies existent où la somme dépenses (D001) + recettes (D002) diffère de plus de 5 % du total déclaré (champ Total) pour l'année 2024 ?,"WITH sums AS (
+  SELECT d.document_id,
+         SUM(CASE WHEN er.safir_field_id = 'D001' THEN CAST(er.value AS REAL) ELSE 0 END) AS dep,
+         SUM(CASE WHEN er.safir_field_id = 'D002' THEN CAST(er.value AS REAL) ELSE 0 END) AS rec,
+         MAX(CASE WHEN er.safir_field_id = 'Total' THEN CAST(er.value AS REAL) END) AS total_declared
+  FROM extraction_results er
+  JOIN documents d ON er.document_id = d.document_id
+  WHERE d.document_year = '2024'
+  GROUP BY d.document_id
+)
+SELECT document_id,
+       dep, rec, total_declared,
+       ROUND(100.0 * ABS((dep + rec) - total_declared) / NULLIF(total_declared,0),2) AS ecart_pct
+FROM sums
+WHERE total_declared IS NOT NULL
+  AND ABS((dep + rec) - total_declared) > 0.05 * total_declared
+ORDER BY ecart_pct DESC
+LIMIT 10;",hard,"[""extraction_results"", ""documents""]",True,,0,5.0,pass,"SQL perfectly matches the French question intent, uses correct schema with valid joins, and produces meaningful financial analysis results.",True,,"{""intent_alignment"": 5.0, ""schema_correctness"": 5.0, ""query_quality"": 5.0}",[],deepseek-chat,2026-03-11T01:35:20.744996+00:00
+cand_000187,"Combien de documents ont été déposés par commune, par année et par type de budget ?","SELECT d.city_name,
+       d.document_year,
+       d.budget_type,
+       COUNT(*) AS nb_documents
+FROM documents d
+GROUP BY d.city_name, d.document_year, d.budget_type
+ORDER BY d.city_name, d.document_year;",easy,"[""documents""]",True,,26,5.0,pass,"SQL perfectly matches the French question intent, uses correct schema, and produces a clear, analyst-friendly output.",True,,"{""intent_alignment"": 5.0, ""schema_correctness"": 5.0, ""query_quality"": 5.0}",[],deepseek-chat,2026-03-11T01:35:41.224997+00:00
+cand_000188,"Quelle est la moyenne du nombre de pages des documents contenant au moins un avertissement d'extraction, ventilée par type de masque ?","SELECT d.mask,
+       AVG(d.nb_pages) AS avg_pages
+FROM documents d
+WHERE EXISTS (
+    SELECT 1
+    FROM extraction_results er
+    WHERE er.document_id = d.document_id
+      AND er.message_warning IS NOT NULL
+      AND TRIM(er.message_warning) <> ''
+)
+GROUP BY d.mask
+ORDER BY avg_pages DESC;",medium,"[""documents"", ""extraction_results""]",True,,3,5.0,pass,"SQL perfectly matches the French question intent, uses correct schema relationships, and produces a meaningful financial analysis output.",True,,"{""intent_alignment"": 5.0, ""schema_correctness"": 5.0, ""query_quality"": 5.0}",[],deepseek-chat,2026-03-11T01:35:45.115513+00:00
+cand_000189,"Quel pourcentage des résultats d'extraction comporte un message d'erreur, par année ?","WITH yearly AS (
+    SELECT d.document_year AS year,
+           COUNT(*) AS total,
+           SUM(CASE WHEN er.message_error IS NOT NULL AND TRIM(er.message_error) <> '' THEN 1 ELSE 0 END) AS with_error
+    FROM extraction_results er
+    JOIN documents d ON er.document_id = d.document_id
+    GROUP BY d.document_year
+)
+SELECT year,
+       ROUND(100.0 * with_error / total, 2) AS error_percentage
+FROM yearly
+ORDER BY year;",medium,"[""extraction_results"", ""documents""]",True,,2,5.0,pass,"SQL perfectly matches the French question intent, uses correct schema joins, and produces a clear percentage calculation by year.",True,,"{""intent_alignment"": 5.0, ""schema_correctness"": 5.0, ""query_quality"": 5.0}",[],deepseek-chat,2026-03-11T01:35:48.903401+00:00
+cand_000190,"Quel est le résultat net (recettes D002 – dépenses D001) par commune pour 2023 et 2024, et comment a‑t‑il évolué entre ces deux années ?","WITH sums AS (
+    SELECT d.city_name,
+           d.document_year,
+           SUM(CASE WHEN er.safir_field_id = 'D001' THEN CAST(er.value AS REAL) ELSE 0 END) AS sum_d001,
+           SUM(CASE WHEN er.safir_field_id = 'D002' THEN CAST(er.value AS REAL) ELSE 0 END) AS sum_d002
+    FROM extraction_results er
+    JOIN documents d ON er.document_id = d.document_id
+    WHERE d.document_year IN ('2023','2024')
+      AND er.safir_field_id IN ('D001','D002')
+    GROUP BY d.city_name, d.document_year
+),
+net AS (
+    SELECT city_name,
+           document_year,
+           sum_d002 - sum_d001 AS net_result
+    FROM sums
+)
+SELECT n2024.city_name,
+       n2023.net_result AS net_2023,
+       n2024.net_result AS net_2024,
+       (n2024.net_result - n2023.net_result) AS change
+FROM net n2024
+JOIN net n2023 ON n2024.city_name = n2023.city_name
+WHERE n2024.document_year = '2024' AND n2023.document_year = '2023'
+ORDER BY change DESC;",hard,"[""extraction_results"", ""documents""]",True,,0,5.0,pass,"SQL perfectly matches the French question intent, uses correct schema with valid joins, and produces clear financial analysis results with year-over-year comparison.",True,,"{""intent_alignment"": 5.0, ""schema_correctness"": 5.0, ""query_quality"": 5.0}",[],deepseek-chat,2026-03-11T01:35:52.794644+00:00
+cand_000193,"Quel est le délai moyen, en heures, entre la création du document et le lancement de l'extraction, par commune pour l'année 2024 ?","SELECT d.city_name,
+       ROUND(AVG(julianday(er.start_time) - julianday(d.created_at)) * 24, 2) AS avg_hours_delay
+FROM documents d
+JOIN extraction_runs er ON er.document_id = d.document_id
+WHERE d.document_year = '2024'
+  AND er.start_time IS NOT NULL
+GROUP BY d.city_name
+ORDER BY avg_hours_delay DESC;",medium,"[""documents"", ""extraction_runs""]",True,,18,5.0,pass,"SQL perfectly matches the French question intent, uses correct schema joins, and produces meaningful analyst-grade results.",True,,"{""intent_alignment"": 5.0, ""schema_correctness"": 5.0, ""query_quality"": 5.0}",[],deepseek-chat,2026-03-11T01:36:12.968379+00:00
+cand_000195,"Pour chaque type de budget, quel est le total des pages des documents où au moins un résultat d'extraction comporte un message d'erreur ?","WITH docs_with_error AS (
+    SELECT DISTINCT d.document_id, d.budget_type, d.nb_pages
+    FROM documents d
+    JOIN extraction_results er ON er.document_id = d.document_id
+    WHERE er.message_error IS NOT NULL
+      AND TRIM(er.message_error) <> ''
+)
+SELECT budget_type,
+       SUM(nb_pages) AS total_pages
+FROM docs_with_error
+GROUP BY budget_type
+ORDER BY total_pages DESC;",hard,"[""documents"", ""extraction_results""]",True,,2,5.0,pass,"SQL perfectly matches the French question intent, uses correct schema joins, and produces a clear, analyst-friendly result.",True,,"{""intent_alignment"": 5.0, ""schema_correctness"": 5.0, ""query_quality"": 5.0}",[],deepseek-chat,2026-03-11T01:36:22.596711+00:00
+cand_000196,Quelles communes ont des dépenses (D001) supérieures à 110 % de leurs recettes (D002) en 2024 ?,"WITH sums AS (
+    SELECT d.city_name,
+           SUM(CASE WHEN er.safir_field_id = 'D001' THEN CAST(er.value AS REAL) ELSE 0 END) AS sum_d001,
+           SUM(CASE WHEN er.safir_field_id = 'D002' THEN CAST(er.value AS REAL) ELSE 0 END) AS sum_d002
+    FROM extraction_results er
+    JOIN documents d ON er.document_id = d.document_id
+    WHERE d.document_year = '2024'
+      AND er.safir_field_id IN ('D001','D002')
+    GROUP BY d.city_name
+)
+SELECT city_name,
+       sum_d001,
+       sum_d002,
+       ROUND(100.0 * sum_d001 / NULLIF(sum_d002,0),2) AS pct_of_revenue
+FROM sums
+WHERE sum_d002 > 0
+  AND sum_d001 > 1.10 * sum_d002
+ORDER BY pct_of_revenue DESC;",medium,"[""extraction_results"", ""documents""]",True,,0,5.0,pass,"SQL perfectly matches the French question intent, uses correct schema relationships, and produces meaningful financial analysis output.",True,,"{""intent_alignment"": 5.0, ""schema_correctness"": 5.0, ""query_quality"": 5.0}",[],deepseek-chat,2026-03-11T01:36:26.280101+00:00
+cand_000197,Quel pourcentage des documents est en état VALIDATED chaque année ?,"WITH yearly_counts AS (
+    SELECT d.document_year AS year,
+           COUNT(*) AS total_docs,
+           SUM(CASE WHEN s.code = 'VALIDATED' THEN 1 ELSE 0 END) AS validated_docs
+    FROM documents d
+    LEFT JOIN states s ON d.state_id = s.state_id
+    GROUP BY d.document_year
+)
+SELECT year,
+       ROUND(100.0 * validated_docs / total_docs, 2) AS validated_percentage
+FROM yearly_counts
+ORDER BY year;",easy,"[""documents"", ""states""]",True,,2,5.0,pass,"SQL perfectly matches the French question intent, uses correct schema joins, and produces clear analyst-grade results.",True,,"{""intent_alignment"": 5.0, ""schema_correctness"": 5.0, ""query_quality"": 5.0}",[],deepseek-chat,2026-03-11T01:36:30.275003+00:00
+cand_000199,Combien de runs d'extraction ont été exécutés par état et par année ?,"SELECT d.document_year AS year,
+       s.code AS run_state,
+       COUNT(*) AS run_count
+FROM extraction_runs er
+JOIN documents d ON er.document_id = d.document_id
+JOIN states s ON er.state_id = s.state_id
+GROUP BY d.document_year, s.code
+ORDER BY d.document_year, run_count DESC;",easy,"[""extraction_runs"", ""documents"", ""states""]",True,,5,5.0,pass,"SQL perfectly matches the French question intent, uses correct schema joins, and produces a clear, analyst-friendly output.",True,,"{""intent_alignment"": 5.0, ""schema_correctness"": 5.0, ""query_quality"": 5.0}",[],deepseek-chat,2026-03-11T01:36:41.025386+00:00

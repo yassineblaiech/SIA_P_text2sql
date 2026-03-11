@@ -1,0 +1,28 @@
+{
+  "generated_at_utc": "2026-03-11T01:18:45.725457+00:00",
+  "judge_model": "deepseek-chat",
+  "base_url": "https://api.deepseek.com/v1",
+  "api_key_env": "DEEPSEEK_API_KEY",
+  "models": [
+    {
+      "alias": "gpt_oss_120b",
+      "paths": {
+        "root": "C:\\Users\\hamza\\Desktop\\Projet SIA\\data\\intermediate\\by_model\\gpt_oss_120b",
+        "in_clean_jsonl": "C:\\Users\\hamza\\Desktop\\Projet SIA\\data\\intermediate\\by_model\\gpt_oss_120b\\ttsql_candidates_clean.jsonl",
+        "out_judged_jsonl": "C:\\Users\\hamza\\Desktop\\Projet SIA\\data\\intermediate\\by_model\\gpt_oss_120b\\ttsql_candidates_judged.jsonl",
+        "out_judged_csv": "C:\\Users\\hamza\\Desktop\\Projet SIA\\data\\intermediate\\by_model\\gpt_oss_120b\\ttsql_candidates_judged.csv",
+        "out_pass_jsonl": "C:\\Users\\hamza\\Desktop\\Projet SIA\\data\\intermediate\\by_model\\gpt_oss_120b\\ttsql_candidates_judge_pass.jsonl",
+        "out_pass_csv": "C:\\Users\\hamza\\Desktop\\Projet SIA\\data\\intermediate\\by_model\\gpt_oss_120b\\ttsql_candidates_judge_pass.csv",
+        "out_report_json": "C:\\Users\\hamza\\Desktop\\Projet SIA\\data\\intermediate\\by_model\\gpt_oss_120b\\ttsql_candidates_judge_report.json"
+      },
+      "status": "ok",
+      "return_code": 0,
+      "report": {
+        "total_rows": 200,
+        "pass_rows": 129,
+        "pass_rate": 0.645,
+        "judge_errors": 0
+      }
+    }
+  ]
+}

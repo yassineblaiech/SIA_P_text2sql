@@ -1,0 +1,165 @@
+{
+  "global_notes": [
+    "documents is the central table for ingested budget documents.",
+    "states is a shared enum-like table used by documents, extraction_runs, and extraction_results.",
+    "resultfeedbacks can be empty and this is normal in current operations.",
+    "sections stores structured JSON fragments extracted from source documents.",
+    "rulesets version both extraction rules (field_rules) and validation rules (validation_rules)."
+  ],
+  "tables": {
+    "documents": {
+      "role": "Central table listing each ingested budget document used as extraction input.",
+      "relationships": [
+        "documents.state_id -> states.state_id (N:1)",
+        "documents.document_id -> extraction_runs.document_id (1:N)",
+        "documents.document_id -> extraction_results.document_id (1:N)",
+        "documents.document_id -> sections.document_id (1:N)"
+      ],
+      "query_hints": [
+        "A document typically has one extraction_run in practice, even if schema allows multiple runs.",
+        "mask is a key filter to choose applicable rules."
+      ],
+      "columns": {
+        "document_id": "Unique document identifier in the platform.",
+        "mask": "Technical document type (examples: M57_CA, M57_CFU, M4_CA, M4_CFU, M57, M4).",
+        "siret": "SIRET identifier of the commune/entity.",
+        "city_name": "Commune or entity name.",
+        "format": "Input document format (pdf, scan, image).",
+        "document_year": "Budget year attached to the document.",
+        "created_at": "Creation timestamp of the document record.",
+        "link_bucketS3": "S3 path/link to the stored document file.",
+        "state_id": "Current global state of the document.",
+        "error_message": "Blocking/global error message for ingestion or extraction.",
+        "warning_message": "Non-blocking/global warning message.",
+        "budget_type": "Budget type (BP or BA).",
+        "nb_pages": "Document page count."
+      }
+    },
+    "extraction_runs": {
+      "role": "Execution context of extraction for a document (status, config, timestamp).",
+      "relationships": [
+        "extraction_runs.document_id -> documents.document_id (N:1)",
+        "extraction_runs.state_id -> states.state_id (N:1)",
+        "extraction_runs.run_id -> extraction_results.run_id (1:N)"
+      ],
+      "columns": {
+        "run_id": "Unique extraction run identifier.",
+        "document_id": "Document processed by this run.",
+        "start_time": "Extraction run start timestamp.",
+        "config": "Extraction configuration snapshot (JSON string).",
+        "state_id": "Current state of the run."
+      }
+    },
+    "extraction_results": {
+      "role": "Extracted financial fields per document/run (one row per targeted field).",
+      "relationships": [
+        "extraction_results.run_id -> extraction_runs.run_id (N:1)",
+        "extraction_results.document_id -> documents.document_id (N:1)",
+        "extraction_results.state_id -> states.state_id (N:1)",
+        "extraction_results.result_id -> resultfeedbacks.result_id (1:N)"
+      ],
+      "columns": {
+        "result_id": "Unique extraction result identifier.",
+        "safir_field_id": "Functional identifier of the targeted financial field.",
+        "run_id": "Run that produced this result.",
+        "document_id": "Source document id (redundant but useful for querying).",
+        "value": "Extracted value (often numeric, stored as text).",
+        "created_at": "Result creation timestamp.",
+        "message_error": "Extraction error details for this field (JSON text).",
+        "message_warning": "Extraction warning details for this field (JSON text).",
+        "state_id": "Current state of this result."
+      }
+    },
+    "resultfeedbacks": {
+      "role": "Human feedback on extracted results (correction, comment, error type).",
+      "empty_table_is_normal": true,
+      "relationships": [
+        "resultfeedbacks.result_id -> extraction_results.result_id (N:1)"
+      ],
+      "query_hints": [
+        "Do not assume missing feedback means missing extraction; feedback collection can be inactive."
+      ],
+      "columns": {
+        "feedback_id": "Unique feedback identifier.",
+        "result_id": "Target extraction result id.",
+        "is_technical_error": "0/1 flag indicating technical issue.",
+        "comment": "Free-text feedback comment.",
+        "corrected_value": "Manual corrected value when extraction is wrong.",
+        "created_at": "Feedback creation timestamp."
+      }
+    },
+    "states": {
+      "role": "Shared state catalog used as enum-like reference.",
+      "relationships": [
+        "states.state_id <- documents.state_id (1:N)",
+        "states.state_id <- extraction_runs.state_id (1:N)",
+        "states.state_id <- extraction_results.state_id (1:N)"
+      ],
+      "columns": {
+        "state_id": "Unique state identifier.",
+        "code": "Business/technical state code (PENDING, PROCESSING, SUCCESS, PARTIAL, ERROR, VALIDATED, REJECTED)."
+      }
+    },
+    "sections": {
+      "role": "Structured sections extracted from documents, stored as JSON text.",
+      "relationships": [
+        "sections.document_id -> documents.document_id (N:1)"
+      ],
+      "query_hints": [
+        "No direct FK exists between sections and extraction_results even if semantically related."
+      ],
+      "columns": {
+        "section_id": "Unique section identifier.",
+        "document_id": "Source document id.",
+        "created_at": "Section creation timestamp.",
+        "section_value": "JSON payload representing extracted table/zone."
+      }
+    },
+    "rulesets": {
+      "role": "Versioned groups of rules shared by extraction and validation logic.",
+      "relationships": [
+        "rulesets.ruleset_id <- field_rules.ruleset_id (1:N)",
+        "rulesets.ruleset_id <- validation_rules.ruleset_id (1:N)"
+      ],
+      "columns": {
+        "ruleset_id": "Unique ruleset version identifier.",
+        "description": "Human-readable description of this ruleset version.",
+        "created_at": "Ruleset creation timestamp."
+      }
+    },
+    "field_rules": {
+      "role": "Extraction rules defining how target values are captured from documents.",
+      "relationships": [
+        "field_rules.ruleset_id -> rulesets.ruleset_id (N:1)"
+      ],
+      "query_hints": [
+        "This table defines the extraction target list through safir_field_id."
+      ],
+      "columns": {
+        "extraction_rule_id": "Unique extraction rule identifier.",
+        "safir_field_id": "Target field identifier extracted from documents.",
+        "mask": "Document mask/type targeted by the extraction rule.",
+        "definition": "Extraction logic definition (JSON text).",
+        "ruleset_id": "Ruleset version for this extraction rule."
+      }
+    },
+    "validation_rules": {
+      "role": "Business validation rules to check extraction consistency and quality.",
+      "relationships": [
+        "validation_rules.ruleset_id -> rulesets.ruleset_id (N:1)"
+      ],
+      "query_hints": [
+        "A single validation rule can apply to multiple safir_field_id via safir_field_id_list."
+      ],
+      "columns": {
+        "validation_rule_id": "Unique validation rule identifier.",
+        "definition": "Validation logic definition (JSON text).",
+        "level_of_problem": "Problem severity when rule fails (ALERTE or ECHEC).",
+        "mask": "Document mask/type targeted by the rule.",
+        "ruleset_id": "Ruleset version for this validation rule.",
+        "message_if_problem": "Explicit message emitted when the rule fails.",
+        "safir_field_id_list": "JSON array of target field ids for the rule."
+      }
+    }
+  }
+}
