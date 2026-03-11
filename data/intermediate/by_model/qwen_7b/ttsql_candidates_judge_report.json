@@ -1,20 +1,33 @@
 {
-  "generated_at_utc": "2026-03-11T01:08:05.872705+00:00",
-  "input_path": "C:\\Users\\hamza\\Desktop\\Projet SIA\\data\\intermediate\\by_model\\qwen_7b\\ttsql_candidates_clean.jsonl",
-  "db_path": "C:\\Users\\hamza\\Desktop\\Projet SIA\\data\\raw\\db.sqlite",
+  "generated_at_utc": "2026-03-11T16:42:43.466287+00:00",
+  "input_path": "C:\\Users\\hamza\\Desktop\\Projet SIA\\temp_repo_sfil\\data\\intermediate\\by_model\\qwen_7b\\ttsql_candidates_clean.jsonl",
+  "db_path": "C:\\Users\\hamza\\Desktop\\Projet SIA\\temp_repo_sfil\\data\\raw\\db.sqlite",
   "judge_model": "deepseek-chat",
   "base_url": "https://api.deepseek.com/v1",
   "total_rows": 200,
-  "pass_rows": 0,
-  "pass_rate": 0.0,
+  "pass_rows": 118,
+  "pass_rate": 0.59,
   "pass_score_threshold": 4.0,
-  "verdict_counts": {},
-  "score_bucket_counts": {},
-  "judge_errors": 200,
+  "verdict_counts": {
+    "needs_fix": 81,
+    "pass": 118,
+    "fail": 1
+  },
+  "score_bucket_counts": {
+    "3": 30,
+    "5": 98,
+    "4": 49,
+    "2": 23
+  },
+  "judge_errors": 0,
   "difficulty_total": {
     "medium": 111,
     "easy": 50,
     "hard": 39
   },
-  "difficulty_pass": {}
+  "difficulty_pass": {
+    "easy": 45,
+    "medium": 58,
+    "hard": 15
+  }
 }

@@ -1,20 +1,34 @@
 {
-  "generated_at_utc": "2026-03-11T00:26:38.722234+00:00",
-  "input_path": "C:\\Users\\hamza\\Desktop\\Projet SIA\\data\\intermediate\\by_model\\mistral_small_24b\\ttsql_candidates_clean.jsonl",
-  "db_path": "C:\\Users\\hamza\\Desktop\\Projet SIA\\data\\raw\\db.sqlite",
+  "generated_at_utc": "2026-03-11T16:23:11.759120+00:00",
+  "input_path": "C:\\Users\\hamza\\Desktop\\Projet SIA\\temp_repo_sfil\\data\\intermediate\\by_model\\mistral_small_24b\\ttsql_candidates_clean.jsonl",
+  "db_path": "C:\\Users\\hamza\\Desktop\\Projet SIA\\temp_repo_sfil\\data\\raw\\db.sqlite",
   "judge_model": "deepseek-chat",
   "base_url": "https://api.deepseek.com/v1",
   "total_rows": 200,
-  "pass_rows": 0,
-  "pass_rate": 0.0,
+  "pass_rows": 55,
+  "pass_rate": 0.275,
   "pass_score_threshold": 4.0,
-  "verdict_counts": {},
-  "score_bucket_counts": {},
-  "judge_errors": 200,
+  "verdict_counts": {
+    "pass": 55,
+    "needs_fix": 136,
+    "fail": 9
+  },
+  "score_bucket_counts": {
+    "4": 55,
+    "5": 35,
+    "3": 31,
+    "2": 74,
+    "1": 5
+  },
+  "judge_errors": 0,
   "difficulty_total": {
     "easy": 95,
     "medium": 80,
     "hard": 25
   },
-  "difficulty_pass": {}
+  "difficulty_pass": {
+    "easy": 39,
+    "medium": 14,
+    "hard": 2
+  }
 }
