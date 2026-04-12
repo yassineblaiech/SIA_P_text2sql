@@ -1,0 +1,97 @@
+erDiagram
+    State {
+        UUID state_id PK
+        StateCode code
+    }
+
+    Document {
+        UUID document_id PK
+        Mask mask
+        String siret
+        String city_name
+        FormatType format
+        String document_year
+        DateTime created_at
+        String link_bucketS3
+        UUID state_id FK
+        String error_message
+        String warning_message
+        BudgetType budget_type
+        Integer nb_pages
+    }
+
+    Section {
+        UUID section_id PK
+        UUID document_id FK
+        DateTime created_at
+        JSONB section_value
+    }
+
+    RuleSet {
+        UUID ruleset_id PK
+        String description
+        DateTime created_at
+    }
+
+    FieldRule {
+        UUID extraction_rule_id PK
+        String safir_field_id
+        Mask mask
+        JSONB definition
+        UUID ruleset_id FK
+    }
+
+    ValidationRule {
+        UUID validation_rule_id PK
+        JSONB definition
+        ConformityError level_of_problem
+        Mask mask
+        UUID ruleset_id FK
+        String message_if_problem
+        Array safir_field_id_list
+    }
+
+    ExtractionRun {
+        UUID run_id PK
+        UUID document_id FK
+        DateTime start_time
+        JSONB config
+        UUID state_id FK
+    }
+
+    ExtractionResult {
+        UUID result_id PK
+        String safir_field_id
+        UUID run_id FK
+        UUID document_id FK
+        String value
+        DateTime created_at
+        JSONB message_error
+        JSONB message_warning
+        UUID state_id FK
+    }
+
+    ResultFeedback {
+        UUID feedback_id PK
+        UUID result_id FK
+        Boolean is_technical_error
+        String comment
+        String corrected_value
+        DateTime created_at
+    }
+
+    %% Relationships
+    State ||--o{ Document : "has"
+    State ||--o{ ExtractionRun : "has"
+    State ||--o{ ExtractionResult : "has"
+
+    Document ||--o{ Section : "contains"
+    Document ||--o{ ExtractionRun : "has"
+    Document ||--o{ ExtractionResult : "has"
+
+    RuleSet ||--o{ FieldRule : "contains"
+    RuleSet ||--o{ ValidationRule : "contains"
+
+    ExtractionRun ||--o{ ExtractionResult : "produces"
+
+    ExtractionResult ||--o{ ResultFeedback : "has"

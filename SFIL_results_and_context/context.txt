@@ -1,0 +1,187 @@
+-- Create independent tables first to satisfy foreign key constraints
+CREATE TABLE states (
+    state_id TEXT PRIMARY KEY,
+    code TEXT
+);
+
+CREATE TABLE rulesets (
+    ruleset_id TEXT PRIMARY KEY,
+    description TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Create core document table
+CREATE TABLE documents (
+    document_id TEXT PRIMARY KEY,
+    mask TEXT,
+    siret TEXT,
+    city_name TEXT,
+    format TEXT,
+    document_year TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    link_bucketS3 TEXT NOT NULL,
+    state_id TEXT,
+    error_message TEXT,
+    warning_message TEXT,
+    budget_type TEXT,
+    nb_pages INTEGER,
+    FOREIGN KEY (state_id) REFERENCES states(state_id)
+);
+
+-- Create document-dependent tables
+CREATE TABLE sections (
+    section_id TEXT PRIMARY KEY,
+    document_id TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    section_value TEXT, -- JSON format
+    FOREIGN KEY (document_id) REFERENCES documents(document_id)
+);
+
+CREATE TABLE extraction_runs (
+    run_id TEXT PRIMARY KEY,
+    document_id TEXT,
+    start_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    config TEXT, -- JSON format
+    state_id TEXT,
+    FOREIGN KEY (document_id) REFERENCES documents(document_id),
+    FOREIGN KEY (state_id) REFERENCES states(state_id)
+);
+
+CREATE TABLE extraction_results (
+    result_id TEXT PRIMARY KEY,
+    safir_field_id TEXT,
+    run_id TEXT,
+    document_id TEXT,
+    value TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    message_error TEXT, -- JSON format
+    message_warning TEXT, -- JSON format
+    state_id TEXT,
+    FOREIGN KEY (run_id) REFERENCES extraction_runs(run_id),
+    FOREIGN KEY (document_id) REFERENCES documents(document_id),
+    FOREIGN KEY (state_id) REFERENCES states(state_id)
+);
+
+CREATE TABLE resultfeedbacks (
+    feedback_id TEXT PRIMARY KEY,
+    result_id TEXT,
+    is_technical_error INTEGER, -- 0 or 1
+    comment TEXT,
+    corrected_value TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (result_id) REFERENCES extraction_results(result_id)
+);
+
+-- Create rule-dependent tables
+CREATE TABLE field_rules (
+    extraction_rule_id TEXT PRIMARY KEY,
+    safir_field_id TEXT NOT NULL,
+    mask TEXT,
+    definition TEXT, -- JSON format
+    ruleset_id TEXT,
+    FOREIGN KEY (ruleset_id) REFERENCES rulesets(ruleset_id)
+);
+
+CREATE TABLE validation_rules (
+    validation_rule_id TEXT PRIMARY KEY,
+    definition TEXT, -- JSON format
+    level_of_problem TEXT,
+    mask TEXT,
+    ruleset_id TEXT,
+    message_if_problem TEXT,
+    safir_field_id_list TEXT, -- JSON array
+    FOREIGN KEY (ruleset_id) REFERENCES rulesets(ruleset_id)
+);
+
+-- ==========================================
+-- SAMPLE INSERTS (For Context)
+-- ==========================================
+
+INSERT INTO states (state_id, code) VALUES 
+('st_1', 'PENDING'),
+('st_2', 'PROCESSING'),
+('st_3', 'SUCCESS'),
+('st_4', 'ERROR');
+
+INSERT INTO rulesets (ruleset_id, description) VALUES 
+('rs_v3', 'Règles extraction v3 – M57 CA/CFU');
+
+INSERT INTO documents (document_id, mask, siret, city_name, format, document_year, link_bucketS3, state_id, budget_type, nb_pages) VALUES 
+('doc_101', 'M57_CA', '21750001600019', 'Paris', 'pdf', '2023', 's3://budget-docs/paris_2023.pdf', 'st_3', 'BP', 124);
+
+INSERT INTO extraction_runs (run_id, document_id, config, state_id) VALUES 
+('run_505', 'doc_101', '{"engine_version": "1.2", "ocr": "enabled"}', 'st_3');
+
+INSERT INTO extraction_results (result_id, safir_field_id, run_id, document_id, value, state_id) VALUES 
+('res_991', 'DI127', 'run_505', 'doc_101', '15400.50', 'st_3');
+
+/* =====================================================================================
+BUDGET DATA EXTRACTION DICTIONARY: SCHEMA LOGIC & CODE REFERENCE
+=====================================================================================
+
+[I] DOCUMENT ATTRIBUTES (Masks, Formats, Budget Types)
+-------------------------------------------------------------------------------------
+1. Document Masks (Technical Typology)
+   Used in: documents.mask, field_rules.mask, validation_rules.mask
+   Defines the accounting framework and document type to route rules correctly.
+   - M57_CA: Compte Administratif under M57 nomenclature.
+   - M57_CFU: Compte Financier Unique under M57 nomenclature.
+   - M4_CA: Compte Administratif under M4 nomenclature (public services).
+   
+2. Input Formats
+   Used in: documents.format
+   - pdf: Native or searchable PDF files.
+   - scan: Flattened PDFs requiring OCR.
+   - image: JPG/PNG single or multi-page uploads.
+
+3. Budget Types
+   Used in: documents.budget_type
+   - BP: Budget Primitif (Initial budget).
+   - BA: Budget Annexe (Supplementary budget).
+   - CA: Compte Administratif (Executed budget).
+
+[II] SYSTEM STATES & LIFECYCLE (States Table)
+-------------------------------------------------------------------------------------
+Used across: documents.state_id, extraction_runs.state_id, extraction_results.state_id
+State tracking ensures asynchronous processing boundaries and data validation levels.
+
+1. Execution States
+   - PENDING: Queued, waiting to be processed by the ingestion/extraction engine.
+   - PROCESSING: Currently being analyzed or extracted.
+   - SUCCESS: Operation completed without blocking errors.
+   - ERROR: Process failed completely (system/technical failure).
+   - PARTIAL: Extracted with some fields missing or raising warnings.
+
+2. Validation States
+   - VALIDATED: Data confirmed by business rules or human reviewers.
+   - REJECTED: Data flagged as entirely invalid.
+
+[III] EXTRACTION & RULES ENGINE (Safir IDs, Sections, JSON definitions)
+-------------------------------------------------------------------------------------
+1. SAFIR Field Identifiers (safir_field_id)
+   Used in: extraction_results, field_rules, validation_rules
+   The absolute functional code for the extracted financial data point.
+   - Examples: DI127, DI82, FI82 (Correspond to specific budget lines or accounting totals).
+
+2. JSON Structured Data
+   The schema heavily relies on JSON payloads to handle variable metadata:
+   - sections.section_value: Contains the tabular structure extracted from PDFs.
+   - extraction_runs.config: Engine versions, OCR parameters, threshold settings.
+   - field_rules.definition: Locational coordinates (bounding boxes), regex patterns, or LLM prompts used to find the data.
+   - extraction_results.message_error/warning: Stack traces or bounding-box confidence scores.
+
+[IV] VALIDATION & HUMAN FEEDBACK
+-------------------------------------------------------------------------------------
+1. Validation Rule Levels
+   Used in: validation_rules.level_of_problem
+   - ALERTE: Non-blocking warning (e.g., unusual variance from previous year).
+   - ECHEC: Blocking business logic failure (e.g., Assets != Liabilities).
+
+2. Human Feedback Loops
+   Used in: resultfeedbacks
+   - is_technical_error (0/1): 
+     * 1 = Technical pipeline failed (e.g., OCR misread a "5" as an "S"). 
+     * 0 = Business error (e.g., right number, wrong column context).
+
+=====================================================================================
+*/

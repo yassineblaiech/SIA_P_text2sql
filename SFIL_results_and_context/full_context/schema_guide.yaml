@@ -1,0 +1,1006 @@
+generated_at_utc: "2026-03-05T14:02:58.046333+00:00"
+database_path: "C:\\Users\\hamza\\Desktop\\Projet SIA\\data\\raw\\db.sqlite"
+tables_count: 9
+tables:
+  -
+    name: "documents"
+    row_count: 126
+    primary_key:
+      - "document_id"
+    columns:
+      -
+        name: "document_id"
+        type: "TEXT"
+        not_null: false
+        default: null
+        is_primary_key: true
+        is_foreign_key: false
+        null_count: 0
+        distinct_count: 126
+        sample_values:
+          - "02975f2f-8329-46fa-ba21-a97ed081a015"
+          - "057ffefd-a1f5-4135-bf27-410c3c492d12"
+          - "0a4dd2e7-d981-43e5-b17d-fa8eb2d4486d"
+          - "0bdfda43-da7f-4198-bb7a-0e0c303d9dcd"
+          - "0eb5fd02-71f8-4b5f-b945-9b8690c3f4c5"
+        business_description: "Unique document identifier in the platform."
+      -
+        name: "mask"
+        type: "TEXT"
+        not_null: false
+        default: null
+        is_primary_key: false
+        is_foreign_key: false
+        null_count: 0
+        distinct_count: 3
+        sample_values:
+          - "M57_CFU"
+          - "M57_CA"
+          - "M4_CFU"
+        allowed_values_from_check:
+          - "M57_CA"
+          - "M57_CFU"
+          - "M4_CA"
+          - "M4_CFU"
+          - "M57"
+          - "M4"
+        business_description: "Technical document type (examples: M57_CA, M57_CFU, M4_CA, M4_CFU, M57, M4)."
+      -
+        name: "siret"
+        type: "TEXT"
+        not_null: false
+        default: null
+        is_primary_key: false
+        is_foreign_key: false
+        null_count: 0
+        distinct_count: 26
+        sample_values:
+          - "24340052000165"
+          - "21200041800013"
+          - "21930006800018"
+          - "21290039300019"
+          - "20006812000019"
+        business_description: "SIRET identifier of the commune/entity."
+      -
+        name: "city_name"
+        type: "TEXT"
+        not_null: false
+        default: null
+        is_primary_key: false
+        is_foreign_key: false
+        null_count: 0
+        distinct_count: 24
+        sample_values:
+          - "COMMUNAUTE AGGLOMERATION LUNEL AGGLO"
+          - "COMMUNE DE BONIFACIO"
+          - "BAGNOLET VILLE - VILLE"
+          - "EUROMETROPOLE STRASBOURG"
+          - "Ville de Concarneau"
+        business_description: "Commune or entity name."
+      -
+        name: "format"
+        type: "TEXT"
+        not_null: false
+        default: null
+        is_primary_key: false
+        is_foreign_key: false
+        null_count: 0
+        distinct_count: 2
+        sample_values:
+          - "pdf"
+          - "scan"
+        allowed_values_from_check:
+          - "pdf"
+          - "scan"
+          - "image"
+        business_description: "Input document format (pdf, scan, image)."
+      -
+        name: "document_year"
+        type: "TEXT"
+        not_null: false
+        default: null
+        is_primary_key: false
+        is_foreign_key: false
+        null_count: 0
+        distinct_count: 2
+        sample_values:
+          - "2024"
+          - "2023"
+        business_description: "Budget year attached to the document."
+      -
+        name: "created_at"
+        type: "TIMESTAMP"
+        not_null: false
+        default: "CURRENT_TIMESTAMP"
+        is_primary_key: false
+        is_foreign_key: false
+        null_count: 0
+        distinct_count: 126
+        sample_values:
+          - "2025-07-22 18:43:15.555479+00"
+          - "2025-07-22 18:43:17.938467+00"
+          - "2025-07-22 19:23:20.151805+00"
+          - "2025-07-22 19:23:22.546222+00"
+          - "2025-07-22 19:23:25.24336+00"
+        business_description: "Creation timestamp of the document record."
+      -
+        name: "link_bucketS3"
+        type: "TEXT"
+        not_null: true
+        default: null
+        is_primary_key: false
+        is_foreign_key: false
+        null_count: 0
+        distinct_count: 25
+        sample_values:
+          - "CA LUNEL Agloprincipal.pdf"
+          - "bonifacio CFU 2024 principal.pdf"
+          - "CFU_2024 Bagnolet.pdf"
+          - "tous CA 2024 Concarneau.pdf"
+          - "QBO CA 2024.pdf"
+        business_description: "S3 path/link to the stored document file."
+      -
+        name: "state_id"
+        type: "TEXT"
+        not_null: true
+        default: null
+        is_primary_key: false
+        is_foreign_key: true
+        null_count: 0
+        distinct_count: 126
+        sample_values:
+          - "01880b28-4d6a-435a-ab2e-8d12a0a6f9e4"
+          - "049fad93-deba-4cbb-aac9-b342af00e406"
+          - "055813d3-1ea5-48ae-a59b-60381536adc4"
+          - "06433747-d87e-4d7a-87be-ad2ecc3ca790"
+          - "0da87b9a-5987-4038-b32d-6cb98ea30eed"
+        references:
+          to_table: "states"
+          to_column: "state_id"
+        business_description: "Current global state of the document."
+      -
+        name: "error_message"
+        type: "TEXT"
+        not_null: false
+        default: null
+        is_primary_key: false
+        is_foreign_key: false
+        null_count: 0
+        distinct_count: 11
+        sample_values:
+          - ""
+          - "Une erreur a interrompue le processus de validation des valeurs extraites : invalid syntax (<unknown>, line 1)"
+          - "Un problème a interrompu le processus d''extraction des valeurs (métadonnées du document :[''M57_CA'', ''21200050900019'', ''2024'', ''MAIRIE DE CALVI - SERVICE GENERAL CALVI - CA'', ''BA'']) : All arrays must be of the same length"
+          - "Un problème a interrompu le processus d''extraction des valeurs (métadonnées du document :[''M57_CA'', ''24340052000165'', ''2024'', ''COMMUNAUTE AGGLOMERATION LUNEL AGGLO'', ''BP'']) : Columns must be same length as key"
+          - "Un problème a interrompu le processus d''extraction des valeurs (métadonnées du document :[''M57_CA'', ''24340052000165'', ''2024'', ''COMMUNAUTE AGGLOMERATION LUNEL AGGLO'', ''BP'']) : local variable ''result'' referenced before assignment"
+        business_description: "Blocking/global error message for ingestion or extraction."
+      -
+        name: "warning_message"
+        type: "TEXT"
+        not_null: false
+        default: null
+        is_primary_key: false
+        is_foreign_key: false
+        null_count: 0
+        distinct_count: 31
+        sample_values:
+          - ""
+          - "Les tableaux de certaines sections n''ont pas pu être correctement détectés dans le document : [(''IV – ÉTATS ANNEXÉS'', ''B - ÉTATS ANNEXÉS PATRIMONIAUX – ÉTAT DE LA DETTE – DÉTAIL DES CRÉDITS DE TRÉSORERIE'')]"
+          - "Les tableaux de certaines sections n''ont pas pu être extraits et validés : [(''IV - ANNEXES'', ''B - ANNEXES PATRIMONIALES – ÉTAT DE LA DETTE – DÉTAIL DES CRÉDITS DE TRÉSORERIE'')]"
+          - "Les tableaux de certaines sections n''ont pas pu être extraits et validés : [(''IV – Annexes'', ''B – Annexes patrimoniales – Etat de la dette – Répartition par nature de dette''), (''IV – ÉTATS ANNEXÉS'', ''B - ÉTATS ANNEXÉS PATRIMONIAUX – ÉTAT DE LA DETTE – DÉTAIL DES CRÉDITS DE TRÉSORERIE'')]"
+          - "Les tableaux de certaines sections n''ont pas pu être correctement détectés dans le document : [(''I – INFORMATIONS GÉNÉRALES ET SYNTHÉTIQUES'', ''Résultats d’exécution du budget principal et des budgets des services non personnalisés'')]"
+        business_description: "Non-blocking/global warning message."
+      -
+        name: "budget_type"
+        type: "TEXT"
+        not_null: false
+        default: null
+        is_primary_key: false
+        is_foreign_key: false
+        null_count: 0
+        distinct_count: 2
+        sample_values:
+          - "BP"
+          - "BA"
+        allowed_values_from_check:
+          - "BP"
+          - "BA"
+        business_description: "Budget type (BP or BA)."
+      -
+        name: "nb_pages"
+        type: "INTEGER"
+        not_null: false
+        default: null
+        is_primary_key: false
+        is_foreign_key: false
+        null_count: 0
+        distinct_count: 24
+        sample_values:
+          - 202
+          - 110
+          - 93
+          - 424
+          - 645
+        business_description: "Document page count."
+    business_role: "Central table listing each ingested budget document used as extraction input."
+    business_relationships:
+      - "documents.state_id -> states.state_id (N:1)"
+      - "documents.document_id -> extraction_runs.document_id (1:N)"
+      - "documents.document_id -> extraction_results.document_id (1:N)"
+      - "documents.document_id -> sections.document_id (1:N)"
+    query_hints:
+      - "A document typically has one extraction_run in practice, even if schema allows multiple runs."
+      - "mask is a key filter to choose applicable rules."
+  -
+    name: "extraction_results"
+    row_count: 12873
+    primary_key:
+      - "result_id"
+    columns:
+      -
+        name: "result_id"
+        type: "TEXT"
+        not_null: false
+        default: null
+        is_primary_key: true
+        is_foreign_key: false
+        null_count: 0
+        distinct_count: 12873
+        sample_values:
+          - "000e407c-249c-426f-98c0-df137772b860"
+          - "000efda2-b39c-4eb1-8c77-1635ed341349"
+          - "0016c0d1-ae66-4a8e-9071-5a09ac169fea"
+          - "00185341-823d-4e02-bd4d-5081152fd145"
+          - "0019eeca-5fe9-4e0e-9c4c-d9278f277725"
+        business_description: "Unique extraction result identifier."
+      -
+        name: "safir_field_id"
+        type: "TEXT"
+        not_null: true
+        default: null
+        is_primary_key: false
+        is_foreign_key: false
+        null_count: 0
+        distinct_count: 141
+        sample_values:
+          - "Année"
+          - "Conso"
+          - "D001"
+          - "D002"
+          - "DF011"
+        business_description: "Functional identifier of the targeted financial field."
+      -
+        name: "run_id"
+        type: "TEXT"
+        not_null: true
+        default: null
+        is_primary_key: false
+        is_foreign_key: true
+        null_count: 0
+        distinct_count: 109
+        sample_values:
+          - "85f4fd86-42e6-46ef-8e4c-9b269285fc3a"
+          - "c2502a52-4c14-4e57-b3fc-393355e28726"
+          - "d6e519d2-0071-4dab-bcc8-61fd0e787c60"
+          - "ed322a1e-a9c8-407f-9a0c-6dc33fcb4eb1"
+          - "257cf7b5-32aa-45d3-a795-43c020ab294f"
+        references:
+          to_table: "extraction_runs"
+          to_column: "run_id"
+        business_description: "Run that produced this result."
+      -
+        name: "document_id"
+        type: "TEXT"
+        not_null: true
+        default: null
+        is_primary_key: false
+        is_foreign_key: true
+        null_count: 0
+        distinct_count: 109
+        sample_values:
+          - "22fa2bfe-d244-4855-814d-3033fee4e5d0"
+          - "2b20bc67-ad2a-4cde-a33d-7a0b7bbf349f"
+          - "c85fa4d6-8c72-463c-b28f-cb602392ecef"
+          - "f008608c-15c1-47a7-b860-b69778b0d7f1"
+          - "1857d175-3ddf-475b-a928-bd185922cc72"
+        references:
+          to_table: "documents"
+          to_column: "document_id"
+        business_description: "Source document id (redundant but useful for querying)."
+      -
+        name: "value"
+        type: "TEXT"
+        not_null: false
+        default: null
+        is_primary_key: false
+        is_foreign_key: false
+        null_count: 0
+        distinct_count: 1454
+        sample_values:
+          - "0.0"
+          - "0"
+          - ""
+          - "N"
+          - "M57"
+        business_description: "Extracted value (often numeric, stored as text)."
+      -
+        name: "created_at"
+        type: "TIMESTAMP"
+        not_null: false
+        default: "CURRENT_TIMESTAMP"
+        is_primary_key: false
+        is_foreign_key: false
+        null_count: 0
+        distinct_count: 12873
+        sample_values:
+          - "2025-07-22 19:55:13.479656"
+          - "2025-07-22 19:55:14.574591"
+          - "2025-07-22 19:55:15.675278"
+          - "2025-07-22 19:55:16.753396"
+          - "2025-07-22 19:55:17.865543"
+        business_description: "Result creation timestamp."
+      -
+        name: "message_error"
+        type: "TEXT"
+        not_null: false
+        default: null
+        is_primary_key: false
+        is_foreign_key: false
+        null_count: 0
+        distinct_count: 280
+        sample_values:
+          - "null"
+          - "['\"[PHASE D''EXTRACTION] Echec de l''extraction de : ['''', ''Total des opérations d’équipement''] dans la section : [''II – PRESENTATION GENERALE'', ''BALANCE GENERALE – DEPENSES'']. L''identifiant ''['''', ''Total des opérations d’équipement'']'' n''as pas été trouvé'\"]"
+          - "['\"[VALEUR EXTRAITE NON CONFORME] Problème sur le total des dépenses de fonctionnemet : la somme du total des opérations réelles et des opération d''ordre est différent du total réalisé'\"]"
+          - "['\"[PHASE D''EXTRACTION] Echec de l''extraction de : [''79''] dans la section : [''II- Exécution budgétaire'', ''Recettes de fonctionnement – Vue d’ensemble'']. L''identifiant ''79'' n''as pas été trouvé'\"]"
+          - "['\"[VALEUR EXTRAITE NON CONFORME] Problème sur le total des recettes de fonctionnement : la somme du total des opérations réelles et des opération d''ordre est différent du total réalisé'\"]"
+        business_description: "Extraction error details for this field (JSON text)."
+      -
+        name: "message_warning"
+        type: "TEXT"
+        not_null: false
+        default: null
+        is_primary_key: false
+        is_foreign_key: false
+        null_count: 0
+        distinct_count: 47
+        sample_values:
+          - "null"
+          - "['\"Une règle de validation prenant en compte DF6611 n''as pas été appliqué car une valeur utilisé dans la règle n''as pas été trouvée'\"]"
+          - "['\"Une règle de validation prenant en compte RI16 n''as pas été appliqué car une valeur utilisé dans la règle n''as pas été trouvée'\"]"
+          - "['\"Une règle de validation prenant en compte DF657 n''as pas été appliqué car une valeur utilisé dans la règle n''as pas été trouvée'\"]"
+          - "['\"Une règle de validation prenant en compte DF65 n''as pas été appliqué car une valeur utilisé dans la règle n''as pas été trouvée'\"]"
+        business_description: "Extraction warning details for this field (JSON text)."
+      -
+        name: "state_id"
+        type: "TEXT"
+        not_null: true
+        default: null
+        is_primary_key: false
+        is_foreign_key: true
+        null_count: 0
+        distinct_count: 12873
+        sample_values:
+          - "0003a720-31b1-4bca-99d6-f4eea38fc944"
+          - "0004b5c3-d2a9-4120-bb6d-b3a750ebd343"
+          - "0014c501-d367-440e-939c-b3bdaf731b50"
+          - "001ad5dd-d198-42d3-a2c3-05f72e2ce0a6"
+          - "00225fc0-ec1e-4806-b0e5-10fded3d80b0"
+        references:
+          to_table: "states"
+          to_column: "state_id"
+        business_description: "Current state of this result."
+    business_role: "Extracted financial fields per document/run (one row per targeted field)."
+    business_relationships:
+      - "extraction_results.run_id -> extraction_runs.run_id (N:1)"
+      - "extraction_results.document_id -> documents.document_id (N:1)"
+      - "extraction_results.state_id -> states.state_id (N:1)"
+      - "extraction_results.result_id -> resultfeedbacks.result_id (1:N)"
+  -
+    name: "extraction_runs"
+    row_count: 126
+    primary_key:
+      - "run_id"
+    columns:
+      -
+        name: "run_id"
+        type: "TEXT"
+        not_null: false
+        default: null
+        is_primary_key: true
+        is_foreign_key: false
+        null_count: 0
+        distinct_count: 126
+        sample_values:
+          - "0026cf26-7ac5-4056-8caa-7d17c340c964"
+          - "02dc1ed9-ba1d-4268-bcd9-e50fa5947b48"
+          - "03d9184a-ca0c-4cd3-9ce8-6e43634db666"
+          - "051ef5f9-2917-41eb-a80f-892a9ec4dcb7"
+          - "094505ac-9585-45b6-995d-d08840b76bb8"
+        business_description: "Unique extraction run identifier."
+      -
+        name: "document_id"
+        type: "TEXT"
+        not_null: true
+        default: null
+        is_primary_key: false
+        is_foreign_key: true
+        null_count: 0
+        distinct_count: 126
+        sample_values:
+          - "02975f2f-8329-46fa-ba21-a97ed081a015"
+          - "057ffefd-a1f5-4135-bf27-410c3c492d12"
+          - "0a4dd2e7-d981-43e5-b17d-fa8eb2d4486d"
+          - "0bdfda43-da7f-4198-bb7a-0e0c303d9dcd"
+          - "0eb5fd02-71f8-4b5f-b945-9b8690c3f4c5"
+        references:
+          to_table: "documents"
+          to_column: "document_id"
+        business_description: "Document processed by this run."
+      -
+        name: "start_time"
+        type: "TIMESTAMP"
+        not_null: false
+        default: "CURRENT_TIMESTAMP"
+        is_primary_key: false
+        is_foreign_key: false
+        null_count: 0
+        distinct_count: 126
+        sample_values:
+          - "2025-07-22 18:43:16.300239+00"
+          - "2025-07-22 18:43:18.783451+00"
+          - "2025-07-22 19:23:20.932693+00"
+          - "2025-07-22 19:23:23.462212+00"
+          - "2025-07-22 19:23:26.015173+00"
+        business_description: "Extraction run start timestamp."
+      -
+        name: "config"
+        type: "TEXT"
+        not_null: false
+        default: null
+        is_primary_key: false
+        is_foreign_key: false
+        null_count: 0
+        distinct_count: 9
+        sample_values:
+          - "{'\"MAILING'\": {'\"mail_sender'\": '\"noreply-sfil@dev.heka.ai'\"}, '\"LLM_CONFIG'\": {'\"type'\": '\"anthropics'\", '\"model-name'\": '\"claude-3-5-sonnet-20240620'\", '\"max_batch_llm'\": 8}, '\"error_directory'\": '\"sfil_extraction/archive'\", '\"output_directory'\": '\"sfil_extraction/output'\", '\"success_directory'\": '\"sfil_extraction/success'\", '\"ruleset_id_extraction'\": '\"3b1a4b60-9f1b-412a-b0b5-6384b521d1c0'\", '\"ruleset_id_validation'\": '\"a2cd4ddf-51e9-4b09-a15f-fa2108f56d37'\"}"
+          - "{'\"MAILING'\": {'\"mail_sender'\": '\"noreply-sfil@dev.heka.ai'\"}, '\"LLM_CONFIG'\": {'\"type'\": '\"anthropics'\", '\"model-name'\": '\"claude-sonnet-4-20250514'\", '\"max_batch_llm'\": 8}, '\"error_directory'\": '\"sfil_extraction/archive'\", '\"output_directory'\": '\"sfil_extraction/output'\", '\"success_directory'\": '\"sfil_extraction/success'\", '\"ruleset_id_extraction'\": '\"f5e13ebf-01cc-434d-8fb9-4c82ca71f5b9'\", '\"ruleset_id_validation'\": '\"4ec9aadd-a692-4673-8eb0-185d8496e02b'\"}"
+          - "{'\"MAILING'\": {'\"mail_sender'\": '\"noreply-sfil@dev.heka.ai'\"}, '\"LLM_CONFIG'\": {'\"type'\": '\"anthropics'\", '\"model-name'\": '\"claude-3-5-sonnet-20240620'\", '\"max_batch_llm'\": 8}, '\"error_directory'\": '\"sfil_extraction/archive'\", '\"output_directory'\": '\"sfil_extraction/output'\", '\"success_directory'\": '\"sfil_extraction/success'\", '\"ruleset_id_extraction'\": '\"9f7ab8d5-9052-40a1-9cea-ed62cd6e45c4'\", '\"ruleset_id_validation'\": '\"634fc563-f214-400d-ae77-30d20fcb13f3'\"}"
+          - "{'\"MAILING'\": {'\"mail_sender'\": '\"noreply-sfil@dev.heka.ai'\"}, '\"LLM_CONFIG'\": {'\"type'\": '\"anthropics'\", '\"model-name'\": '\"claude-3-5-sonnet-20240620'\", '\"max_batch_llm'\": 8}, '\"error_directory'\": '\"sfil_extraction/archive'\", '\"output_directory'\": '\"sfil_extraction/output'\", '\"success_directory'\": '\"sfil_extraction/success'\", '\"ruleset_id_extraction'\": '\"f5e13ebf-01cc-434d-8fb9-4c82ca71f5b9'\", '\"ruleset_id_validation'\": '\"4ec9aadd-a692-4673-8eb0-185d8496e02b'\"}"
+          - "{'\"MAILING'\": {'\"mail_sender'\": '\"noreply-sfil@dev.heka.ai'\"}, '\"LLM_CONFIG'\": {'\"type'\": '\"anthropics'\", '\"model-name'\": '\"claude-sonnet-4-5-20250929'\", '\"max_batch_llm'\": 8}, '\"error_directory'\": '\"sfil_extraction/archive'\", '\"output_directory'\": '\"sfil_extraction/output'\", '\"success_directory'\": '\"sfil_extraction/success'\", '\"ruleset_id_extraction'\": '\"f5e13ebf-01cc-434d-8fb9-4c82ca71f5b9'\", '\"ruleset_id_validation'\": '\"4ec9aadd-a692-4673-8eb0-185d8496e02b'\"}"
+        business_description: "Extraction configuration snapshot (JSON string)."
+      -
+        name: "state_id"
+        type: "TEXT"
+        not_null: true
+        default: null
+        is_primary_key: false
+        is_foreign_key: true
+        null_count: 0
+        distinct_count: 126
+        sample_values:
+          - "0322c3a6-0ec1-4b48-98bf-a272518ae795"
+          - "0694ddf3-b8cf-4832-8603-7da0fc496fc0"
+          - "09dd172d-1b57-432a-bcd0-028192cca5e6"
+          - "0ca169ee-43bf-4402-8fab-e552113eb8bb"
+          - "0d19f4d4-fd99-49ce-a825-836907349930"
+        references:
+          to_table: "states"
+          to_column: "state_id"
+        business_description: "Current state of the run."
+    business_role: "Execution context of extraction for a document (status, config, timestamp)."
+    business_relationships:
+      - "extraction_runs.document_id -> documents.document_id (N:1)"
+      - "extraction_runs.state_id -> states.state_id (N:1)"
+      - "extraction_runs.run_id -> extraction_results.run_id (1:N)"
+  -
+    name: "field_rules"
+    row_count: 6894
+    primary_key:
+      - "extraction_rule_id"
+    columns:
+      -
+        name: "extraction_rule_id"
+        type: "TEXT"
+        not_null: false
+        default: null
+        is_primary_key: true
+        is_foreign_key: false
+        null_count: 0
+        distinct_count: 6894
+        sample_values:
+          - "0001debd-b048-4d96-811c-7c76b7f719b5"
+          - "00049def-85bc-42fb-a58c-aebb82b57837"
+          - "000a1961-ddc2-4ace-99a3-5c016cf7ec4e"
+          - "0011c2ff-75fb-4f39-86b2-0d836a4a4c8b"
+          - "0014d141-1931-4e1f-999c-1134425b01f5"
+        business_description: "Unique extraction rule identifier."
+      -
+        name: "safir_field_id"
+        type: "TEXT"
+        not_null: true
+        default: null
+        is_primary_key: false
+        is_foreign_key: false
+        null_count: 0
+        distinct_count: 137
+        sample_values:
+          - "D001"
+          - "D002"
+          - "DF011"
+          - "DF012"
+          - "DF014"
+        business_description: "Target field identifier extracted from documents."
+      -
+        name: "mask"
+        type: "TEXT"
+        not_null: true
+        default: null
+        is_primary_key: false
+        is_foreign_key: false
+        null_count: 0
+        distinct_count: 3
+        sample_values:
+          - "M57_CA"
+          - "M57_CFU"
+          - "M4_CFU"
+        allowed_values_from_check:
+          - "M57_CA"
+          - "M57_CFU"
+          - "M4_CA"
+          - "M4_CFU"
+          - "M57"
+          - "M4"
+        business_description: "Document mask/type targeted by the extraction rule."
+      -
+        name: "definition"
+        type: "TEXT"
+        not_null: true
+        default: null
+        is_primary_key: false
+        is_foreign_key: false
+        null_count: 0
+        distinct_count: 318
+        sample_values:
+          - "{'\"extract'\": {'\"column'\": '\"Capital restant dû au 31/12/N'\", '\"identifiers'\": ['\"Total general'\"], '\"section_header'\": ['\"IV – Annexes'\", '\"B - ANNEXES PATRIMONIALES – ETAT DE LA DETTE – REPARTITION PAR NATURE DE DETTE'\"]}}"
+          - "{'\"extract'\": {'\"column'\": '\"ICNE de l’exercice'\", '\"identifiers'\": ['\"Total général'\"], '\"section_header'\": ['\"IV – Annexes'\", '\"B – Annexes patrimoniales – Etat de la dette – Répartition par nature de dette'\"]}}"
+          - "{'\"sum'\": [{'\"extract'\": {'\"column'\": '\"Réalisations nettes(d=b-c)'\", '\"startswith'\": '\"10222'\", '\"operation_type'\": '\"real'\", '\"section_header'\": ['\"II-Exécution budgétaire'\", '\"Recettes d''investissement - Vue détaillée'\"], '\"conservative_mode'\": false}}]}"
+          - "{'\"sum'\": [{'\"extract'\": {'\"column'\": '\"Réalisations nettes(d=b-c)'\", '\"startswith'\": '\"16449'\", '\"operation_type'\": '\"real'\", '\"section_header'\": ['\"II-Exécution budgétaire'\", '\"Dépenses d''investissement - Vue détaillée'\"], '\"conservative_mode'\": false}}]}"
+          - "{'\"sum'\": [{'\"extract'\": {'\"column'\": '\"Réalisations nettes(d=b-c)'\", '\"startswith'\": '\"16449'\", '\"operation_type'\": '\"real'\", '\"section_header'\": ['\"II-Exécution budgétaire'\", '\"Recettes d''investissement - Vue détaillée'\"], '\"conservative_mode'\": false}}]}"
+        business_description: "Extraction logic definition (JSON text)."
+      -
+        name: "ruleset_id"
+        type: "TEXT"
+        not_null: true
+        default: null
+        is_primary_key: false
+        is_foreign_key: true
+        null_count: 0
+        distinct_count: 23
+        sample_values:
+          - "0c27b65a-2f17-4eda-8633-d550493f124c"
+          - "52496fa7-8a2a-4077-b2ea-2317112c9cf2"
+          - "9f7ab8d5-9052-40a1-9cea-ed62cd6e45c4"
+          - "b953de3a-b7fb-4d4d-be8b-529638079c1e"
+          - "f5e13ebf-01cc-434d-8fb9-4c82ca71f5b9"
+        references:
+          to_table: "rulesets"
+          to_column: "ruleset_id"
+        business_description: "Ruleset version for this extraction rule."
+    business_role: "Extraction rules defining how target values are captured from documents."
+    business_relationships:
+      - "field_rules.ruleset_id -> rulesets.ruleset_id (N:1)"
+    query_hints:
+      - "This table defines the extraction target list through safir_field_id."
+  -
+    name: "resultfeedbacks"
+    row_count: 0
+    primary_key:
+      - "feedback_id"
+    columns:
+      -
+        name: "feedback_id"
+        type: "TEXT"
+        not_null: false
+        default: null
+        is_primary_key: true
+        is_foreign_key: false
+        null_count: 0
+        distinct_count: 0
+        sample_values:
+
+        business_description: "Unique feedback identifier."
+      -
+        name: "result_id"
+        type: "TEXT"
+        not_null: true
+        default: null
+        is_primary_key: false
+        is_foreign_key: true
+        null_count: 0
+        distinct_count: 0
+        sample_values:
+
+        references:
+          to_table: "extraction_results"
+          to_column: "result_id"
+        business_description: "Target extraction result id."
+      -
+        name: "is_technical_error"
+        type: "INTEGER"
+        not_null: false
+        default: null
+        is_primary_key: false
+        is_foreign_key: false
+        null_count: 0
+        distinct_count: 0
+        sample_values:
+
+        business_description: "0/1 flag indicating technical issue."
+      -
+        name: "comment"
+        type: "TEXT"
+        not_null: false
+        default: null
+        is_primary_key: false
+        is_foreign_key: false
+        null_count: 0
+        distinct_count: 0
+        sample_values:
+
+        business_description: "Free-text feedback comment."
+      -
+        name: "corrected_value"
+        type: "TEXT"
+        not_null: false
+        default: null
+        is_primary_key: false
+        is_foreign_key: false
+        null_count: 0
+        distinct_count: 0
+        sample_values:
+
+        business_description: "Manual corrected value when extraction is wrong."
+      -
+        name: "created_at"
+        type: "TIMESTAMP"
+        not_null: false
+        default: "CURRENT_TIMESTAMP"
+        is_primary_key: false
+        is_foreign_key: false
+        null_count: 0
+        distinct_count: 0
+        sample_values:
+
+        business_description: "Feedback creation timestamp."
+    business_role: "Human feedback on extracted results (correction, comment, error type)."
+    business_relationships:
+      - "resultfeedbacks.result_id -> extraction_results.result_id (N:1)"
+    query_hints:
+      - "Do not assume missing feedback means missing extraction; feedback collection can be inactive."
+    empty_table_is_normal: true
+  -
+    name: "rulesets"
+    row_count: 51
+    primary_key:
+      - "ruleset_id"
+    columns:
+      -
+        name: "ruleset_id"
+        type: "TEXT"
+        not_null: false
+        default: null
+        is_primary_key: true
+        is_foreign_key: false
+        null_count: 0
+        distinct_count: 51
+        sample_values:
+          - "08ddb8c4-29ea-4ca6-95b5-81f5e17b0a3d"
+          - "0c27b65a-2f17-4eda-8633-d550493f124c"
+          - "0e48b14d-887a-4b33-bdb1-552811bb4675"
+          - "0f4f0d92-55aa-4fea-978a-f31d0971275a"
+          - "156febdc-cedf-462f-84b5-45928f357ba5"
+        business_description: "Unique ruleset version identifier."
+      -
+        name: "description"
+        type: "TEXT"
+        not_null: false
+        default: null
+        is_primary_key: false
+        is_foreign_key: false
+        null_count: 0
+        distinct_count: 34
+        sample_values:
+          - ""
+          - "extraction V10"
+          - "extraction V11"
+          - "extraction V12"
+          - "extraction V13 (extracting DCT and the two other dditional rules)"
+        business_description: "Human-readable description of this ruleset version."
+      -
+        name: "created_at"
+        type: "TIMESTAMP"
+        not_null: false
+        default: "CURRENT_TIMESTAMP"
+        is_primary_key: false
+        is_foreign_key: false
+        null_count: 0
+        distinct_count: 44
+        sample_values:
+          - "2025-07-02 07:54:19.378377+00"
+          - "2025-07-02 08:39:42.545262+00"
+          - "2025-07-02 10:16:50.36351+00"
+          - "2025-07-07 07:53:45.254443+00"
+          - "2025-07-07 09:07:52.10282+00"
+        business_description: "Ruleset creation timestamp."
+    business_role: "Versioned groups of rules shared by extraction and validation logic."
+    business_relationships:
+      - "rulesets.ruleset_id <- field_rules.ruleset_id (1:N)"
+      - "rulesets.ruleset_id <- validation_rules.ruleset_id (1:N)"
+  -
+    name: "sections"
+    row_count: 1071
+    primary_key:
+      - "section_id"
+    columns:
+      -
+        name: "section_id"
+        type: "TEXT"
+        not_null: false
+        default: null
+        is_primary_key: true
+        is_foreign_key: false
+        null_count: 0
+        distinct_count: 1071
+        sample_values:
+          - "0005f261-4946-44ac-95f9-edb3e3d54924"
+          - "0024a981-d238-4279-8a44-5e7fde6200fb"
+          - "00348e7b-f1c9-409d-b904-a4259b1ed80c"
+          - "003fd177-62c0-4d39-a831-1b3592a51e7c"
+          - "00574585-e8e8-4d6c-a5bd-d37a707d2b84"
+        business_description: "Unique section identifier."
+      -
+        name: "document_id"
+        type: "TEXT"
+        not_null: true
+        default: null
+        is_primary_key: false
+        is_foreign_key: true
+        null_count: 0
+        distinct_count: 119
+        sample_values:
+          - "02975f2f-8329-46fa-ba21-a97ed081a015"
+          - "057ffefd-a1f5-4135-bf27-410c3c492d12"
+          - "0a4dd2e7-d981-43e5-b17d-fa8eb2d4486d"
+          - "13be058e-845c-4800-b1b6-75493b21eae8"
+          - "1ba5f976-dcda-4b12-b235-1da69cbd488c"
+        references:
+          to_table: "documents"
+          to_column: "document_id"
+        business_description: "Source document id."
+      -
+        name: "created_at"
+        type: "TIMESTAMP"
+        not_null: false
+        default: "CURRENT_TIMESTAMP"
+        is_primary_key: false
+        is_foreign_key: false
+        null_count: 0
+        distinct_count: 1071
+        sample_values:
+          - "2025-07-22 18:55:23.703681+00"
+          - "2025-07-22 18:55:24.699697+00"
+          - "2025-07-22 18:55:25.702448+00"
+          - "2025-07-22 18:55:26.782321+00"
+          - "2025-07-22 18:55:27.629883+00"
+        business_description: "Section creation timestamp."
+      -
+        name: "section_value"
+        type: "TEXT"
+        not_null: true
+        default: null
+        is_primary_key: false
+        is_foreign_key: false
+        null_count: 0
+        distinct_count: 370
+        sample_values:
+          - "{'\"tables'\": [{'\"Chapitre'\": ['\"'\", '\"013'\", '\"6419'\", '\"6459'\", '\"016'\", '\"017'\", '\"70'\", '\"70328'\", '\"70388'\", '\"70612'\", '\"7062'\", '\"70632'\", '\"706888'\", '\"7078'\", '\"708421'\", '\"70845'\", '\"70848'\", '\"70875'\", '\"70878'\", '\"7088'\", '\"73'\", '\"73211'\", '\"732221'\", '\"7351'\", '\"7352'\", '\"731'\", '\"73111'\", '\"73113'\", '\"73114'\", '\"73118'\", '\"73133'\"], '\"Intitulé'\": ['\"TOTAL'\", '\"Atténuations de charges (4)'\", '\"Remboursements rémunérations personnel'\", '\"Remb.charges sécu.sociale et prévoyance'\", '\"APA'\", '\"RSA / Régularisations de RMI'\", '\"Prod. services, domaine, ventes diverses'\", '\"Autres droits stationnement et location'\", '\"Autres redevances et recettes diverses'\", '\"Redevance spéciale enlèvement ordures'\", '\"Redevances services à caractère culturel'\", '\"Redevances services à caractère loisir'\", '\"Autres'\", '\"Autres marchandises'\", '\"Mise dispo pers. BA/régie sans ps.morale'\", '\"Mise à dispo personnel communes du GFP'\", '\"Mise à dispo personnel autres organismes'\", '\"Remb. frais par les communes du GFP'\", '\"Remb. frais par des tiers'\", '\"Produits activités annexes (abonnements)'\", '\"Impôts et taxes (sauf 731)'\", '\"Attribution de compensation'\", '\"Fonds péréquation ress. com. et intercom'\", '\"Fract° compens. TFPB, taxe rés. princi.'\", '\"Fraction compensatoire de la CVAE'\", '\"Fiscalité locale'\", '\"Impôts directs locaux'\", '\"Taxe sur les surfaces commerciales'\", '\"Imposition forf. sur entrep. réseaux'\", '\"Autres contributions directes'\", '\"Taxe enlèvement ordures ménagères et ass'\"], '\"Produits rattachés'\": [410000.0, 0.0, 0.0, 0.0, 0.0, 0.0, 283000.0, 0.0, 0.0, 220000.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 11000.0, 0.0, 52000.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], '\"Crédits sans emploi (3)'\": [337132.24, -82647.28, -74136.28, -8511.0, 0.0, 0.0, 21244.45, -8045.15, 16263.53, -36409.35, -3395.77, 19825.73, 5720.3, -2986.93, 38487.3, -2024.06, -10135.71, -2259.6, -7559.48, 13763.64, 444968.0, -532.0, -42037.0, 379799.0, 107738.0, 74249.1, -23432.0, 176323.0, -16423.0, -81546.0, -22001.0], '\"Réalisations Titres émis'\": [34151867.76, 182647.28, 174136.28, 8511.0, 0.0, 0.0, 2494755.55, 18045.15, 183736.47, 216409.35, 4395.77, 490174.27, 24279.7, 11986.93, 223512.7, 794024.06, 129135.71, -3740.4, 260559.48, 142236.36, 11641032.0, 548532.0, 553037.0, 8356201.0, 2183262.0, 15174750.9, 5797432.0, 514677.0, 317423.0, 293546.0, 7253001.0], '\"Restes à réaliser au 31/12 (2)'\": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], '\"Crédits ouverts (BP + DM + RAR N-1)'\": [34899000.0, 100000.0, 100000.0, 0.0, 0.0, 0.0, 2799000.0, 10000.0, 200000.0, 400000.0, 1000.0, 510000.0, 30000.0, 9000.0, 262000.0, 792000.0, 119000.0, 5000.0, 253000.0, 208000.0, 12086000.0, 548000.0, 511000.0, 8736000.0, 2291000.0, 15249000.0, 5774000.0, 691000.0, 301000.0, 212000.0, 7231000.0]}, {'\"Chapitre'\": ['\"73136'\", '\"731721'\", '\"74'\", '\"741124'\", '\"741126'\", '\"744'\", '\"74718'\", '\"7472'\", '\"7473'\", '\"74772'\", '\"747818'\", '\"747888'\", '\"74832'\", '\"748388'\", '\"75'\", '\"752'\", '\"755'\", '\"75888'\", '\"Total des recettes de gestion des services'\", '\"76'\", '\"77'\", '\"775'\", '\"78'\", '\"Total des recettes réelles'\", '\"042'\", '\"722'\", '\"7761'\", '\"043'\", '\"Total des recettes d''ordre'\"], '\"Intitulé'\": ['\"Taxe gest° milieux aqua, prévent° inond'\", '\"Taxe de séjour'\", '\"Dotations et participations (4)'\", '\"Dotation d''intercommunalité des EPCI'\", '\"Dotation de compensation des EPCI'\", '\"FCTVA'\", '\"Autres participations Etat'\", '\"Participation régions'\", '\"Participation départements'\", '\"Participation FEDER'\", '\"Autres'\", '\"Autres'\", '\"Etat - Compensation CET (CVAE et CFE)'\", '\"Autres'\", '\"Autres produits de gestion courante (4)'\", '\"Revenus des immeubles'\", '\"Dédits et pénalités perçus'\", '\"Autres'\", '\"'\", '\"Produits financiers'\", '\"Produits spécifiques (4)'\", '\"Produits des cessions d''immobilisations'\", '\"Reprises amort., dépréciations, prov. (semi-budgétaires) (4)'\", '\"'\", '\"Opérations ordre transf. entre sections (5) (6)'\", '\"Immobilisations corporelles'\", '\"Différences sur réalisations (négatives)'\", '\"Opérations ordre intérieur de la section (5) (7)'\", '\"'\"], '\"Produits rattachés'\": [0.0, 0.0, 127000.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 127000.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 410000.0, 0.0, 0.0, 0.0, 0.0, 410000.0, 0.0, 0.0, 0.0, 0.0, 0.0], '\"Crédits sans emploi (3)'\": [5942.0, 35386.1, -55473.57, -1953.0, 1717.0, -23090.64, 5124.95, -13937.64, 38270.39, -10000.0, 19000.0, -70694.63, -290.0, 380.0, -17396.54, 1775.28, -636.12, -18535.7, 384944.16, 0.0, -13200.0, -13200.0, 0.0, 371744.16, -34611.92, 5288.08, -39900.0, 0.0, -34611.92], '\"Réalisations Titres émis'\": [794058.0, 204613.9, 4454473.57, 510953.0, 1672283.0, 33090.64, 875.05, 13937.64, 59729.61, 10000.0, 0.0, 1395694.63, 751290.0, 6620.0, 136396.54, 29224.72, 1636.12, 105535.7, 34084055.84, 0.0, 13200.0, 13200.0, 0.0, 34097255.84, 54611.92, 14711.92, 39900.0, 0.0, 54611.92], '\"Restes à réaliser au 31/12 (2)'\": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], '\"Crédits ouverts (BP + DM + RAR N-1)'\": [800000.0, 240000.0, 4526000.0, 509000.0, 1674000.0, 10000.0, 6000.0, 0.0, 98000.0, 0.0, 19000.0, 1452000.0, 751000.0, 7000.0, 119000.0, 31000.0, 1000.0, 87000.0, 34879000.0, 0.0, 0.0, 0.0, 0.0, 34879000.0, 20000.0, 20000.0, 0.0, 0.0, 20000.0]}, {'\"Valeur'\": [0.0, 0.0, 0.0], '\"Information'\": ['\"Montant brut'\", '\"Compensation'\", '\"Montant net'\"]}, {'\"Valeur'\": [0.0, 0.0, 0.0], '\"Information'\": ['\"Montant des ICNE de l''exercice'\", '\"Montant des ICNE de l''exercice N-1'\", '\"= Différence ICNE N – ICNE N-1'\"]}], '\"page_number'\": 38, '\"section_header'\": ['\"III – ADOPTION DU CA'\", '\"SECTION DE FONCTIONNEMENT – RECETTES – DETAIL PAR ARTICLE'\"]}"
+          - "{'\"tables'\": [{'\"Chapitre'\": ['\"10'\", '\"13'\", '\"15'\", '\"16'\", '\"18'\", '\"19'\", '\"20'\", '\"204'\", '\"21'\", '\"22'\", '\"23'\", '\"018'\", '\"26'\", '\"27'\", '\"28'\", '\"29'\", '\"39'\", '\"3…'\", '\"45'\", '\"481'\", '\"49'\", '\"59'\", '\"Recettes d''investissement – Total'\"], '\"Intitulé'\": ['\"Dotations, fonds divers et réserves (sauf 1068)'\", '\"Subventions d''investissement (reçues) (3)'\", '\"Provisions pour risques et charges (4)'\", '\"Emprunts et dettes assimilées (sauf 1688 non budgétaire)'\", '\"Cpte de liaison : affectation (BA,régie)'\", '\"Neutral. et régul. d''opérations'\", '\"Immobilisations incorporelles (sauf 204) (3)'\", '\"Subventions d''équipement versées (3) (9)'\", '\"Immobilisations corporelles (3)'\", '\"Immobilisations reçues en affectation (3)'\", '\"Immobilisations en cours (sauf 2324) (3)'\", '\"RSA'\", '\"Participations et créances rattachées'\", '\"Autres immobilisations financières (3)'\", '\"Amortissement des immobilisations'\", '\"Dépréciations des immobilisations (4)'\", '\"Dépréciation des stocks et en-cours (4)'\", '\"Stocks et en-cours'\", '\"Chapitres d''opérations pour compte de tiers (5)'\", '\"Charges à rép. sur plusieurs exercices'\", '\"Dépréciation des comptes de tiers (4)'\", '\"Dépréciation des comptes financiers (4)'\", '\"'\"], '\"TOTAL Réalisé'\": [499697.01, 3950021.69, 0.0, 2003211.0, 0.0, 0.0, 0.0, 0.0, 53100.0, 0.0, 0.0, 0.0, 0.0, 37500.0, 1744002.85, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 8287532.55], '\"Opérations d''ordre (2)'\": [0.0, 904875.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 53100.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1744002.85, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 2701977.85], '\"Opérations réelles (1)'\": [499697.01, 3045146.69, 0.0, 2003211.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 37500.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 5585554.7]}, {'\"Valeur'\": [583042.15], '\"Information'\": ['\"1068 Excédent de fonctionnement capitalisé N-1'\"]}, {'\"Valeur'\": [1799868.34], '\"Information'\": ['\"Pour information R001 Solde d''exécution positif reporté'\"]}, {'\"Chapitre'\": ['\"013'\", '\"016'\", '\"017'\", '\"60'\", '\"70'\", '\"71'\", '\"72'\", '\"73'\", '\"731'\", '\"74'\", '\"75'\", '\"76'\", '\"77'\", '\"78'\", '\"79'\", '\"Recettes de fonctionnement – Total'\"], '\"Intitulé'\": ['\"Atténuations de charges (8)'\", '\"APA'\", '\"RSA / Régularisations de RMI'\", '\"Achats et variation des stocks'\", '\"Prod. services, domaine, ventes diverses'\", '\"Production stockée (ou déstockage)'\", '\"Production immobilisée'\", '\"Impôts et taxes (sauf 731)'\", '\"Fiscalité locale'\", '\"Dotations et participations (8)'\", '\"Autres produits de gestion courante (8)'\", '\"Produits financiers'\", '\"Produits spécifiques (8)'\", '\"Reprise sur amortissements et provisions (8)'\", '\"Transferts de charges'\", '\"'\"], '\"TOTAL Réalisé'\": [182647.28, 0.0, 0.0, 0.0, 2777755.55, 0.0, 14711.92, 11641032.0, 15174750.9, 4581473.57, 136396.54, 0.0, 53100.0, 0.0, 0.0, 34561867.76], '\"Opérations d''ordre (2)'\": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 14711.92, 0.0, 0.0, 0.0, 0.0, 0.0, 39900.0, 0.0, 0.0, 54611.92], '\"Opérations réelles (1)'\": [182647.28, 0.0, 0.0, 0.0, 2777755.55, 0.0, 0.0, 11641032.0, 15174750.9, 4581473.57, 136396.54, 0.0, 13200.0, 0.0, 0.0, 34507255.84]}, {'\"Valeur'\": [3712116.05], '\"Information'\": ['\"Pour information R002 Résultat positif reporté'\"]}], '\"page_number'\": 14, '\"section_header'\": ['\"II – PRESENTATION GENERALE'\", '\"BALANCE GENERALE – RECETTES'\"]}"
+          - "{'\"tables'\": [{'\"Chapitre'\": ['\"TOTAL'\", '\"018'\", '\"13'\", '\"1321'\", '\"1322'\", '\"1323'\", '\"13246'\", '\"13256'\", '\"1328'\", '\"13461'\", '\"13462'\", '\"16'\", '\"1641'\", '\"20'\", '\"204'\", '\"21'\", '\"22'\", '\"23'\", '\"Total des recettes d''équipement'\", '\"10'\", '\"10222'\", '\"10226'\", '\"1068'\", '\"138'\", '\"16'\", '\"165'\", '\"18'\", '\"26'\", '\"27'\", '\"2764'\", '\"024'\", '\"Total des recettes financières'\"], '\"Intitulé'\": ['\"'\", '\"RSA'\", '\"Subventions d''investissement (hors 138)'\", '\"Subv. non transf. Etat, établ. nationaux'\", '\"Subv. non transf. Régions'\", '\"Subv. non transf. Départements'\", '\"Attributions compensation investissement'\", '\"Attributions compensation investissement'\", '\"Autres subventions d''équip. non transf.'\", '\"Dot. équip.territoires ruraux non transf'\", '\"Dotation de soutien à l''invest local'\", '\"Emprunts et dettes assimilées (hors 1688 non budgétaire) (4)'\", '\"Emprunts en euros'\", '\"Immobilisations incorporelles (sauf 204) (5)'\", '\"Subventions d''équipement versées (5) (11)'\", '\"Immobilisations corporelles (5)'\", '\"Immobilisations reçues en affectation (5)'\", '\"Immobilisations en cours (sauf 2324) (5)'\", '\"'\", '\"Dotations, fonds divers et réserves'\", '\"FCTVA'\", '\"Taxe d''aménagement'\", '\"Excédents de fonctionnement capitalisés'\", '\"Autres subventions invest. non transf.'\", '\"Emprunts et dettes assimilées (16449, 165 et 166)'\", '\"Dépôts et cautionnements reçus'\", '\"Cpte de liaison : affectation (BA,régie)'\", '\"Participations et créances rattachées'\", '\"Autres immobilisations financières'\", '\"Créances/particuliers, pers. droit privé'\", '\"Produits des cessions d''immobilisations'\", '\"'\"], '\"Crédits sans emploi (3)'\": [5777765.78, 0.0, 72651.64, 145442.71, 75994.88, 0.0, -632883.0, 632000.0, 13000.0, -186348.8, 25445.85, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 72651.64, 392802.99, 393954.99, -1152.0, 0.0, 0.0, 6789.0, 6789.0, 0.0, 0.0, -500.0, -500.0, 0.0, 470091.99], '\"Réalisations Titres émis'\": [8870574.7, 0.0, 3045146.69, 399526.29, 659217.15, 0.0, 1176883.0, 0.0, 436000.0, 186348.8, 187171.45, 2000000.0, 2000000.0, 0.0, 0.0, 0.0, 0.0, 0.0, 5045146.69, 1082739.16, 488545.01, 11152.0, 583042.15, 0.0, 3211.0, 3211.0, 0.0, 0.0, 37500.0, 37500.0, 0.0, 1123450.16], '\"Restes à réaliser au 31/12 (2)'\": [2762418.97, 0.0, 762418.97, 333031.0, 4387.97, 25000.0, 0.0, 0.0, 250000.0, 0.0, 150000.0, 2000000.0, 2000000.0, 0.0, 0.0, 0.0, 0.0, 0.0, 2762418.97, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], '\"Crédits ouverts (BP + DM + RAR N-1)'\": [17410759.45, 0.0, 3880217.3, 878000.0, 739600.0, 25000.0, 544000.0, 632000.0, 699000.0, 0.0, 362617.3, 4000000.0, 4000000.0, 0.0, 0.0, 0.0, 0.0, 0.0, 7880217.3, 1475542.15, 882500.0, 10000.0, 583042.15, 0.0, 10000.0, 10000.0, 0.0, 0.0, 37000.0, 37000.0, 71000.0, 1593542.15]}, {'\"Chapitre'\": ['\"45'\", '\"Total des recettes réelles'\", '\"021'\", '\"040'\", '\"215731'\", '\"2802'\", '\"28031'\", '\"2804113'\", '\"2804132'\", '\"28041412'\", '\"28041582'\", '\"2804183'\", '\"280422'\", '\"280423'\", '\"2805'\", '\"28128'\", '\"281318'\", '\"281351'\", '\"28151'\", '\"281538'\", '\"281568'\", '\"2815731'\", '\"2815738'\", '\"28158'\", '\"28162'\", '\"28181'\", '\"281828'\", '\"281838'\", '\"281848'\", '\"28185'\", '\"28188'\", '\"041'\", '\"13241'\", '\"238'\", '\"Total des recettes d''ordre'\"], '\"Intitulé'\": ['\"Chapitres d''opérations pour compte de tiers (6)'\", '\"'\", '\"Virement de la section de fonctionnement'\", '\"Opérations ordre transf. entre sections (7) (8) (9)'\", '\"Matériel roulant'\", '\"Frais liés à la réalisation de document'\", '\"Frais d''études'\", '\"Subv. Etat : Projet infrastructure'\", '\"Subv. Dpt : Bâtiments, installations'\", '\"Subv.Cne GFP : Bâtiments, installations'\", '\"Autres grpts - Bâtiments et installat°'\", '\"Autres org pub-Proj infrastruct int nat.'\", '\"Privé - Bâtiments et installations'\", '\"Privé : Projet infrastructure'\", '\"Licences, logiciels, droits similaires'\", '\"Autres aménagements de terrains'\", '\"Autres bâtiments publics'\", '\"Bâtiments publics'\", '\"Réseaux de voirie'\", '\"Autres réseaux'\", '\"Autre matériel, outillage incendie'\", '\"Matériel roulant'\", '\"Autre matériel et outillage de voirie'\", '\"Autres inst.,matériel,outil. techniques'\", '\"Biens historiques et culturels mobiliers'\", '\"Installations générales, aménagt divers'\", '\"Autres matériels de transport'\", '\"Autre matériel informatique'\", '\"Autres matériels de bureau et mobiliers'\", '\"Matériel de téléphonie'\", '\"Autres immo. corporelles'\", '\"Opérations patrimoniales (10)'\", '\"Subv. non transf. Commune membre du GFP'\", '\"Avances commandes immo corporelles'\", '\"'\"], '\"Crédits sans emploi (3)'\": [0.0, 542743.63, 0.0, 202897.15, -53100.0, -473.0, -1997.0, -368.0, -200275.61, -147536.0, -61956.0, -6156.0, -26187.0, -22231.0, -69216.9, -4511.0, -91786.0, -3347.0, -130704.0, -5878.0, -99.0, -95636.43, -2621.0, -1570.8, -1359.0, -4215.1, -107243.0, 1895601.38, -24089.42, -5756.0, -624391.97, 150125.0, 125.0, 150000.0, 5235022.15], '\"Réalisations Titres émis'\": [0.0, 6168596.85, 0.0, 1797102.85, 53100.0, 473.0, 1997.0, 368.0, 200275.61, 147536.0, 61956.0, 6156.0, 26187.0, 22231.0, 69216.9, 4511.0, 91786.0, 3347.0, 130704.0, 5878.0, 99.0, 95636.43, 2621.0, 1570.8, 1359.0, 4215.1, 107243.0, 104398.62, 24089.42, 5756.0, 624391.97, 904875.0, 904875.0, 0.0, 2701977.85], '\"Restes à réaliser au 31/12 (2)'\": [0.0, 2762418.97, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], '\"Crédits ouverts (BP + DM + RAR N-1)'\": [0.0, 9473759.45, 4882000.0, 2000000.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 2000000.0, 0.0, 0.0, 0.0, 1055000.0, 905000.0, 150000.0, 7937000.0]}], '\"page_number'\": 26, '\"section_header'\": ['\"III – ADOPTION DU CA'\", '\"SECTION D’INVESTISSEMENT – RECETTES – DETAIL PAR ARTICLE'\"]}"
+          - "{'\"tables'\": [{'\"Chapitre'\": ['\"TOTAL'\", '\"018'\", '\"20'\", '\"202'\", '\"2031'\", '\"2051'\", '\"2088'\", '\"204'\", '\"204113'\", '\"2041412'\", '\"20415332'\", '\"2041582'\", '\"20422'\", '\"21'\", '\"2111'\", '\"2118'\", '\"2121'\", '\"2128'\", '\"2151'\", '\"21534'\", '\"21538'\", '\"215731'\", '\"2181'\", '\"21828'\", '\"21838'\", '\"21848'\", '\"2185'\", '\"2188'\", '\"22'\", '\"23'\"], '\"Intitulé'\": ['\"'\", '\"RSA'\", '\"Immobilisations incorporelles (sauf 204)'\", '\"Frais réalisation documents urbanisme'\", '\"Frais d''études'\", '\"Concessions, droits similaires'\", '\"Autres immobilisations incorporelles'\", '\"Subventions d''équipement versées (9)'\", '\"Subv. Etat : Projet infrastructure'\", '\"Subv. Cne GFP : Bâtiments, installations'\", '\"ADM : Bâtiments, installations'\", '\"Autres grpts - Bâtiments et installat°'\", '\"Privé : Bâtiments, installations'\", '\"Immobilisations corporelles'\", '\"Terrains nus'\", '\"Autres terrains'\", '\"Plantations d''arbres et d''arbustes'\", '\"Autres agencements et aménagements'\", '\"Réseaux de voirie'\", '\"Réseaux d''électrification'\", '\"Autres réseaux'\", '\"Matériel roulant'\", '\"Install. générales, agencements'\", '\"Autres matériels de transport'\", '\"Autre matériel informatique'\", '\"Autres matériels de bureau et mobiliers'\", '\"Matériel de téléphonie'\", '\"Autres immobilisations corporelles'\", '\"Immobilisations reçues en affectation'\", '\"Immobilisations en cours (sauf 2324)'\"], '\"Crédits sans emploi (3)'\": [6618696.87, 0.0, 31599.79, 19045.0, 13623.87, -1383.08, 314.0, 500585.65, 0.0, 34686.71, 30000.0, 410099.94, 25799.0, 175703.4, -16826.27, 78000.0, -1200.0, -15134.4, 4298.56, -24950.12, 13356.21, 1532.0, -7658.78, 15218.64, -50766.11, 8048.31, -171.0, 171956.36, 0.0, 5787184.18], '\"Réalisations Mandats émis'\": [4840120.49, 0.0, 44892.0, 2730.0, 23682.0, 7020.0, 11460.0, 1208583.2, 34000.0, 58482.14, 660000.0, 354900.06, 101201.0, 1473497.48, 21554.27, 0.0, 0.0, 20109.43, 120870.16, 26281.35, 376579.88, 132468.0, 7658.78, 111663.76, 113115.51, 19335.97, 1755.0, 522105.37, 0.0, 380771.66], '\"Restes à réaliser au 31/12 (2)'\": [7751810.43, 0.0, 73146.08, 42585.0, 6348.0, 16527.08, 7686.0, 1809157.41, 956719.36, 840438.05, 0.0, 0.0, 12000.0, 1553992.49, 50272.0, 0.0, 1200.0, 3960.0, 769724.06, 0.0, 374605.95, 0.0, 0.0, 171463.75, 98599.61, 11491.84, 0.0, 72675.28, 0.0, 4315514.45], '\"Crédits ouverts (BP + DM + RAR N-1)'\": [19210627.79, 0.0, 149637.87, 64360.0, 43653.87, 22164.0, 19460.0, 3518326.26, 990719.36, 933606.9, 690000.0, 765000.0, 139000.0, 3203193.37, 55000.0, 78000.0, 0.0, 8935.03, 894892.78, 1331.23, 764542.04, 134000.0, 0.0, 298346.15, 160949.01, 38876.12, 1584.0, 766737.01, 0.0, 10483470.29], '\"Pour information, réalisations gérées hors AP'\": [4776080.31, 0.0, 44892.0, 2730.0, 23682.0, 7020.0, 11460.0, 1208583.2, 34000.0, 58482.14, 660000.0, 354900.06, 101201.0, 1473497.48, 21554.27, 0.0, 0.0, 20109.43, 120870.16, 26281.35, 376579.88, 132468.0, 7658.78, 111663.76, 113115.51, 19335.97, 1755.0, 522105.37, 0.0, 316731.48], '\"Pour information, réalisations gérées dans le cadre d''une AP'\": [64040.18, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 64040.18]}, {'\"Chapitre'\": ['\"2312'\", '\"2313'\", '\"2316'\", '\"238'\", '\"'\", '\"Total des dépenses d''équipement'\", '\"10'\", '\"1021'\", '\"13'\", '\"16'\", '\"1641'\", '\"165'\", '\"18'\", '\"26'\", '\"27'\", '\"Total des dépenses financières'\", '\"45…'\", '\"Total des dépenses réelles'\", '\"040'\", '\"'\", '\"192'\", '\"'\", '\"2313'\", '\"041'\", '\"2111'\", '\"2313'\", '\"Total des dépenses d''ordre'\"], '\"Intitulé'\": ['\"Agencements et aménagements de terrains'\", '\"Constructions'\", '\"Restaur. des biens histo. et culturels'\", '\"Avances commandes immo corporelles'\", '\"Total des opérations d''équipement (4)'\", '\"'\", '\"Dotations, fonds divers et réserves'\", '\"Dotation'\", '\"Subventions d''investissement'\", '\"Emprunts et dettes assimilées (sauf le 1688 non budgétaire)'\", '\"Emprunts en euros'\", '\"Dépôts et cautionnements reçus'\", '\"Cpte de liaison : affectation (BA,régie)'\", '\"Participations et créances rattachées'\", '\"Autres immobilisations financières'\", '\"'\", '\"Opérations pour compte de tiers (5)'\", '\"'\", '\"Opérations ordre transf. entre sections (6)'\", '\"Reprise sur autofinancement antérieur'\", '\"Plus ou moins-values sur cession immo.'\", '\"Charges transférées (7)'\", '\"Constructions'\", '\"Opérations patrimoniales (8)'\", '\"Terrains nus'\", '\"Constructions'\", '\"'\"], '\"Crédits sans emploi (3)'\": [-6444.32, 5793541.3, 87.2, 0.0, 0.0, 6495073.02, 0.0, 0.0, 0.0, 8110.77, 410.77, 7700.0, 0.0, 0.0, 0.0, 8110.77, 0.0, 6503183.79, -34611.92, -39900.0, -39900.0, 5288.08, 5288.08, 150125.0, 125.0, 150000.0, 115513.08], '\"Réalisations Mandats émis'\": [132444.32, 248327.34, 0.0, 0.0, 0.0, 3107744.34, 321000.0, 321000.0, 0.0, 451889.23, 449589.23, 2300.0, 0.0, 0.0, 0.0, 772889.23, 0.0, 3880633.57, 54611.92, 39900.0, 39900.0, 14711.92, 14711.92, 904875.0, 904875.0, 0.0, 959486.92], '\"Restes à réaliser au 31/12 (2)'\": [24000.0, 4144912.45, 26414.8, 120187.2, 0.0, 7751810.43, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 7751810.43, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], '\"Crédits ouverts (BP + DM + RAR N-1)'\": [150000.0, 10186781.09, 26502.0, 120187.2, 0.0, 17354627.79, 321000.0, 321000.0, 0.0, 460000.0, 450000.0, 10000.0, 0.0, 0.0, 0.0, 781000.0, 0.0, 18135627.79, 20000.0, 0.0, 0.0, 20000.0, 20000.0, 1055000.0, 905000.0, 150000.0, 1075000.0], '\"Pour information, réalisations gérées hors AP'\": [132444.32, 184287.16, 0.0, 0.0, 0.0, 3043704.16, 321000.0, 321000.0, 0.0, 451889.23, 449589.23, 2300.0, 0.0, 0.0, 0.0, 772889.23, 0.0, 3816593.39, 54611.92, 39900.0, 39900.0, 14711.92, 14711.92, 904875.0, 904875.0, 0.0, 959486.92], '\"Pour information, réalisations gérées dans le cadre d''une AP'\": [0.0, 64040.18, 0.0, 0.0, 0.0, 64040.18, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 64040.18, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0]}], '\"page_number'\": 20, '\"section_header'\": ['\"III – ADOPTION DU CA'\", '\"SECTION D’INVESTISSEMENT – DEPENSES – DETAIL PAR ARTICLE'\"]}"
+          - "{'\"tables'\": [{'\"Capital'\": [0.0, 449589.24, 449589.24, 33333.33, 26545.49, 97603.05, 40782.55, 35497.12, 35470.56, 8220.51, 60684.77, 18225.93, 18225.93, 75000.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], '\"Chapitre'\": ['\"163 Emprunts obligataires (Total)'\", '\"164 Emprunts auprèsdes établissements financiers(Total)'\", '\"1641 Emprunts en euros (total)'\", '\"0046N7015PR (0035)'\", '\"1G770010PR (0012)'\", '\"2765405 (0009)'\", '\"2RFWP018PR (0005)'\", '\"40351 (0004)'\", '\"4255235 (0003)'\", '\"8148124 (0014)'\", '\"8390301 (0008)'\", '\"A1708652 (0033)'\", '\"A17160DB (0034)'\", '\"DD20596388 (0016)'\", '\"MIN545770EUR (0017)'\", '\"1643 Emprunts en devises (total)'\", '\"16441 Emprunts assortis d''une option de tirage sur ligne de trésorerie (total) (10)'\", '\"165 Dépôts et cautionnements reçus (Total)'\", '\"167 Emprunts et dettes assortis de conditions particulières (Total)'\", '\"1671 Avances consolidées du Trésor (total)'\", '\"1672 Emprunts sur comptes spéciaux (total)'\", '\"1675 Dettes pour METP et PPP (total)'\"], '\"Intitulé'\": ['\"'\", '\"'\", '\"'\", '\"N'\", '\"N'\", '\"N'\", '\"N'\", '\"N'\", '\"N'\", '\"N'\", '\"N'\", '\"N'\", '\"N'\", '\"N'\", '\"N'\", '\"'\", '\"'\", '\"'\", '\"'\", '\"'\", '\"'\", '\"'\"], '\"Index (14)'\": ['\"'\", '\"'\", '\"'\", '\"FIXE'\", '\"FIXE'\", '\"FIXE'\", '\"FIXE'\", '\"FIXE'\", '\"FIXE'\", '\"FIXE'\", '\"FIXE'\", '\"FIXE'\", '\"FIXE'\", '\"FIXE'\", '\"FIXE'\", '\"'\", '\"'\", '\"'\", '\"'\", '\"'\", '\"'\", '\"'\"], '\"Montant couvert'\": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], '\"Type de taux (13)'\": ['\"'\", '\"'\", '\"'\", '\"F'\", '\"F'\", '\"F'\", '\"F'\", '\"F'\", '\"F'\", '\"F'\", '\"F'\", '\"F'\", '\"F'\", '\"F'\", '\"F'\", '\"'\", '\"'\", '\"'\", '\"'\", '\"'\", '\"'\", '\"'\"], '\"ICNE de l''exercice'\": [0.0, 37697.22, 37697.22, 3411.09, 30.61, 431.84, 4386.78, 5240.25, 3975.03, 719.79, 1978.37, 2811.57, 2762.14, 219.75, 11730.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], '\"Charges d''intérêt (16)'\": [0.0, 165126.11, 165126.11, 18600.85, 6280.75, 24562.35, 9170.53, 9159.55, 8998.32, 4149.17, 12227.31, 15662.11, 15386.73, 40928.44, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], '\"Capital restant dû au 31/12/N'\": [0.0, 6028508.65, 6028508.65, 400000.24, 119260.57, 578351.12, 180727.78, 199363.23, 198860.57, 79335.42, 268332.64, 327138.54, 327138.54, 1350000.0, 2000000.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], '\"Durée résiduelle (en années)'\": ['\"'\", '\"'\", '\"'\", '\"11.81'\", '\"4.00'\", '\"5.24'\", '\"3.42'\", '\"4.33'\", '\"4.49'\", '\"7.57'\", '\"3.82'\", '\"13.57'\", '\"13.57'\", '\"18.00'\", '\"19.92'\", '\"'\", '\"'\", '\"'\", '\"'\", '\"'\", '\"'\", '\"'\"], '\"Intérêts perçus (le cas échéant) (17)'\": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], '\"Niveau de taux d''intérêt au 31/12/N (15)'\": ['\"'\", '\"'\", '\"'\", '\"4.420'\", '\"4.620'\", '\"3.840'\", '\"4.140'\", '\"3.900'\", '\"3.840'\", '\"4.910'\", '\"3.990'\", '\"4.550'\", '\"4.470'\", '\"2.930'\", '\"3.910'\", '\"'\", '\"'\", '\"'\", '\"'\", '\"'\", '\"'\", '\"'\"], '\"Catégorie d''emprunt après couverture éventuelle (12)'\": ['\"'\", '\"'\", '\"'\", '\"A-1'\", '\"A-1'\", '\"A-1'\", '\"A-1'\", '\"A-1'\", '\"A-1'\", '\"A-1'\", '\"A-1'\", '\"A-1'\", '\"A-1'\", '\"A-1'\", '\"A-1'\", '\"'\", '\"'\", '\"'\", '\"'\", '\"'\", '\"'\", '\"'\"]}, {'\"Capital'\": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 449589.24], '\"Chapitre'\": ['\"1676 Dettes envers locataires-acquéreurs (total)'\", '\"1678 Autres emprunts et dettes (total)'\", '\"168 Emprunts et dettes assimilés (Total)'\", '\"1681 Autres emprunts (total)'\", '\"1682 Bons à moyen terme négociables (total)'\", '\"1687 Autres dettes (total)'\", '\"Total général'\"], '\"Intitulé'\": ['\"'\", '\"'\", '\"'\", '\"'\", '\"'\", '\"'\", '\"'\"], '\"Index (14)'\": ['\"'\", '\"'\", '\"'\", '\"'\", '\"'\", '\"'\", '\"'\"], '\"Montant couvert'\": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], '\"Type de taux (13)'\": ['\"'\", '\"'\", '\"'\", '\"'\", '\"'\", '\"'\", '\"'\"], '\"ICNE de l''exercice'\": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 37697.22], '\"Charges d''intérêt (16)'\": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 165126.11], '\"Capital restant dû au 31/12/N'\": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 6028508.65], '\"Durée résiduelle (en années)'\": ['\"'\", '\"'\", '\"'\", '\"'\", '\"'\", '\"'\", '\"'\"], '\"Intérêts perçus (le cas échéant) (17)'\": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], '\"Niveau de taux d''intérêt au 31/12/N (15)'\": ['\"'\", '\"'\", '\"'\", '\"'\", '\"'\", '\"'\", '\"'\"], '\"Catégorie d''emprunt après couverture éventuelle (12)'\": ['\"'\", '\"'\", '\"'\", '\"'\", '\"'\", '\"'\", '\"'\"]}], '\"page_number'\": 129, '\"section_header'\": ['\"IV – ANNEXES'\", '\"B – ANNEXES PATRIMONIALES – ETAT DE LA DETTE – REPARTITION PAR NATURE DE DETTE'\"]}"
+        business_description: "JSON payload representing extracted table/zone."
+    business_role: "Structured sections extracted from documents, stored as JSON text."
+    business_relationships:
+      - "sections.document_id -> documents.document_id (N:1)"
+    query_hints:
+      - "No direct FK exists between sections and extraction_results even if semantically related."
+  -
+    name: "states"
+    row_count: 42859
+    primary_key:
+      - "state_id"
+    columns:
+      -
+        name: "state_id"
+        type: "TEXT"
+        not_null: false
+        default: null
+        is_primary_key: true
+        is_foreign_key: false
+        null_count: 0
+        distinct_count: 42859
+        sample_values:
+          - "0000ceb0-ce10-4347-b427-a0231cafcfc5"
+          - "0001c64a-0734-4f8c-9d15-50b6fdb4006a"
+          - "00021bfa-feb4-4226-b600-5654308f37f0"
+          - "0002574d-85da-447b-995d-74454c016018"
+          - "00028eed-3b82-49a8-bd6f-a842dac9b288"
+        business_description: "Unique state identifier."
+      -
+        name: "code"
+        type: "TEXT"
+        not_null: false
+        default: null
+        is_primary_key: false
+        is_foreign_key: false
+        null_count: 0
+        distinct_count: 6
+        sample_values:
+          - "VALIDATED"
+          - "SUCCESS"
+          - "ERROR"
+          - "REJECTED"
+          - "PROCESSING"
+        allowed_values_from_check:
+          - "PENDING"
+          - "ERROR"
+          - "SUCCESS"
+          - "PARTIAL"
+          - "PROCESSING"
+          - "VALIDATED"
+          - "REJECTED"
+        business_description: "Business/technical state code (PENDING, PROCESSING, SUCCESS, PARTIAL, ERROR, VALIDATED, REJECTED)."
+    business_role: "Shared state catalog used as enum-like reference."
+    business_relationships:
+      - "states.state_id <- documents.state_id (1:N)"
+      - "states.state_id <- extraction_runs.state_id (1:N)"
+      - "states.state_id <- extraction_results.state_id (1:N)"
+  -
+    name: "validation_rules"
+    row_count: 3494
+    primary_key:
+      - "validation_rule_id"
+    columns:
+      -
+        name: "validation_rule_id"
+        type: "TEXT"
+        not_null: false
+        default: null
+        is_primary_key: true
+        is_foreign_key: false
+        null_count: 0
+        distinct_count: 3494
+        sample_values:
+          - "00016ae6-2d27-426a-bd4d-feba693f49ed"
+          - "0019d7d6-4a7e-42fd-8563-119f5621fc1e"
+          - "0021b027-c546-475b-a292-a5ec452a6f5e"
+          - "002a0f56-3bda-4e7c-9361-6d589cd51d79"
+          - "002a642f-1462-420d-a19d-c38f2500176d"
+        business_description: "Unique validation rule identifier."
+      -
+        name: "definition"
+        type: "TEXT"
+        not_null: true
+        default: null
+        is_primary_key: false
+        is_foreign_key: false
+        null_count: 0
+        distinct_count: 267
+        sample_values:
+          - "{'\"not'\": {'\"is_equal'\": [{'\"validate'\": {'\"safir_field_id'\": '\"DF011'\"}}, {'\"sum'\": [{'\"extract'\": {'\"column'\": '\"Rattachements (c)'\", '\"identifiers'\": ['\"011'\"], '\"operation_type'\": '\"real'\", '\"section_header'\": ['\"II- Exécution budgétaire'\", '\"Dépenses de fonctionnement – Vue d’ensemble'\"]}}, {'\"extract'\": {'\"column'\": '\"Réalisations Mandats émis'\", '\"identifiers'\": ['\"011'\"], '\"operation_type'\": '\"real'\", '\"section_header'\": ['\"II- Exécution budgétaire'\", '\"Dépenses de fonctionnement – Vue d’ensemble'\"]}}]}]}}"
+          - "{'\"not'\": {'\"is_equal'\": [{'\"validate'\": {'\"safir_field_id'\": '\"DF012'\"}}, {'\"sum'\": [{'\"extract'\": {'\"column'\": '\"Rattachements (c)'\", '\"identifiers'\": ['\"012'\"], '\"operation_type'\": '\"real'\", '\"section_header'\": ['\"II- Exécution budgétaire'\", '\"Dépenses de fonctionnement – Vue d’ensemble'\"]}}, {'\"extract'\": {'\"column'\": '\"Réalisations Mandats émis'\", '\"identifiers'\": ['\"012'\"], '\"operation_type'\": '\"real'\", '\"section_header'\": ['\"II- Exécution budgétaire'\", '\"Dépenses de fonctionnement – Vue d’ensemble'\"]}}]}]}}"
+          - "{'\"not'\": {'\"is_equal'\": [{'\"validate'\": {'\"safir_field_id'\": '\"DF014'\"}}, {'\"sum'\": [{'\"extract'\": {'\"column'\": '\"Rattachements (c)'\", '\"identifiers'\": ['\"014'\"], '\"operation_type'\": '\"real'\", '\"section_header'\": ['\"II- Exécution budgétaire'\", '\"Dépenses de fonctionnement – Vue d’ensemble'\"]}}, {'\"extract'\": {'\"column'\": '\"Réalisations Mandats émis'\", '\"identifiers'\": ['\"014'\"], '\"operation_type'\": '\"real'\", '\"section_header'\": ['\"II- Exécution budgétaire'\", '\"Dépenses de fonctionnement – Vue d’ensemble'\"]}}]}]}}"
+          - "{'\"not'\": {'\"is_equal'\": [{'\"validate'\": {'\"safir_field_id'\": '\"DF65'\"}}, {'\"sum'\": [{'\"extract'\": {'\"column'\": '\"Rattachements (c)'\", '\"identifiers'\": ['\"65'\"], '\"operation_type'\": '\"real'\", '\"section_header'\": ['\"II- Exécution budgétaire'\", '\"Dépenses de fonctionnement – Vue d’ensemble'\"]}}, {'\"extract'\": {'\"column'\": '\"Réalisations Mandats émis'\", '\"identifiers'\": ['\"65'\"], '\"operation_type'\": '\"real'\", '\"section_header'\": ['\"II- Exécution budgétaire'\", '\"Dépenses de fonctionnement – Vue d’ensemble'\"]}}]}]}}"
+          - "{'\"not'\": {'\"is_equal'\": [{'\"validate'\": {'\"safir_field_id'\": '\"DF6586'\"}}, {'\"sum'\": [{'\"extract'\": {'\"column'\": '\"Rattachements (c)'\", '\"identifiers'\": ['\"6586'\"], '\"operation_type'\": '\"real'\", '\"section_header'\": ['\"II- Exécution budgétaire'\", '\"Dépenses de fonctionnement – Vue d’ensemble'\"]}}, {'\"extract'\": {'\"column'\": '\"Réalisations Mandats émis'\", '\"identifiers'\": ['\"6586'\"], '\"operation_type'\": '\"real'\", '\"section_header'\": ['\"II- Exécution budgétaire'\", '\"Dépenses de fonctionnement – Vue d’ensemble'\"]}}]}]}}"
+        business_description: "Validation logic definition (JSON text)."
+      -
+        name: "level_of_problem"
+        type: "TEXT"
+        not_null: false
+        default: null
+        is_primary_key: false
+        is_foreign_key: false
+        null_count: 0
+        distinct_count: 2
+        sample_values:
+          - "ECHEC"
+          - "ALERTE"
+        allowed_values_from_check:
+          - "ALERTE"
+          - "ECHEC"
+        business_description: "Problem severity when rule fails (ALERTE or ECHEC)."
+      -
+        name: "mask"
+        type: "TEXT"
+        not_null: false
+        default: null
+        is_primary_key: false
+        is_foreign_key: false
+        null_count: 0
+        distinct_count: 4
+        sample_values:
+          - "M57_CFU"
+          - "M57_CA"
+          - "M57"
+          - "M4_CFU"
+        allowed_values_from_check:
+          - "M57_CA"
+          - "M57_CFU"
+          - "M4_CA"
+          - "M4_CFU"
+          - "M57"
+          - "M4"
+        business_description: "Document mask/type targeted by the rule."
+      -
+        name: "ruleset_id"
+        type: "TEXT"
+        not_null: true
+        default: null
+        is_primary_key: false
+        is_foreign_key: true
+        null_count: 0
+        distinct_count: 22
+        sample_values:
+          - "4ec9aadd-a692-4673-8eb0-185d8496e02b"
+          - "634fc563-f214-400d-ae77-30d20fcb13f3"
+          - "0e48b14d-887a-4b33-bdb1-552811bb4675"
+          - "156febdc-cedf-462f-84b5-45928f357ba5"
+          - "394ef0b7-970c-4acd-bb32-8b613e8f8e36"
+        references:
+          to_table: "rulesets"
+          to_column: "ruleset_id"
+        business_description: "Ruleset version for this validation rule."
+      -
+        name: "message_if_problem"
+        type: "TEXT"
+        not_null: false
+        default: null
+        is_primary_key: false
+        is_foreign_key: false
+        null_count: 0
+        distinct_count: 633
+        sample_values:
+          - "[VALEUR NON CONFORME] Problème sur le compte DF011 : le total des réalisation extrait est différent de la somme des rattachements et des réalisation mandats émis"
+          - "[VALEUR EXTRAITE NON CONFORME] CRD dette  vide ou non trouvé"
+          - "[VALEUR EXTRAITE NON CONFORME] Dotation c74 vide ou non trouvée"
+          - "[VALEUR EXTRAITE NON CONFORME] Fiscalité locale c731 vide ou non trouvée"
+          - "[VALEUR EXTRAITE NON CONFORME] Problème sur l'année"
+        business_description: "Explicit message emitted when the rule fails."
+      -
+        name: "safir_field_id_list"
+        type: "TEXT"
+        not_null: false
+        default: null
+        is_primary_key: false
+        is_foreign_key: false
+        null_count: 0
+        distinct_count: 128
+        sample_values:
+          - "{DF011,DFA}"
+          - "{DF661}"
+          - "{DF739}"
+          - "{SIRET}"
+          - "{DF012,DFA}"
+        business_description: "JSON array of target field ids for the rule."
+    business_role: "Business validation rules to check extraction consistency and quality."
+    business_relationships:
+      - "validation_rules.ruleset_id -> rulesets.ruleset_id (N:1)"
+    query_hints:
+      - "A single validation rule can apply to multiple safir_field_id via safir_field_id_list."
+global_business_notes:
+  - "documents is the central table for ingested budget documents."
+  - "states is a shared enum-like table used by documents, extraction_runs, and extraction_results."
+  - "resultfeedbacks can be empty and this is normal in current operations."
+  - "sections stores structured JSON fragments extracted from source documents."
+  - "rulesets version both extraction rules (field_rules) and validation rules (validation_rules)."

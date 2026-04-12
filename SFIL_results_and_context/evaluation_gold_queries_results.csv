@@ -1,0 +1,675 @@
+,prompt,answer,success,result
+0,Quel est le nombre total de documents traités pour l'année 2024 ?,SELECT COUNT(*) AS total_documents FROM documents WHERE document_year = '2024';,True,"|   total_documents |
+|------------------:|
+|               108 |"
+1,Combien de documents ont été extraits avec succès (état SUCCESS) ?,SELECT COUNT(*) AS documents_reussis FROM documents d JOIN states s ON d.state_id = s.state_id WHERE s.code = 'SUCCESS';,True,"|   documents_reussis |
+|--------------------:|
+|                 109 |"
+2,Quelle est la répartition des types de budget (BP vs BA) parmi les documents ?,"SELECT budget_type, COUNT(*) AS nombre FROM documents GROUP BY budget_type;",True,"| budget_type   |   nombre |
+|:--------------|---------:|
+| BA            |       13 |
+| BP            |      113 |"
+3,Liste des communes distinctes ayant soumis des documents en 2023.,SELECT DISTINCT city_name FROM documents WHERE document_year = '2023';,True,"| city_name                     |
+|:------------------------------|
+| VILLE DE LYON                 |
+| BOURGES PLUS                  |
+| Mairie de Nantes              |
+| VILLE DE CANNES               |
+| REGIE ENR-SYNDMC SDEC ENERGIE |"
+4,Nombre moyen de pages des documents au format PDF.,SELECT AVG(nb_pages) AS pages_moyennes FROM documents WHERE format = 'pdf';,True,"|   pages_moyennes |
+|-----------------:|
+|          263.607 |"
+5,Combien de documents présentent un message d'avertissement ?,SELECT COUNT(*) AS docs_avec_alertes FROM documents WHERE warning_message IS NOT NULL AND warning_message != '';,True,"|   docs_avec_alertes |
+|--------------------:|
+|                  64 |"
+6,Quels sont les types de masque documentaire existants et leur fréquence ?,"SELECT mask, COUNT(*) AS occurrence FROM documents GROUP BY mask;",True,"| mask    |   occurrence |
+|:--------|-------------:|
+| M4_CFU  |            1 |
+| M57_CA  |           55 |
+| M57_CFU |           70 |"
+7,Nombre de documents par année budgétaire.,"SELECT document_year, COUNT(*) AS total FROM documents GROUP BY document_year;",True,"|   document_year |   total |
+|----------------:|--------:|
+|            2023 |      18 |
+|            2024 |     108 |"
+8,Quelle est la valeur extraite moyenne du champ 'D001' (dette) pour la commune de Paris en 2024 ?,SELECT AVG(CAST(er.value AS REAL)) AS dette_moyenne FROM extraction_results er JOIN documents d ON er.document_id = d.document_id WHERE er.safir_field_id = 'D001' AND d.city_name LIKE '%Paris%' AND d.document_year = '2024';,True,"| dette_moyenne   |
+|:----------------|
+|                 |"
+9,"Liste des communes avec plus de 5 documents traités, classées par volume décroissant.","SELECT city_name, COUNT(*) AS total_documents FROM documents GROUP BY city_name HAVING COUNT(*) > 5 ORDER BY total_documents DESC;",True,"| city_name                            |   total_documents |
+|:-------------------------------------|------------------:|
+| COMMUNAUTE AGGLOMERATION LUNEL AGGLO |                21 |
+| COMMUNE DE BONIFACIO                 |                20 |
+| BAGNOLET VILLE - VILLE               |                14 |
+| Ville de Concarneau                  |                 8 |
+| EUROMETROPOLE STRASBOURG             |                 8 |"
+10,"Pour chaque type de document (mask), quel est le taux d'échec d'extraction (documents en état ERROR) ?","SELECT d.mask, ROUND(100.0 * SUM(CASE WHEN s.code = 'ERROR' THEN 1 ELSE 0 END) / COUNT(*), 2) AS taux_echec FROM documents d JOIN states s ON d.state_id = s.state_id GROUP BY d.mask;",True,"| mask    |   taux_echec |
+|:--------|-------------:|
+| M4_CFU  |         0    |
+| M57_CA  |        12.73 |
+| M57_CFU |         5.71 |"
+11,Top 5 des indicateurs financiers les plus fréquemment extraits (safir_field_id) en 2024.,"SELECT safir_field_id, COUNT(*) AS occurrences FROM extraction_results er JOIN documents d ON er.document_id = d.document_id WHERE d.document_year = '2024' GROUP BY safir_field_id ORDER BY occurrences DESC LIMIT 5;",True,"| safir_field_id   |   occurrences |
+|:-----------------|--------------:|
+| SIRET            |            93 |
+| RRI              |            93 |
+| RRF              |            93 |
+| ROI              |            93 |
+| ROF              |            93 |"
+12,Quelles communes ont des documents avec des valeurs manquantes pour le champ 'DF011' (dépenses d'investissement) ?,SELECT DISTINCT d.city_name FROM documents d JOIN extraction_results er ON d.document_id = er.document_id WHERE er.safir_field_id = 'DF011' AND (er.value IS NULL OR er.value = '');,True,"| city_name                          |
+|:-----------------------------------|
+| MAIRIE DE CALVI - PLAGE CALVI - CA |
+| COMMUNE DE BONIFACIO               |
+| VILLE DE LYON                      |
+| Ville de Concarneau                |"
+13,Comparaison du nombre de documents entre 2023 et 2024 par type de budget.,"SELECT budget_type, SUM(CASE WHEN document_year = '2023' THEN 1 ELSE 0 END) AS annee_2023, SUM(CASE WHEN document_year = '2024' THEN 1 ELSE 0 END) AS annee_2024 FROM documents GROUP BY budget_type;",True,"| budget_type   |   annee_2023 |   annee_2024 |
+|:--------------|-------------:|-------------:|
+| BA            |            1 |           12 |
+| BP            |           17 |           96 |"
+14,Durée moyenne d'exécution des extractions (différence entre start_time et created_at des résultats) pour les documents M57_CA.,SELECT AVG(JULIANDAY(er.created_at) - JULIANDAY(r.start_time)) * 86400 AS duree_moyenne_sec FROM extraction_runs r JOIN extraction_results er ON r.run_id = er.run_id JOIN documents d ON r.document_id = d.document_id WHERE d.mask = 'M57_CA';,True,"| duree_moyenne_sec   |
+|:--------------------|
+|                     |"
+15,Quels indicateurs financiers présentent plus de 10% de valeurs nulles ou vides ?,"SELECT safir_field_id, ROUND(100.0 * SUM(CASE WHEN value IS NULL OR value = '' THEN 1 ELSE 0 END) / COUNT(*), 2) AS taux_vides FROM extraction_results GROUP BY safir_field_id HAVING taux_vides > 10;",True,"| safir_field_id   |   taux_vides |
+|:-----------------|-------------:|
+| DCT              |        43.42 |
+| DF6551           |        12.04 |
+| DF6564           |        12.04 |
+| DF66112          |        27.78 |
+| DF739211         |        11.11 |"
+16,Identifier les communes où la dette (champ 'D001') a augmenté de plus de 10% entre 2023 et 2024.,"WITH dette_2023 AS (SELECT d.city_name, CAST(er.value AS REAL) AS valeur FROM extraction_results er JOIN documents d ON er.document_id = d.document_id WHERE er.safir_field_id = 'D001' AND d.document_year = '2023'), dette_2024 AS (SELECT d.city_name, CAST(er.value AS REAL) AS valeur FROM extraction_results er JOIN documents d ON er.document_id = d.document_id WHERE er.safir_field_id = 'D001' AND d.document_year = '2024') SELECT d23.city_name, d23.valeur AS dette_2023, d24.valeur AS dette_2024, ROUND((d24.valeur - d23.valeur) * 100.0 / d23.valeur, 2) AS evolution_pct FROM dette_2023 d23 JOIN dette_2024 d24 ON d23.city_name = d24.city_name WHERE d24.valeur > d23.valeur * 1.10;",True,Empty Result (0 rows returned)
+17,Quels ensembles de règles (ruleset_id) incluent à la fois des règles d'extraction et des règles de validation pour le masque M57_CA ?,SELECT DISTINCT fr.ruleset_id FROM field_rules fr JOIN validation_rules vr ON fr.ruleset_id = vr.ruleset_id WHERE fr.mask = 'M57_CA' AND vr.mask = 'M57_CA';,True,Empty Result (0 rows returned)
+18,Quel est le montant total de la dette (indicateur D001) pour toutes les communes en 2024 ?,SELECT SUM(CAST(er.value AS REAL)) AS dette_totale_2024 FROM extraction_results er JOIN documents d ON er.document_id = d.document_id WHERE er.safir_field_id = 'D001' AND d.document_year = '2024';,True,"|   dette_totale_2024 |
+|--------------------:|
+|          5.0331e+08 |"
+19,Combien de documents ont été traités avec succès pour le budget principal (BP) en 2023 ?,SELECT COUNT(*) FROM documents d JOIN states s ON d.state_id = s.state_id WHERE s.code = 'SUCCESS' AND d.budget_type = 'BP' AND d.document_year = '2023';,True,"|   COUNT(*) |
+|-----------:|
+|         15 |"
+20,Quelle est la valeur moyenne des dépenses d'investissement (indicateur DF011) pour les communes de plus de 100 000 habitants en 2024 ?,"SELECT AVG(CAST(er.value AS REAL)) AS depenses_moyennes FROM extraction_results er JOIN documents d ON er.document_id = d.document_id WHERE er.safir_field_id = 'DF011' AND d.document_year = '2024' AND d.city_name IN ('Paris', 'Marseille', 'Lyon', 'Toulouse');",True,"| depenses_moyennes   |
+|:--------------------|
+|                     |"
+21,Liste des communes ayant soumis des documents au format PDF en 2024.,SELECT DISTINCT city_name FROM documents WHERE format = 'pdf' AND document_year = '2024';,True,"| city_name                            |
+|:-------------------------------------|
+| VILLE DE SETE                        |
+| BAGNOLET VILLE - VILLE               |
+| COMMUNAUTE AGGLOMERATION LUNEL AGGLO |
+| COMMUNE DE BONIFACIO                 |
+| EUROMETROPOLE STRASBOURG             |"
+22,Quel est le nombre total de pages traitées pour les documents M57_CA en 2023 ?,SELECT SUM(nb_pages) AS total_pages FROM documents WHERE mask = 'M57_CA' AND document_year = '2023';,True,"|   total_pages |
+|--------------:|
+|           602 |"
+23,Combien de documents présentent des avertissements lors de l'extraction pour l'année 2024 ?,SELECT COUNT(*) FROM documents WHERE warning_message != '' AND document_year = '2024';,True,"|   COUNT(*) |
+|-----------:|
+|         53 |"
+24,Quelle est la valeur maximale de recettes de fonctionnement (indicateur RF01) extraite en 2024 ?,SELECT MAX(CAST(er.value AS REAL)) AS recettes_max FROM extraction_results er JOIN documents d ON er.document_id = d.document_id WHERE er.safir_field_id = 'RF01' AND d.document_year = '2024';,True,"| recettes_max   |
+|:---------------|
+|                |"
+25,Pourcentage de documents avec budget annexe (BA) parmi les documents 2024.,SELECT (COUNT(*) FILTER (WHERE budget_type = 'BA') * 100.0 / COUNT(*)) AS pourcentage_ba FROM documents WHERE document_year = '2024';,True,"|   pourcentage_ba |
+|-----------------:|
+|          11.1111 |"
+26,Classement des 5 communes avec les plus hautes dettes (D001) en 2024.,"SELECT d.city_name, CAST(er.value AS REAL) AS dette FROM extraction_results er JOIN documents d ON er.document_id = d.document_id WHERE er.safir_field_id = 'D001' AND d.document_year = '2024' ORDER BY dette DESC LIMIT 5;",True,"| city_name                  |       dette |
+|:---------------------------|------------:|
+| EUROMETROPOLE STRASBOURG   | 5.03577e+07 |
+| EUROMETROPOLE STRASBOURG   | 5.03577e+07 |
+| EUROMETROPOLE STRASBOURG   | 5.03577e+07 |
+| METROPOLE NICE COTE D'AZUR | 4.95652e+07 |
+| METROPOLE NICE COTE D'AZUR | 4.95652e+07 |"
+27,Évolution du nombre de documents traités entre 2023 et 2024 par type de masque.,"SELECT mask, COUNT(*) FILTER (WHERE document_year = '2023') AS count_2023, COUNT(*) FILTER (WHERE document_year = '2024') AS count_2024 FROM documents GROUP BY mask;",True,"| mask    |   count_2023 |   count_2024 |
+|:--------|-------------:|-------------:|
+| M4_CFU  |            1 |            0 |
+| M57_CA  |            2 |           53 |
+| M57_CFU |           15 |           55 |"
+28,Quelles communes ont une dette (D001) supérieure à la moyenne nationale en 2024 ?,"SELECT d.city_name, CAST(er.value AS REAL) AS dette FROM extraction_results er JOIN documents d ON er.document_id = d.document_id WHERE er.safir_field_id = 'D001' AND d.document_year = '2024' AND CAST(er.value AS REAL) > (SELECT AVG(CAST(value AS REAL)) FROM extraction_results WHERE safir_field_id = 'D001' AND document_id IN (SELECT document_id FROM documents WHERE document_year = '2024'));",True,"| city_name                |       dette |
+|:-------------------------|------------:|
+| BAGNOLET VILLE - VILLE   | 6.62993e+06 |
+| BAGNOLET VILLE - VILLE   | 6.62993e+06 |
+| BAGNOLET VILLE - VILLE   | 6.62993e+06 |
+| EUROMETROPOLE STRASBOURG | 5.03577e+07 |
+| COMMUNE DE BRIVE         | 8.37481e+06 |"
+29,Répartition des indicateurs financiers les plus fréquemment extraits en 2024.,"SELECT safir_field_id, COUNT(*) AS nombre_extractions FROM extraction_results WHERE document_id IN (SELECT document_id FROM documents WHERE document_year = '2024') GROUP BY safir_field_id ORDER BY nombre_extractions DESC LIMIT 10;",True,"| safir_field_id   |   nombre_extractions |
+|:-----------------|---------------------:|
+| SIRET            |                   93 |
+| RRI              |                   93 |
+| RRF              |                   93 |
+| ROI              |                   93 |
+| ROF              |                   93 |"
+30,Taux d'échec d'extraction par type de document (mask) en 2024.,"SELECT d.mask, (COUNT(*) FILTER (WHERE s.code = 'ERROR') * 100.0 / COUNT(*)) AS taux_echec FROM documents d JOIN states s ON d.state_id = s.state_id WHERE d.document_year = '2024' GROUP BY d.mask;",True,"| mask    |   taux_echec |
+|:--------|-------------:|
+| M57_CA  |     13.2075  |
+| M57_CFU |      7.27273 |"
+31,Montant total des investissements (DF011) par région (groupement de communes) en 2024.,"SELECT CASE WHEN d.city_name LIKE '%AGGLOMERATION%' THEN 'Agglomération' WHEN d.city_name LIKE '%METROPOLE%' THEN 'Métropole' ELSE 'Commune' END AS type_entite, SUM(CAST(er.value AS REAL)) AS total_investissement FROM extraction_results er JOIN documents d ON er.document_id = d.document_id WHERE er.safir_field_id = 'DF011' AND d.document_year = '2024' GROUP BY type_entite;",True,"| type_entite   |   total_investissement |
+|:--------------|-----------------------:|
+| Agglomération |            1.89371e+08 |
+| Commune       |            5.46997e+08 |
+| Métropole     |            6.44523e+08 |"
+32,Quels indicateurs financiers n'ont jamais été extraits avec erreur en 2024 ?,SELECT DISTINCT safir_field_id FROM extraction_results WHERE safir_field_id NOT IN (SELECT safir_field_id FROM extraction_results WHERE message_error != '' AND document_id IN (SELECT document_id FROM documents WHERE document_year = '2024')) AND document_id IN (SELECT document_id FROM documents WHERE document_year = '2024');,True,Empty Result (0 rows returned)
+33,Comparaison des dépenses de fonctionnement (DF01) entre budgets principaux (BP) et annexes (BA) en 2024.,"SELECT d.budget_type, AVG(CAST(er.value AS REAL)) AS depenses_moyennes FROM extraction_results er JOIN documents d ON er.document_id = d.document_id WHERE er.safir_field_id = 'DF01' AND d.document_year = '2024' GROUP BY d.budget_type;",True,Empty Result (0 rows returned)
+34,Quelles communes ont vu leur dette (D001) augmenter de plus de 10% entre 2023 et 2024 ?,"WITH dette_2023 AS (SELECT d.siret, CAST(er.value AS REAL) AS valeur FROM extraction_results er JOIN documents d ON er.document_id = d.document_id WHERE er.safir_field_id = 'D001' AND d.document_year = '2023'), dette_2024 AS (SELECT d.siret, CAST(er.value AS REAL) AS valeur FROM extraction_results er JOIN documents d ON er.document_id = d.document_id WHERE er.safir_field_id = 'D001' AND d.document_year = '2024') SELECT d2024.siret, d2023.valeur AS dette_2023, d2024.valeur AS dette_2024 FROM dette_2024 d2024 JOIN dette_2023 d2023 ON d2024.siret = d2023.siret WHERE (d2024.valeur - d2023.valeur) / d2023.valeur > 0.1;",True,Empty Result (0 rows returned)
+35,Quels ensembles de règles (ruleset) incluent des validations pour la dette (D001) et les investissements (DF011) ?,SELECT DISTINCT vr.ruleset_id FROM validation_rules vr WHERE vr.safir_field_id_list LIKE '%D001%' AND vr.safir_field_id_list LIKE '%DF011%';,True,Empty Result (0 rows returned)
+36,Taux de complétude par indicateur financier (pourcentage de valeurs non vides) en 2024.,"SELECT safir_field_id, (COUNT(*) FILTER (WHERE value != '') * 100.0 / COUNT(*)) AS taux_remplissage FROM extraction_results WHERE document_id IN (SELECT document_id FROM documents WHERE document_year = '2024') GROUP BY safir_field_id ORDER BY taux_remplissage DESC;",True,"| safir_field_id   |   taux_remplissage |
+|:-----------------|-------------------:|
+| Type de budget   |                100 |
+| SIRET            |                100 |
+| Numéro Tiers     |                100 |
+| Nom du Tiers     |                100 |
+| Nom              |                100 |"
+37,Détection des anomalies : communes où les dépenses (DF01) dépassent 150% des recettes (RF01) en 2024.,"SELECT dep.document_id, dep.value AS depenses, rec.value AS recettes FROM (SELECT er.document_id, CAST(er.value AS REAL) AS value FROM extraction_results er WHERE er.safir_field_id = 'DF01' AND er.document_id IN (SELECT document_id FROM documents WHERE document_year = '2024')) dep JOIN (SELECT er.document_id, CAST(er.value AS REAL) AS value FROM extraction_results er WHERE er.safir_field_id = 'RF01' AND er.document_id IN (SELECT document_id FROM documents WHERE document_year = '2024')) rec ON dep.document_id = rec.document_id WHERE dep.value > rec.value * 1.5;",True,Empty Result (0 rows returned)
+38,Quel est le montant total des dépenses de fonctionnement (DF01) pour toutes les communes en 2024 ?,SELECT SUM(CAST(er.value AS REAL)) AS total_depenses_fonctionnement FROM extraction_results er JOIN documents d ON er.document_id = d.document_id WHERE er.safir_field_id = 'DF01' AND d.document_year = '2024';,True,"| total_depenses_fonctionnement   |
+|:--------------------------------|
+|                                 |"
+39,Combien de communes ont déclaré des recettes d'investissement (RI01) supérieures à 500 000 € en 2023 ?,SELECT COUNT(DISTINCT d.siret) FROM extraction_results er JOIN documents d ON er.document_id = d.document_id WHERE er.safir_field_id = 'RI01' AND d.document_year = '2023' AND CAST(er.value AS REAL) > 500000;,True,"|   COUNT(DISTINCT d.siret) |
+|--------------------------:|
+|                         0 |"
+40,Quelle est la dette moyenne (D001) des communes de plus de 100 000 habitants en 2024 ?,SELECT AVG(CAST(er.value AS REAL)) AS dette_moyenne FROM extraction_results er JOIN documents d ON er.document_id = d.document_id WHERE er.safir_field_id = 'D001' AND d.document_year = '2024';,True,"|   dette_moyenne |
+|----------------:|
+|     5.41194e+06 |"
+41,Répartition des documents par type de budget (BP/BA) pour l'année 2024.,"SELECT budget_type, COUNT(*) AS nombre_documents FROM documents WHERE document_year = '2024' GROUP BY budget_type;",True,"| budget_type   |   nombre_documents |
+|:--------------|-------------------:|
+| BA            |                 12 |
+| BP            |                 96 |"
+42,Quel est le ratio moyen dépenses/investissements par commune en 2023 ?,"SELECT d.siret, AVG(CAST(er1.value AS REAL) / NULLIF(CAST(er2.value AS REAL), 0)) AS ratio FROM extraction_results er1 JOIN extraction_results er2 ON er1.document_id = er2.document_id JOIN documents d ON er1.document_id = d.document_id WHERE er1.safir_field_id = 'DF01' AND er2.safir_field_id = 'DF011' AND d.document_year = '2023' GROUP BY d.siret;",True,Empty Result (0 rows returned)
+43,Top 5 des communes avec les plus hautes recettes de fonctionnement (RF01) en 2024.,"SELECT d.city_name, CAST(er.value AS REAL) AS recettes FROM extraction_results er JOIN documents d ON er.document_id = d.document_id WHERE er.safir_field_id = 'RF01' AND d.document_year = '2024' ORDER BY recettes DESC LIMIT 5;",True,Empty Result (0 rows returned)
+44,Comparaison du total des investissements (DF011) entre budgets principaux et annexes en 2024.,"SELECT d.budget_type, SUM(CAST(er.value AS REAL)) AS total_investissements FROM extraction_results er JOIN documents d ON er.document_id = d.document_id WHERE er.safir_field_id = 'DF011' AND d.document_year = '2024' GROUP BY d.budget_type;",True,"| budget_type   |   total_investissements |
+|:--------------|------------------------:|
+| BA            |             1.64063e+07 |
+| BP            |             1.36448e+09 |"
+45,Quelles communes ont un ratio dette/recettes supérieur à 1.5 en 2024 ?,SELECT d.city_name FROM extraction_results er1 JOIN extraction_results er2 ON er1.document_id = er2.document_id JOIN documents d ON er1.document_id = d.document_id WHERE er1.safir_field_id = 'D001' AND er2.safir_field_id = 'RF01' AND d.document_year = '2024' AND (CAST(er1.value AS REAL) / CAST(er2.value AS REAL)) > 1.5;,True,Empty Result (0 rows returned)
+46,Évolution de la dette moyenne (D001) entre 2023 et 2024 par type de document.,"SELECT d.mask, d.document_year, AVG(CAST(er.value AS REAL)) AS dette_moyenne FROM extraction_results er JOIN documents d ON er.document_id = d.document_id WHERE er.safir_field_id = 'D001' AND d.document_year IN ('2023','2024') GROUP BY d.mask, d.document_year ORDER BY d.mask, d.document_year;",True,"| mask    |   document_year |   dette_moyenne |
+|:--------|----------------:|----------------:|
+| M4_CFU  |            2023 |     0           |
+| M57_CA  |            2023 |     1.06073e+07 |
+| M57_CA  |            2024 |     4.61082e+06 |
+| M57_CFU |            2023 |     2.13635e+07 |
+| M57_CFU |            2024 |     6.1009e+06  |"
+47,Quel pourcentage des documents présente des anomalies de validation pour les indicateurs clés ?,SELECT (COUNT(DISTINCT CASE WHEN er.message_error IS NOT NULL THEN d.document_id END) * 100.0 / COUNT(DISTINCT d.document_id)) AS pourcentage_anomalies FROM documents d LEFT JOIN extraction_results er ON d.document_id = er.document_id WHERE d.document_year = '2024';,True,"|   pourcentage_anomalies |
+|------------------------:|
+|                 86.1111 |"
+48,Détecter les communes où les dépenses de fonctionnement (DF01) dépassent de 20% la moyenne départementale en 2024.,"WITH moyenne_dep AS (SELECT AVG(CAST(er.value AS REAL)) AS avg_df01 FROM extraction_results er JOIN documents d ON er.document_id = d.document_id WHERE er.safir_field_id = 'DF01' AND d.document_year = '2024') SELECT d.city_name, CAST(er.value AS REAL) AS depenses FROM extraction_results er JOIN documents d ON er.document_id = d.document_id, moyenne_dep WHERE er.safir_field_id = 'DF01' AND d.document_year = '2024' AND CAST(er.value AS REAL) > moyenne_dep.avg_df01 * 1.2;",True,Empty Result (0 rows returned)
+49,Analyse de la corrélation entre le nombre de pages des documents et le taux d'erreur d'extraction par commune en 2024.,"SELECT d.city_name, d.nb_pages, (COUNT(CASE WHEN er.message_error IS NOT NULL THEN 1 END) * 100.0 / COUNT(*)) AS taux_erreur FROM documents d LEFT JOIN extraction_results er ON d.document_id = er.document_id WHERE d.document_year = '2024' GROUP BY d.city_name, d.nb_pages ORDER BY taux_erreur DESC;",True,"| city_name                                                                                     |   nb_pages |   taux_erreur |
+|:----------------------------------------------------------------------------------------------|-----------:|--------------:|
+| COMMUNE DE BRIVE                                                                              |        306 |           100 |
+| COMMUNE DE MITRY- MORY dont la population est de 3500 habitants et plus : VILLE DE MITRY-MORY |        188 |           100 |
+| EUROMETROPOLE STRASBOURG                                                                      |        705 |           100 |
+| LANESTER                                                                                      |        177 |           100 |
+| MAIRIE DE CALVI - PLAGE CALVI - CA                                                            |         64 |           100 |"
+50,Quel est le montant total des recettes de fonctionnement (RF01) pour toutes les communes en 2024 ?,SELECT SUM(CAST(er.value AS REAL)) AS total_recettes_fonctionnement FROM extraction_results er JOIN documents d ON er.document_id = d.document_id WHERE er.safir_field_id = 'RF01' AND d.document_year = '2024';,True,"| total_recettes_fonctionnement   |
+|:--------------------------------|
+|                                 |"
+51,Combien de communes ont déclaré des dépenses d'investissement (DF011) supérieures à 1 million d'euros en 2023 ?,SELECT COUNT(DISTINCT d.siret) AS nombre_communes FROM extraction_results er JOIN documents d ON er.document_id = d.document_id WHERE er.safir_field_id = 'DF011' AND d.document_year = '2023' AND CAST(er.value AS REAL) > 1000000;,True,"|   nombre_communes |
+|------------------:|
+|                 5 |"
+52,Quelle est la dette moyenne (D001) des communes ayant publié des documents M57_CA en 2024 ?,SELECT AVG(CAST(er.value AS REAL)) AS dette_moyenne FROM extraction_results er JOIN documents d ON er.document_id = d.document_id WHERE er.safir_field_id = 'D001' AND d.mask = 'M57_CA' AND d.document_year = '2024';,True,"|   dette_moyenne |
+|----------------:|
+|     4.61082e+06 |"
+53,Liste des communes dont le ratio dette/recettes (D001/RF01) dépasse 1.2 en 2024.,"SELECT d.city_name, CAST(er_d.value AS REAL) / CAST(er_r.value AS REAL) AS ratio FROM documents d JOIN extraction_results er_d ON d.document_id = er_d.document_id AND er_d.safir_field_id = 'D001' JOIN extraction_results er_r ON d.document_id = er_r.document_id AND er_r.safir_field_id = 'RF01' WHERE d.document_year = '2024' AND ratio > 1.2;",True,Empty Result (0 rows returned)
+54,Top 5 des communes avec les plus hautes recettes d'investissement (RI01) en 2023.,"SELECT d.city_name, CAST(er.value AS REAL) AS recettes_investissement FROM extraction_results er JOIN documents d ON er.document_id = d.document_id WHERE er.safir_field_id = 'RI01' AND d.document_year = '2023' ORDER BY recettes_investissement DESC LIMIT 5;",True,Empty Result (0 rows returned)
+55,Évolution du montant total des investissements (DF011) entre 2023 et 2024 par type de budget.,"SELECT d.budget_type, d.document_year, SUM(CAST(er.value AS REAL)) AS total_investissements FROM extraction_results er JOIN documents d ON er.document_id = d.document_id WHERE er.safir_field_id = 'DF011' AND d.document_year IN ('2023','2024') GROUP BY d.budget_type, d.document_year ORDER BY d.document_year;",True,"| budget_type   |   document_year |   total_investissements |
+|:--------------|----------------:|------------------------:|
+| BA            |            2023 |         25880.8         |
+| BP            |            2023 |             1.358e+09   |
+| BA            |            2024 |             1.64063e+07 |
+| BP            |            2024 |             1.36448e+09 |"
+56,Quelles communes ont vu leurs dépenses de fonctionnement (DF01) augmenter de plus de 15% entre 2023 et 2024 ?,"WITH depenses_2023 AS (SELECT d.siret, CAST(er.value AS REAL) AS df01 FROM extraction_results er JOIN documents d ON er.document_id = d.document_id WHERE er.safir_field_id = 'DF01' AND d.document_year = '2023'), depenses_2024 AS (SELECT d.siret, CAST(er.value AS REAL) AS df01 FROM extraction_results er JOIN documents d ON er.document_id = d.document_id WHERE er.safir_field_id = 'DF01' AND d.document_year = '2024') SELECT d.city_name, ((d2024.df01 - d2023.df01) / d2023.df01) * 100 AS evolution_pourcentage FROM documents d JOIN depenses_2023 d2023 ON d.siret = d2023.siret JOIN depenses_2024 d2024 ON d.siret = d2024.siret WHERE ((d2024.df01 - d2023.df01) / d2023.df01) > 0.15;",True,Empty Result (0 rows returned)
+57,Répartition du nombre de documents par type de masque et par année.,"SELECT mask, document_year, COUNT(*) AS nombre_documents FROM documents GROUP BY mask, document_year ORDER BY document_year;",True,"| mask    |   document_year |   nombre_documents |
+|:--------|----------------:|-------------------:|
+| M4_CFU  |            2023 |                  1 |
+| M57_CA  |            2023 |                  2 |
+| M57_CFU |            2023 |                 15 |
+| M57_CA  |            2024 |                 53 |
+| M57_CFU |            2024 |                 55 |"
+58,Quel est le ratio moyen dépenses/investissements (DF01/DF011) par commune en 2024 ?,"SELECT d.city_name, AVG(CAST(er_df01.value AS REAL) / CAST(er_df011.value AS REAL)) AS ratio_moyen FROM documents d JOIN extraction_results er_df01 ON d.document_id = er_df01.document_id AND er_df01.safir_field_id = 'DF01' JOIN extraction_results er_df011 ON d.document_id = er_df011.document_id AND er_df011.safir_field_id = 'DF011' WHERE d.document_year = '2024' GROUP BY d.city_name;",True,Empty Result (0 rows returned)
+59,Détecter les communes où les recettes de fonctionnement (RF01) sont inférieures à 80% des dépenses de fonctionnement (DF01) en 2024.,"SELECT d.city_name, CAST(er_rf.value AS REAL) AS recettes, CAST(er_df.value AS REAL) AS depenses FROM documents d JOIN extraction_results er_rf ON d.document_id = er_rf.document_id AND er_rf.safir_field_id = 'RF01' JOIN extraction_results er_df ON d.document_id = er_df.document_id AND er_df.safir_field_id = 'DF01' WHERE d.document_year = '2024' AND CAST(er_rf.value AS REAL) < 0.8 * CAST(er_df.value AS REAL);",True,Empty Result (0 rows returned)
+60,Comparaison des dettes moyennes (D001) entre budgets principaux et annexes en 2024.,"SELECT d.budget_type, AVG(CAST(er.value AS REAL)) AS dette_moyenne FROM extraction_results er JOIN documents d ON er.document_id = d.document_id WHERE er.safir_field_id = 'D001' AND d.document_year = '2024' GROUP BY d.budget_type;",True,"| budget_type   |    dette_moyenne |
+|:--------------|-----------------:|
+| BA            | 729466           |
+| BP            |      5.91363e+06 |"
+61,Top 10 des indicateurs financiers les plus fréquemment extraits avec succès en 2024.,"SELECT er.safir_field_id, COUNT(*) AS nombre_extractions FROM extraction_results er JOIN documents d ON er.document_id = d.document_id JOIN states s ON er.state_id = s.state_id WHERE d.document_year = '2024' AND s.code = 'SUCCESS' GROUP BY er.safir_field_id ORDER BY nombre_extractions DESC LIMIT 10;",True,"| safir_field_id   |   nombre_extractions |
+|:-----------------|---------------------:|
+| NC               |                   93 |
+| Conso            |                   93 |
+| Nom              |                   85 |
+| SCE              |                   56 |
+| SCD              |                   56 |"
+62,Quel pourcentage des documents présente des anomalies de validation pour la dette (D001) en 2024 ?,SELECT (COUNT(DISTINCT CASE WHEN er.message_error IS NOT NULL THEN d.document_id END) * 100.0 / COUNT(DISTINCT d.document_id)) AS pourcentage_anomalies FROM documents d JOIN extraction_results er ON d.document_id = er.document_id WHERE er.safir_field_id = 'D001' AND d.document_year = '2024';,True,"|   pourcentage_anomalies |
+|------------------------:|
+|                     100 |"
+63,Montant total des investissements (DF011) par région (groupement par deux premiers chiffres du SIRET) en 2024.,"SELECT SUBSTR(d.siret,1,2) AS region, SUM(CAST(er.value AS REAL)) AS total_investissements FROM extraction_results er JOIN documents d ON er.document_id = d.document_id WHERE er.safir_field_id = 'DF011' AND d.document_year = '2024' GROUP BY region;",True,"|   region |   total_investissements |
+|---------:|------------------------:|
+|       20 |             3.48761e+08 |
+|       21 |             4.89948e+08 |
+|       24 |             5.42182e+08 |"
+64,Quelles communes ont un ratio recettes/dettes (RF01/D001) inférieur à 0.8 en 2024 ?,"SELECT d.city_name, CAST(er_rf.value AS REAL) / CAST(er_d.value AS REAL) AS ratio FROM documents d JOIN extraction_results er_rf ON d.document_id = er_rf.document_id AND er_rf.safir_field_id = 'RF01' JOIN extraction_results er_d ON d.document_id = er_d.document_id AND er_d.safir_field_id = 'D001' WHERE d.document_year = '2024' AND ratio < 0.8;",True,Empty Result (0 rows returned)
+65,"Nombre de documents traités avec succès par format (PDF, scan, image) en 2023.","SELECT d.format, COUNT(*) AS documents_reussis FROM documents d JOIN states s ON d.state_id = s.state_id WHERE d.document_year = '2023' AND s.code = 'SUCCESS' GROUP BY d.format;",True,"| format   |   documents_reussis |
+|:---------|--------------------:|
+| pdf      |                  16 |"
+66,Classement des communes par niveau d'endettement (D001) décroissant en 2024.,"SELECT d.city_name, CAST(er.value AS REAL) AS dette FROM extraction_results er JOIN documents d ON er.document_id = d.document_id WHERE er.safir_field_id = 'D001' AND d.document_year = '2024' ORDER BY dette DESC;",True,"| city_name                  |       dette |
+|:---------------------------|------------:|
+| EUROMETROPOLE STRASBOURG   | 5.03577e+07 |
+| EUROMETROPOLE STRASBOURG   | 5.03577e+07 |
+| EUROMETROPOLE STRASBOURG   | 5.03577e+07 |
+| METROPOLE NICE COTE D'AZUR | 4.95652e+07 |
+| METROPOLE NICE COTE D'AZUR | 4.95652e+07 |"
+67,Détecter les communes où les dépenses totales dépassent 120% des recettes totales en 2024.,"SELECT d.city_name FROM documents d JOIN extraction_results er_dep ON d.document_id = er_dep.document_id AND er_dep.safir_field_id IN ('DF01','DF011') JOIN extraction_results er_rec ON d.document_id = er_rec.document_id AND er_rec.safir_field_id IN ('RF01','RI01') WHERE d.document_year = '2024' GROUP BY d.city_name HAVING SUM(CAST(er_dep.value AS REAL)) > 1.2 * SUM(CAST(er_rec.value AS REAL));",True,Empty Result (0 rows returned)
+68,Évolution du nombre moyen de pages des documents entre 2023 et 2024.,"SELECT document_year, AVG(nb_pages) AS pages_moyennes FROM documents WHERE document_year IN ('2023','2024') GROUP BY document_year;",True,"|   document_year |   pages_moyennes |
+|----------------:|-----------------:|
+|            2023 |          366.333 |
+|            2024 |          218.833 |"
+69,Quels indicateurs financiers présentent le plus fort taux d'erreurs d'extraction en 2024 ?,"SELECT er.safir_field_id, (COUNT(CASE WHEN s.code = 'ERROR' THEN 1 END) * 100.0 / COUNT(*)) AS taux_erreur FROM extraction_results er JOIN states s ON er.state_id = s.state_id JOIN documents d ON er.document_id = d.document_id WHERE d.document_year = '2024' GROUP BY er.safir_field_id HAVING COUNT(*) > 10 ORDER BY taux_erreur DESC LIMIT 5;",True,"| safir_field_id   |   taux_erreur |
+|:-----------------|--------------:|
+| DCT              |       49.2537 |
+| DIEQU            |       33.3333 |
+| DF66112          |       31.1828 |
+| EDBP             |       30.1075 |
+| DIEQUBA          |       23.4043 |"
+70,Quel est le montant total des dépenses de fonctionnement (DF01) pour toutes les communes en 2023 ?,SELECT SUM(CAST(er.value AS REAL)) AS total_depenses_fonctionnement FROM extraction_results er JOIN documents d ON er.document_id = d.document_id WHERE er.safir_field_id = 'DF01' AND d.document_year = '2023',True,"| total_depenses_fonctionnement   |
+|:--------------------------------|
+|                                 |"
+71,Combien de communes ont déclaré des recettes d'investissement (RI01) supérieures à 500 000 € en 2024 ?,SELECT COUNT(DISTINCT d.siret) FROM extraction_results er JOIN documents d ON er.document_id = d.document_id WHERE er.safir_field_id = 'RI01' AND d.document_year = '2024' AND CAST(er.value AS REAL) > 500000,True,"|   COUNT(DISTINCT d.siret) |
+|--------------------------:|
+|                         0 |"
+72,Quelles communes ont un ratio dette/recettes (D001/RF01) supérieur à 1.2 en 2024 ?,SELECT d.city_name FROM documents d JOIN extraction_results e1 ON d.document_id = e1.document_id JOIN extraction_results e2 ON d.document_id = e2.document_id WHERE d.document_year = '2024' AND e1.safir_field_id = 'D001' AND e2.safir_field_id = 'RF01' AND (CAST(e1.value AS REAL) / CAST(e2.value AS REAL)) > 1.2,True,Empty Result (0 rows returned)
+73,Évolution du montant total des investissements (DF011) entre 2023 et 2024 par type de masque.,"SELECT d.mask, d.document_year, SUM(CAST(er.value AS REAL)) AS total_investissements FROM extraction_results er JOIN documents d ON er.document_id = d.document_id WHERE er.safir_field_id = 'DF011' AND d.document_year IN ('2023','2024') GROUP BY d.mask, d.document_year ORDER BY d.mask, d.document_year",True,"| mask    |   document_year |   total_investissements |
+|:--------|----------------:|------------------------:|
+| M4_CFU  |            2023 |         25880.8         |
+| M57_CA  |            2023 |             1.86821e+08 |
+| M57_CA  |            2024 |             6.98373e+08 |
+| M57_CFU |            2023 |             1.17118e+09 |
+| M57_CFU |            2024 |             6.82518e+08 |"
+74,Quel est le montant total des recettes de fonctionnement (RF01) pour toutes les communes en 2023 ?,SELECT SUM(CAST(e.value AS REAL)) AS total_recettes_fonctionnement FROM extraction_results e JOIN documents d ON e.document_id = d.document_id WHERE e.safir_field_id = 'RF01' AND d.document_year = '2023' AND e.value <> '',True,"| total_recettes_fonctionnement   |
+|:--------------------------------|
+|                                 |"
+75,Combien de communes ont déclaré des dépenses d'investissement (DF011) supérieures à 1 million d'euros en 2024 ?,SELECT COUNT(DISTINCT d.siret) FROM extraction_results e JOIN documents d ON e.document_id = d.document_id WHERE e.safir_field_id = 'DF011' AND d.document_year = '2024' AND CAST(e.value AS REAL) > 1000000 AND e.value <> '',True,"|   COUNT(DISTINCT d.siret) |
+|--------------------------:|
+|                        17 |"
+76,Nombre de documents traités avec succès (état SUCCESS) en 2023.,SELECT COUNT(*) FROM documents d JOIN states s ON d.state_id = s.state_id WHERE s.code = 'SUCCESS' AND d.document_year = '2023',True,"|   COUNT(*) |
+|-----------:|
+|         16 |"
+77,Quel pourcentage des documents 2024 sont des budgets annexes (BA) ?,SELECT (COUNT(CASE WHEN budget_type = 'BA' THEN 1 END) * 100.0 / COUNT(*)) AS pourcentage_ba FROM documents WHERE document_year = '2024',True,"|   pourcentage_ba |
+|-----------------:|
+|          11.1111 |"
+78,Comparaison des dépenses de fonctionnement (DF01) entre communes de plus de 100 000 habitants et les autres en 2024.,"SELECT CASE WHEN CAST(SUBSTR(d.siret, 1, 9) AS INTEGER) > 100000 THEN 'Grandes communes' ELSE 'Autres communes' END AS categorie, AVG(CAST(e.value AS REAL)) AS depenses_moyennes FROM extraction_results e JOIN documents d ON e.document_id = d.document_id WHERE e.safir_field_id = 'DF01' AND d.document_year = '2024' AND e.value <> '' GROUP BY categorie",True,Empty Result (0 rows returned)
+79,Évolution du montant total des investissements (DF011) entre 2023 et 2024 par type de masque documentaire.,"SELECT d.mask, d.document_year, SUM(CAST(e.value AS REAL)) AS total_investissements FROM extraction_results e JOIN documents d ON e.document_id = d.document_id WHERE e.safir_field_id = 'DF011' AND d.document_year IN ('2023','2024') AND e.value <> '' GROUP BY d.mask, d.document_year ORDER BY d.mask, d.document_year",True,"| mask    |   document_year |   total_investissements |
+|:--------|----------------:|------------------------:|
+| M4_CFU  |            2023 |         25880.8         |
+| M57_CA  |            2023 |             1.86821e+08 |
+| M57_CA  |            2024 |             6.98373e+08 |
+| M57_CFU |            2023 |             1.17118e+09 |
+| M57_CFU |            2024 |             6.82518e+08 |"
+80,Quelles communes ont un ratio dette/recettes (D001/RF01) supérieur à 1.5 en 2024 ?,SELECT d.city_name FROM documents d JOIN extraction_results e1 ON d.document_id = e1.document_id JOIN extraction_results e2 ON d.document_id = e2.document_id WHERE d.document_year = '2024' AND e1.safir_field_id = 'D001' AND e2.safir_field_id = 'RF01' AND e1.value <> '' AND e2.value <> '' AND (CAST(e1.value AS REAL) / CAST(e2.value AS REAL)) > 1.5 GROUP BY d.city_name,True,Empty Result (0 rows returned)
+81,Répartition du nombre de pages des documents par type de budget et année.,"SELECT budget_type, document_year, AVG(nb_pages) AS pages_moyennes FROM documents GROUP BY budget_type, document_year",True,"| budget_type   |   document_year |   pages_moyennes |
+|:--------------|----------------:|-----------------:|
+| BA            |            2023 |           70     |
+| BA            |            2024 |          104.667 |
+| BP            |            2023 |          383.765 |
+| BP            |            2024 |          233.104 |"
+82,Quels sont les indicateurs financiers les plus fréquemment extraits avec des erreurs en 2024 ?,"SELECT e.safir_field_id, COUNT(*) AS nombre_erreurs FROM extraction_results e JOIN documents d ON e.document_id = d.document_id WHERE d.document_year = '2024' AND e.message_error IS NOT NULL AND e.message_error <> '' GROUP BY e.safir_field_id ORDER BY nombre_erreurs DESC LIMIT 5",True,"| safir_field_id   |   nombre_erreurs |
+|:-----------------|-----------------:|
+| SIRET            |               93 |
+| RRI              |               93 |
+| RRF              |               93 |
+| ROI              |               93 |
+| ROF              |               93 |"
+83,Comparaison des recettes de fonctionnement (RF01) entre documents PDF et scans en 2024.,"SELECT d.format, AVG(CAST(e.value AS REAL)) AS recettes_moyennes FROM extraction_results e JOIN documents d ON e.document_id = d.document_id WHERE e.safir_field_id = 'RF01' AND d.document_year = '2024' AND d.format IN ('pdf','scan') AND e.value <> '' GROUP BY d.format",True,Empty Result (0 rows returned)
+84,Quelles communes ont vu leurs dépenses de fonctionnement (DF01) augmenter de plus de 10% entre 2023 et 2024 ?,SELECT d2024.city_name FROM documents d2024 JOIN extraction_results e2024 ON d2024.document_id = e2024.document_id JOIN documents d2023 ON d2024.siret = d2023.siret JOIN extraction_results e2023 ON d2023.document_id = e2023.document_id WHERE d2024.document_year = '2024' AND d2023.document_year = '2023' AND e2024.safir_field_id = 'DF01' AND e2023.safir_field_id = 'DF01' AND e2024.value <> '' AND e2023.value <> '' AND (CAST(e2024.value AS REAL) - CAST(e2023.value AS REAL)) / CAST(e2023.value AS REAL) > 0.1,True,Empty Result (0 rows returned)
+85,Taux de documents avec anomalies de validation pour la dette (D001) en 2024.,SELECT (COUNT(DISTINCT CASE WHEN e.message_error IS NOT NULL AND e.message_error <> '' THEN d.document_id END) * 100.0 / COUNT(DISTINCT d.document_id)) AS taux_anomalies FROM documents d LEFT JOIN extraction_results e ON d.document_id = e.document_id AND e.safir_field_id = 'D001' WHERE d.document_year = '2024',True,"|   taux_anomalies |
+|-----------------:|
+|          86.1111 |"
+86,Communes où les dépenses totales dépassent 120% des recettes totales en 2024 (somme RF01 + RI01 vs DF01 + DF011).,"SELECT d.city_name FROM documents d JOIN (SELECT document_id, SUM(CASE safir_field_id WHEN 'RF01' THEN CAST(value AS REAL) WHEN 'RI01' THEN CAST(value AS REAL) ELSE 0 END) AS recettes_totales, SUM(CASE safir_field_id WHEN 'DF01' THEN CAST(value AS REAL) WHEN 'DF011' THEN CAST(value AS REAL) ELSE 0 END) AS depenses_totales FROM extraction_results WHERE safir_field_id IN ('RF01','RI01','DF01','DF011') AND value <> '' GROUP BY document_id) e ON d.document_id = e.document_id WHERE d.document_year = '2024' AND depenses_totales > 1.2 * recettes_totales",True,"| city_name                            |
+|:-------------------------------------|
+| COMMUNE DE BONIFACIO                 |
+| COMMUNE DE BONIFACIO                 |
+| COMMUNE DE BONIFACIO                 |
+| COMMUNAUTE AGGLOMERATION LUNEL AGGLO |
+| BAGNOLET VILLE - VILLE               |"
+87,Évolution du ratio dette/recettes (D001/RF01) par commune entre 2023 et 2024.,"WITH ratios AS (SELECT d.siret, d.document_year, CAST(e1.value AS REAL) / CAST(e2.value AS REAL) AS ratio FROM documents d JOIN extraction_results e1 ON d.document_id = e1.document_id JOIN extraction_results e2 ON d.document_id = e2.document_id WHERE e1.safir_field_id = 'D001' AND e2.safir_field_id = 'RF01' AND e1.value <> '' AND e2.value <> '' AND d.document_year IN ('2023','2024')) SELECT siret, MAX(CASE document_year WHEN '2023' THEN ratio END) AS ratio_2023, MAX(CASE document_year WHEN '2024' THEN ratio END) AS ratio_2024 FROM ratios GROUP BY siret",True,Empty Result (0 rows returned)
+88,Corrélation entre le nombre de pages des documents et le taux d'erreur d'extraction par commune en 2024.,"SELECT d.siret, d.nb_pages, COUNT(CASE WHEN e.message_error IS NOT NULL AND e.message_error <> '' THEN 1 END) * 1.0 / COUNT(*) AS taux_erreur FROM documents d LEFT JOIN extraction_results e ON d.document_id = e.document_id WHERE d.document_year = '2024' GROUP BY d.siret, d.nb_pages",True,"|          siret |   nb_pages |   taux_erreur |
+|---------------:|-----------:|--------------:|
+| 20003019500115 |        307 |      1        |
+| 20003986500106 |         49 |      1        |
+| 20006812000019 |        645 |      0.998601 |
+| 21080044600072 |        116 |      0.991935 |
+| 21080445600072 |        116 |      1        |"
+89,Répartition des documents par type de masque et année budgétaire.,"SELECT mask, document_year, COUNT(*) AS nombre_documents FROM documents GROUP BY mask, document_year;",True,"| mask    |   document_year |   nombre_documents |
+|:--------|----------------:|-------------------:|
+| M4_CFU  |            2023 |                  1 |
+| M57_CA  |            2023 |                  2 |
+| M57_CA  |            2024 |                 53 |
+| M57_CFU |            2023 |                 15 |
+| M57_CFU |            2024 |                 55 |"
+90,Quel est le taux de documents traités avec succès (état SUCCESS) en 2023 ?,SELECT (COUNT(*) * 100.0 / (SELECT COUNT(*) FROM documents WHERE document_year = '2023')) AS taux_success FROM documents d JOIN states s ON d.state_id = s.state_id WHERE s.code = 'SUCCESS' AND d.document_year = '2023';,True,"|   taux_success |
+|---------------:|
+|        88.8889 |"
+91,Top 5 des communes par montant total d'investissement (DF011) en 2024.,"SELECT d.city_name, SUM(CAST(er.value AS REAL)) AS total_investissement FROM extraction_results er JOIN documents d ON er.document_id = d.document_id WHERE er.safir_field_id = 'DF011' AND d.document_year = '2024' GROUP BY d.city_name ORDER BY total_investissement DESC LIMIT 5;",True,"| city_name                            |   total_investissement |
+|:-------------------------------------|-----------------------:|
+| EUROMETROPOLE STRASBOURG             |            3.52811e+08 |
+| METROPOLE NICE COTE D'AZUR           |            2.48869e+08 |
+| COMMUNAUTE AGGLOMERATION LUNEL AGGLO |            1.89371e+08 |
+| BAGNOLET VILLE - VILLE               |            1.61099e+08 |
+| VILLE DE SETE                        |            9.35102e+07 |"
+92,Nombre moyen de pages des documents par type de budget (BP/BA) en 2024.,"SELECT budget_type, AVG(nb_pages) AS pages_moyennes FROM documents WHERE document_year = '2024' GROUP BY budget_type;",True,"| budget_type   |   pages_moyennes |
+|:--------------|-----------------:|
+| BA            |          104.667 |
+| BP            |          233.104 |"
+93,Comparaison des recettes de fonctionnement (RF01) entre communes de moins de 10 000 habitants et les autres en 2024 (basé sur SIRET).,"SELECT CASE WHEN CAST(SUBSTR(d.siret, 10, 5) AS INTEGER) < 10000 THEN 'Petites communes' ELSE 'Grandes communes' END AS categorie, AVG(CAST(er.value AS REAL)) AS recettes_moyennes FROM extraction_results er JOIN documents d ON er.document_id = d.document_id WHERE er.safir_field_id = 'RF01' AND d.document_year = '2024' GROUP BY categorie;",True,Empty Result (0 rows returned)
+94,Évolution du montant total des investissements (DF011) entre 2023 et 2024 par région (3 premiers chiffres SIRET).,"SELECT SUBSTR(d.siret, 1, 3) AS region, d.document_year, SUM(CAST(er.value AS REAL)) AS total_investissement FROM extraction_results er JOIN documents d ON er.document_id = d.document_id WHERE er.safir_field_id = 'DF011' AND d.document_year IN ('2023','2024') GROUP BY region, d.document_year ORDER BY region, d.document_year;",True,"|   region |   document_year |   total_investissement |
+|---------:|----------------:|-----------------------:|
+|      200 |            2023 |        25880.8         |
+|      200 |            2024 |            3.48761e+08 |
+|      210 |            2023 |            1.59304e+08 |
+|      210 |            2024 |       148061           |
+|      211 |            2024 |            2.93437e+07 |"
+95,Communes où les dépenses de fonctionnement (DF01) dépassent les recettes de fonctionnement (RF01) en 2024.,"SELECT d.city_name FROM (SELECT d.document_id, MAX(CASE WHEN er.safir_field_id = 'DF01' THEN CAST(er.value AS REAL) END) AS depenses, MAX(CASE WHEN er.safir_field_id = 'RF01' THEN CAST(er.value AS REAL) END) AS recettes FROM extraction_results er JOIN documents d ON er.document_id = d.document_id WHERE d.document_year = '2024' AND er.safir_field_id IN ('DF01','RF01') GROUP BY d.document_id) AS sub JOIN documents d ON sub.document_id = d.document_id WHERE sub.depenses > sub.recettes GROUP BY d.city_name;",True,Empty Result (0 rows returned)
+96,Taux de documents présentant des erreurs d'extraction pour la dette (D001) en 2024.,SELECT (COUNT(DISTINCT d.document_id) * 100.0 / (SELECT COUNT(DISTINCT document_id) FROM extraction_results WHERE safir_field_id = 'D001' AND document_year = '2024')) AS taux_erreur FROM extraction_results er JOIN documents d ON er.document_id = d.document_id WHERE er.safir_field_id = 'D001' AND d.document_year = '2024' AND er.message_error IS NOT NULL AND er.message_error <> '';,True,"|   taux_erreur |
+|--------------:|
+|       85.3211 |"
+97,Communes dont le ratio dette/recettes (D001/RF01) dépasse 1.5 en 2024.,"SELECT d.city_name FROM (SELECT d.document_id, MAX(CASE WHEN er.safir_field_id = 'D001' THEN CAST(er.value AS REAL) END) AS dette, MAX(CASE WHEN er.safir_field_id = 'RF01' THEN CAST(er.value AS REAL) END) AS recettes FROM extraction_results er JOIN documents d ON er.document_id = d.document_id WHERE d.document_year = '2024' AND er.safir_field_id IN ('D001','RF01') GROUP BY d.document_id) AS sub JOIN documents d ON sub.document_id = d.document_id WHERE sub.dette / sub.recettes > 1.5 GROUP BY d.city_name;",True,Empty Result (0 rows returned)
+98,Évolution du nombre de documents traités par mois en 2024.,"SELECT STRFTIME('%Y-%m', created_at) AS mois, COUNT(*) AS nombre_documents FROM documents WHERE document_year = '2024' GROUP BY mois ORDER BY mois;",True,"| mois   |   nombre_documents |
+|:-------|-------------------:|
+|        |                108 |"
+99,Corrélation entre le nombre de pages des documents et le nombre d'erreurs d'extraction en 2024.,"SELECT d.document_id, d.nb_pages, COUNT(er.result_id) AS nombre_erreurs FROM documents d LEFT JOIN extraction_results er ON d.document_id = er.document_id AND er.message_error IS NOT NULL AND er.message_error <> '' WHERE d.document_year = '2024' GROUP BY d.document_id;",True,"| document_id                          |   nb_pages |   nombre_erreurs |
+|:-------------------------------------|-----------:|-----------------:|
+| 02975f2f-8329-46fa-ba21-a97ed081a015 |        110 |              119 |
+| 057ffefd-a1f5-4135-bf27-410c3c492d12 |        110 |              119 |
+| 0a4dd2e7-d981-43e5-b17d-fa8eb2d4486d |        110 |              119 |
+| 0bdfda43-da7f-4198-bb7a-0e0c303d9dcd |        202 |              116 |
+| 0eb5fd02-71f8-4b5f-b945-9b8690c3f4c5 |         93 |              119 |"
+100,Communes où la dette (D001) a augmenté de plus de 15% entre 2023 et 2024.,"WITH dette_2023 AS (SELECT d.siret, AVG(CAST(er.value AS REAL)) AS dette FROM extraction_results er JOIN documents d ON er.document_id = d.document_id WHERE er.safir_field_id = 'D001' AND d.document_year = '2023' GROUP BY d.siret), dette_2024 AS (SELECT d.siret, AVG(CAST(er.value AS REAL)) AS dette FROM extraction_results er JOIN documents d ON er.document_id = d.document_id WHERE er.safir_field_id = 'D001' AND d.document_year = '2024' GROUP BY d.siret) SELECT d.city_name FROM dette_2024 d4 JOIN dette_2023 d3 ON d4.siret = d3.siret JOIN documents d ON d4.siret = d.siret WHERE d4.dette > d3.dette * 1.15 GROUP BY d.city_name;",True,Empty Result (0 rows returned)
+101,Communes avec un excédent budgétaire (RF01 > DF01) en 2023 et un déficit (RF01 < DF01) en 2024.,"WITH bilan_2023 AS (SELECT d.siret, MAX(CASE WHEN er.safir_field_id = 'RF01' THEN CAST(er.value AS REAL) END) - MAX(CASE WHEN er.safir_field_id = 'DF01' THEN CAST(er.value AS REAL) END) AS solde FROM extraction_results er JOIN documents d ON er.document_id = d.document_id WHERE d.document_year = '2023' AND er.safir_field_id IN ('RF01','DF01') GROUP BY d.document_id), bilan_2024 AS (SELECT d.siret, MAX(CASE WHEN er.safir_field_id = 'RF01' THEN CAST(er.value AS REAL) END) - MAX(CASE WHEN er.safir_field_id = 'DF01' THEN CAST(er.value AS REAL) END) AS solde FROM extraction_results er JOIN documents d ON er.document_id = d.document_id WHERE d.document_year = '2024' AND er.safir_field_id IN ('RF01','DF01') GROUP BY d.document_id) SELECT d.city_name FROM documents d WHERE d.siret IN (SELECT siret FROM bilan_2023 WHERE solde > 0) AND d.siret IN (SELECT siret FROM bilan_2024 WHERE solde < 0) GROUP BY d.city_name;",True,Empty Result (0 rows returned)
+102,Quel est le montant total des investissements (DF011) pour toutes les communes en 2024 ?,SELECT SUM(CAST(e.value AS REAL)) AS total_investissements FROM extraction_results e JOIN documents d ON e.document_id = d.document_id WHERE e.safir_field_id = 'DF011' AND d.document_year = '2024';,True,"|   total_investissements |
+|------------------------:|
+|             1.38089e+09 |"
+103,Combien de communes ont déclaré des dépenses de fonctionnement (DF01) supérieures à 1 million d'euros en 2024 ?,SELECT COUNT(DISTINCT d.siret) FROM extraction_results e JOIN documents d ON e.document_id = d.document_id WHERE e.safir_field_id = 'DF01' AND CAST(e.value AS REAL) > 1000000 AND d.document_year = '2024';,True,"|   COUNT(DISTINCT d.siret) |
+|--------------------------:|
+|                         0 |"
+104,Liste des communes ayant publié un budget annexe (BA) en 2023.,SELECT DISTINCT city_name FROM documents WHERE budget_type = 'BA' AND document_year = '2023';,True,"| city_name                     |
+|:------------------------------|
+| REGIE ENR-SYNDMC SDEC ENERGIE |"
+105,Quel est le nombre moyen de pages des documents traités en 2024 ?,SELECT AVG(nb_pages) FROM documents WHERE document_year = '2024';,True,"|   AVG(nb_pages) |
+|----------------:|
+|         218.833 |"
+106,Quelles communes ont un ratio recettes/dettes (RF01/D001) inférieur à 0.7 en 2024 ?,SELECT d.city_name FROM extraction_results e1 JOIN extraction_results e2 ON e1.document_id = e2.document_id JOIN documents d ON e1.document_id = d.document_id WHERE e1.safir_field_id = 'RF01' AND e2.safir_field_id = 'D001' AND d.document_year = '2024' AND CAST(e1.value AS REAL) / CAST(e2.value AS REAL) < 0.7;,True,Empty Result (0 rows returned)
+107,Nombre de documents traités avec le masque M57_CA en 2023.,SELECT COUNT(*) FROM documents WHERE mask = 'M57_CA' AND document_year = '2023';,True,"|   COUNT(*) |
+|-----------:|
+|          2 |"
+108,Quel est le montant maximal de dette (D001) déclaré par une commune en 2024 ?,SELECT MAX(CAST(e.value AS REAL)) AS dette_max FROM extraction_results e JOIN documents d ON e.document_id = d.document_id WHERE e.safir_field_id = 'D001' AND d.document_year = '2024';,True,"|   dette_max |
+|------------:|
+| 5.03577e+07 |"
+109,Liste des communes dont le document dépasse 300 pages en 2024.,SELECT DISTINCT city_name FROM documents WHERE nb_pages > 300 AND document_year = '2024';,True,"| city_name                    |
+|:-----------------------------|
+| EUROMETROPOLE STRASBOURG     |
+| COMMUNE DE BRIVE             |
+| QUIMPER BRETAGNE OCCIDENTALE |
+| METROPOLE NICE COTE D'AZUR   |
+| Ville de Concarneau          |"
+110,Top 10 des communes par montant total de recettes d'investissement (RI01) en 2024.,"SELECT d.city_name, SUM(CAST(e.value AS REAL)) AS total_recettes_invest FROM extraction_results e JOIN documents d ON e.document_id = d.document_id WHERE e.safir_field_id = 'RI01' AND d.document_year = '2024' GROUP BY d.city_name ORDER BY total_recettes_invest DESC LIMIT 10;",True,Empty Result (0 rows returned)
+111,Comparaison du taux d'endettement moyen (D001/RF01) entre budgets principaux et annexes en 2024.,"SELECT d.budget_type, AVG(CAST(e1.value AS REAL) / CAST(e2.value AS REAL)) AS ratio_moyen FROM extraction_results e1 JOIN extraction_results e2 ON e1.document_id = e2.document_id JOIN documents d ON e1.document_id = d.document_id WHERE e1.safir_field_id = 'D001' AND e2.safir_field_id = 'RF01' AND d.document_year = '2024' GROUP BY d.budget_type;",True,Empty Result (0 rows returned)
+112,Quelles communes ont vu leur dette (D001) augmenter de plus de 20% entre 2023 et 2024 ?,"WITH dette_2023 AS (SELECT d.siret, CAST(e.value AS REAL) AS valeur FROM extraction_results e JOIN documents d ON e.document_id = d.document_id WHERE e.safir_field_id = 'D001' AND d.document_year = '2023'), dette_2024 AS (SELECT d.siret, CAST(e.value AS REAL) AS valeur FROM extraction_results e JOIN documents d ON e.document_id = d.document_id WHERE e.safir_field_id = 'D001' AND d.document_year = '2024') SELECT d.city_name FROM dette_2024 d4 JOIN dette_2023 d3 ON d4.siret = d3.siret JOIN documents d ON d4.siret = d.siret WHERE d4.valeur > d3.valeur * 1.20;",True,Empty Result (0 rows returned)
+113,Répartition des documents par type de masque et budget type en 2024.,"SELECT mask, budget_type, COUNT(*) AS nombre_documents FROM documents WHERE document_year = '2024' GROUP BY mask, budget_type;",True,"| mask    | budget_type   |   nombre_documents |
+|:--------|:--------------|-------------------:|
+| M57_CA  | BA            |                 12 |
+| M57_CA  | BP            |                 41 |
+| M57_CFU | BP            |                 55 |"
+114,Quel est l'indicateur financier le plus fréquemment extrait avec des erreurs en 2024 ?,"SELECT e.safir_field_id, COUNT(*) AS nombre_erreurs FROM extraction_results e JOIN documents d ON e.document_id = d.document_id WHERE d.document_year = '2024' AND e.message_error IS NOT NULL AND e.message_error != '' GROUP BY e.safir_field_id ORDER BY nombre_erreurs DESC LIMIT 1;",True,"| safir_field_id   |   nombre_erreurs |
+|:-----------------|-----------------:|
+| SIRET            |               93 |"
+115,Comparaison des recettes de fonctionnement (RF01) moyennes entre documents PDF et scans en 2024.,"SELECT d.format, AVG(CAST(e.value AS REAL)) AS recettes_moyennes FROM extraction_results e JOIN documents d ON e.document_id = d.document_id WHERE e.safir_field_id = 'RF01' AND d.document_year = '2024' AND d.format IN ('pdf', 'scan') GROUP BY d.format;",True,Empty Result (0 rows returned)
+116,Quelles communes ont un excédent de fonctionnement (RF01 > DF01) en 2024 mais un déficit en 2023 ?,"WITH solde_2023 AS (SELECT d.siret, MAX(CASE WHEN e.safir_field_id = 'RF01' THEN CAST(e.value AS REAL) END) - MAX(CASE WHEN e.safir_field_id = 'DF01' THEN CAST(e.value AS REAL) END) AS solde FROM extraction_results e JOIN documents d ON e.document_id = d.document_id WHERE d.document_year = '2023' AND e.safir_field_id IN ('RF01', 'DF01') GROUP BY d.siret HAVING solde < 0), solde_2024 AS (SELECT d.siret, MAX(CASE WHEN e.safir_field_id = 'RF01' THEN CAST(e.value AS REAL) END) - MAX(CASE WHEN e.safir_field_id = 'DF01' THEN CAST(e.value AS REAL) END) AS solde FROM extraction_results e JOIN documents d ON e.document_id = d.document_id WHERE d.document_year = '2024' AND e.safir_field_id IN ('RF01', 'DF01') GROUP BY d.siret HAVING solde > 0) SELECT d.city_name FROM solde_2024 s4 JOIN solde_2023 s3 ON s4.siret = s3.siret JOIN documents d ON s4.siret = d.siret;",True,Empty Result (0 rows returned)
+117,Détecter les communes où les dépenses totales (DF01 + DF011) dépassent de 30% les recettes totales (RF01 + RI01) en 2024.,"SELECT d.city_name FROM (SELECT document_id, SUM(CASE WHEN safir_field_id IN ('DF01', 'DF011') THEN CAST(value AS REAL) ELSE 0 END) AS depenses, SUM(CASE WHEN safir_field_id IN ('RF01', 'RI01') THEN CAST(value AS REAL) ELSE 0 END) AS recettes FROM extraction_results WHERE document_id IN (SELECT document_id FROM documents WHERE document_year = '2024') GROUP BY document_id HAVING depenses > recettes * 1.30) res JOIN documents d ON res.document_id = d.document_id;",True,"| city_name                            |
+|:-------------------------------------|
+| COMMUNE DE BONIFACIO                 |
+| COMMUNE DE BONIFACIO                 |
+| COMMUNE DE BONIFACIO                 |
+| COMMUNAUTE AGGLOMERATION LUNEL AGGLO |
+| BAGNOLET VILLE - VILLE               |"
+118,Taux de documents avec au moins une erreur de validation pour la règle 'D001_coherence' en 2024.,SELECT COUNT(DISTINCT e.document_id) * 100.0 / (SELECT COUNT(*) FROM documents WHERE document_year = '2024') AS taux_erreur FROM extraction_results e JOIN validation_rules vr ON e.safir_field_id IN (SELECT value FROM json_each(vr.safir_field_id_list)) WHERE vr.validation_rule_id = 'D001_coherence' AND e.message_error IS NOT NULL AND e.message_error != '' AND e.document_id IN (SELECT document_id FROM documents WHERE document_year = '2024');,True,"|   taux_erreur |
+|--------------:|
+|             0 |"
+119,Classement des régions (3 premiers chiffres SIRET) par augmentation moyenne de la dette (D001) entre 2023 et 2024.,"WITH dette_2023 AS (SELECT SUBSTR(d.siret,1,3) AS region, AVG(CAST(e.value AS REAL)) AS moyenne FROM extraction_results e JOIN documents d ON e.document_id = d.document_id WHERE e.safir_field_id = 'D001' AND d.document_year = '2023' GROUP BY region), dette_2024 AS (SELECT SUBSTR(d.siret,1,3) AS region, AVG(CAST(e.value AS REAL)) AS moyenne FROM extraction_results e JOIN documents d ON e.document_id = d.document_id WHERE e.safir_field_id = 'D001' AND d.document_year = '2024' GROUP BY region) SELECT d4.region, (d4.moyenne - d3.moyenne) AS augmentation FROM dette_2024 d4 JOIN dette_2023 d3 ON d4.region = d3.region ORDER BY augmentation DESC;",True,"|   region |   augmentation |
+|---------:|---------------:|
+|      200 |    1.64955e+07 |
+|      214 |   -7.48516e+06 |
+|      216 |   -1.52662e+07 |
+|      213 |   -1.61435e+07 |
+|      210 |   -4.29869e+07 |"
+120,Combien de documents ont été traités avec succès (état SUCCESS) en 2023 ?,SELECT COUNT(*) AS documents_reussis FROM documents d JOIN states s ON d.state_id = s.state_id WHERE s.code = 'SUCCESS' AND d.document_year = '2023';,True,"|   documents_reussis |
+|--------------------:|
+|                  16 |"
+121,Quel est le montant moyen des investissements (DF011) par commune en 2024 ?,"SELECT d.city_name, AVG(CAST(er.value AS REAL)) AS investissement_moyen FROM extraction_results er JOIN documents d ON er.document_id = d.document_id WHERE er.safir_field_id = 'DF011' AND d.document_year = '2024' GROUP BY d.city_name;",True,"| city_name                                                                                     |   investissement_moyen |
+|:----------------------------------------------------------------------------------------------|-----------------------:|
+| BAGNOLET VILLE - VILLE                                                                        |            1.34249e+07 |
+| COMMUNAUTE AGGLOMERATION LUNEL AGGLO                                                          |            1.05206e+07 |
+| COMMUNE DE BONIFACIO                                                                          |            2.14202e+06 |
+| COMMUNE DE BRIVE                                                                              |            1.46719e+07 |
+| COMMUNE DE MITRY- MORY dont la population est de 3500 habitants et plus : VILLE DE MITRY-MORY |            9.50863e+06 |"
+122,Liste des communes ayant publié un budget annexe (BA) en 2024.,SELECT DISTINCT city_name FROM documents WHERE budget_type = 'BA' AND document_year = '2024';,True,"| city_name                                    |
+|:---------------------------------------------|
+| GESTION FORETS VIREUX-WALLERAND 48730        |
+| MAIRIE DE CALVI - SERVICE GENERAL CALVI - CA |
+| EUROMETROPOLE STRASBOURG                     |
+| MAIRIE DE CALVI - PLAGE CALVI - CA           |"
+123,Quelles communes ont vu leurs recettes de fonctionnement (RF01) augmenter de plus de 10% entre 2023 et 2024 ?,"WITH recettes_2023 AS (SELECT d.city_name, CAST(er.value AS REAL) AS valeur FROM extraction_results er JOIN documents d ON er.document_id = d.document_id WHERE er.safir_field_id = 'RF01' AND d.document_year = '2023'), recettes_2024 AS (SELECT d.city_name, CAST(er.value AS REAL) AS valeur FROM extraction_results er JOIN documents d ON er.document_id = d.document_id WHERE er.safir_field_id = 'RF01' AND d.document_year = '2024') SELECT r2024.city_name FROM recettes_2024 r2024 JOIN recettes_2023 r2023 ON r2024.city_name = r2023.city_name WHERE (r2024.valeur - r2023.valeur) / r2023.valeur > 0.1;",True,Empty Result (0 rows returned)
+124,Répartition du nombre de documents par type de masque en 2024.,"SELECT mask, COUNT(*) AS nombre_documents FROM documents WHERE document_year = '2024' GROUP BY mask;",True,"| mask    |   nombre_documents |
+|:--------|-------------------:|
+| M57_CA  |                 53 |
+| M57_CFU |                 55 |"
+125,Top 5 des communes par montant d'investissement (DF011) en 2024.,"SELECT d.city_name, CAST(er.value AS REAL) AS investissement FROM extraction_results er JOIN documents d ON er.document_id = d.document_id WHERE er.safir_field_id = 'DF011' AND d.document_year = '2024' ORDER BY investissement DESC LIMIT 5;",True,"| city_name                  |   investissement |
+|:---------------------------|-----------------:|
+| EUROMETROPOLE STRASBOURG   |      1.13277e+08 |
+| EUROMETROPOLE STRASBOURG   |      1.13277e+08 |
+| EUROMETROPOLE STRASBOURG   |      1.13277e+08 |
+| METROPOLE NICE COTE D'AZUR |      8.29564e+07 |
+| METROPOLE NICE COTE D'AZUR |      8.29564e+07 |"
+126,Quel est le pourcentage de documents avec des erreurs d'extraction pour la dette (D001) en 2024 ?,"WITH total_docs AS (SELECT COUNT(*) AS total FROM documents WHERE document_year = '2024'), docs_erreur AS (SELECT COUNT(DISTINCT d.document_id) AS erreurs FROM extraction_results er JOIN documents d ON er.document_id = d.document_id WHERE er.safir_field_id = 'D001' AND d.document_year = '2024' AND er.message_error IS NOT NULL) SELECT (erreurs * 100.0 / total) AS pourcentage_erreur FROM docs_erreur, total_docs;",True,"|   pourcentage_erreur |
+|---------------------:|
+|              86.1111 |"
+127,Quelles communes ont un excédent de fonctionnement (RF01 > DF01) en 2024 ?,SELECT d.city_name FROM extraction_results recettes JOIN extraction_results depenses ON recettes.document_id = depenses.document_id JOIN documents d ON d.document_id = recettes.document_id WHERE recettes.safir_field_id = 'RF01' AND depenses.safir_field_id = 'DF01' AND d.document_year = '2024' AND CAST(recettes.value AS REAL) > CAST(depenses.value AS REAL) GROUP BY d.city_name;,True,Empty Result (0 rows returned)
+128,Évolution du montant total de la dette (D001) entre 2023 et 2024 par région (3 premiers chiffres SIRET).,"SELECT SUBSTR(d.siret,1,3) AS region, d.document_year, SUM(CAST(er.value AS REAL)) AS dette_totale FROM extraction_results er JOIN documents d ON er.document_id = d.document_id WHERE er.safir_field_id = 'D001' AND d.document_year IN ('2023','2024') GROUP BY region, d.document_year ORDER BY region, d.document_year;",True,"|   region |   document_year |     dette_totale |
+|---------:|----------------:|-----------------:|
+|      200 |            2023 |      0           |
+|      200 |            2024 |      1.64955e+08 |
+|      210 |            2023 |      1.29051e+08 |
+|      210 |            2024 | 120140           |
+|      211 |            2024 |      1.67496e+07 |"
+129,Quels sont les indicateurs financiers avec le plus d'erreurs d'extraction en 2024 ?,"SELECT er.safir_field_id, COUNT(*) AS nombre_erreurs FROM extraction_results er JOIN documents d ON er.document_id = d.document_id WHERE d.document_year = '2024' AND er.message_error IS NOT NULL GROUP BY er.safir_field_id ORDER BY nombre_erreurs DESC LIMIT 5;",True,"| safir_field_id   |   nombre_erreurs |
+|:-----------------|-----------------:|
+| SIRET            |               93 |
+| RRI              |               93 |
+| RRF              |               93 |
+| ROI              |               93 |
+| ROF              |               93 |"
+130,Montant total des recettes d'investissement (RI01) par type de masque en 2024.,"SELECT d.mask, SUM(CAST(er.value AS REAL)) AS recettes_investissement FROM extraction_results er JOIN documents d ON er.document_id = d.document_id WHERE er.safir_field_id = 'RI01' AND d.document_year = '2024' GROUP BY d.mask;",True,Empty Result (0 rows returned)
+131,Communes où la dette (D001) dépasse 2 millions d'euros en 2024.,"SELECT d.city_name, CAST(er.value AS REAL) AS dette FROM extraction_results er JOIN documents d ON er.document_id = d.document_id WHERE er.safir_field_id = 'D001' AND d.document_year = '2024' AND CAST(er.value AS REAL) > 2000000;",True,"| city_name              |       dette |
+|:-----------------------|------------:|
+| BAGNOLET VILLE - VILLE | 6.62993e+06 |
+| BAGNOLET VILLE - VILLE | 6.62993e+06 |
+| COMMUNE DE BONIFACIO   | 3.18125e+06 |
+| COMMUNE DE BONIFACIO   | 3.18125e+06 |
+| BAGNOLET VILLE - VILLE | 6.62993e+06 |"
+132,Variation absolue des dépenses de fonctionnement (DF01) par commune entre 2023 et 2024.,"WITH df2023 AS (SELECT d.city_name, CAST(er.value AS REAL) AS valeur_2023 FROM extraction_results er JOIN documents d ON er.document_id = d.document_id WHERE er.safir_field_id = 'DF01' AND d.document_year = '2023'), df2024 AS (SELECT d.city_name, CAST(er.value AS REAL) AS valeur_2024 FROM extraction_results er JOIN documents d ON er.document_id = d.document_id WHERE er.safir_field_id = 'DF01' AND d.document_year = '2024') SELECT df2024.city_name, (df2024.valeur_2024 - df2023.valeur_2023) AS variation FROM df2024 JOIN df2023 ON df2024.city_name = df2023.city_name;",True,Empty Result (0 rows returned)
+133,Quel est le taux de documents validés sans avertissement en 2024 ?,"WITH docs_valides AS (SELECT COUNT(*) AS valides FROM documents d JOIN states s ON d.state_id = s.state_id WHERE d.document_year = '2024' AND s.code = 'VALIDATED' AND d.warning_message = ''), total_docs AS (SELECT COUNT(*) AS total FROM documents WHERE document_year = '2024') SELECT (valides * 100.0 / total) AS taux_valides FROM docs_valides, total_docs;",True,"|   taux_valides |
+|---------------:|
+|              0 |"
+134,Comparaison du nombre moyen de pages entre documents M57_CA et M57_CFU en 2024.,"SELECT mask, AVG(nb_pages) AS pages_moyennes FROM documents WHERE document_year = '2024' AND mask IN ('M57_CA','M57_CFU') GROUP BY mask;",True,"| mask    |   pages_moyennes |
+|:--------|-----------------:|
+| M57_CA  |          258.887 |
+| M57_CFU |          180.236 |"
+135,Communes avec un ratio investissements/recettes (DF011/RI01) supérieur à 1.5 en 2024.,SELECT d.city_name FROM extraction_results invest JOIN extraction_results recettes ON invest.document_id = recettes.document_id JOIN documents d ON d.document_id = invest.document_id WHERE invest.safir_field_id = 'DF011' AND recettes.safir_field_id = 'RI01' AND d.document_year = '2024' AND CAST(invest.value AS REAL) / CAST(recettes.value AS REAL) > 1.5 GROUP BY d.city_name;,True,Empty Result (0 rows returned)
+136,Répartition des budgets par type (BP/BA) et par année.,"SELECT document_year, budget_type, COUNT(*) AS nombre FROM documents GROUP BY document_year, budget_type;",True,"|   document_year | budget_type   |   nombre |
+|----------------:|:--------------|---------:|
+|            2023 | BA            |        1 |
+|            2023 | BP            |       17 |
+|            2024 | BA            |       12 |
+|            2024 | BP            |       96 |"
+137,Combien de communes ont un ratio dépenses/recettes de fonctionnement (DF01/RF01) supérieur à 1.1 en 2024 ?,SELECT COUNT(DISTINCT d.siret) FROM extraction_results er1 JOIN extraction_results er2 ON er1.document_id = er2.document_id JOIN documents d ON er1.document_id = d.document_id WHERE er1.safir_field_id = 'DF01' AND er2.safir_field_id = 'RF01' AND d.document_year = '2024' AND (CAST(er1.value AS REAL) / CAST(er2.value AS REAL)) > 1.1;,True,"|   COUNT(DISTINCT d.siret) |
+|--------------------------:|
+|                         0 |"
+138,Liste des communes dont les dépenses d'investissement (DF011) dépassent 500 000 euros en 2024.,SELECT DISTINCT d.city_name FROM extraction_results er JOIN documents d ON er.document_id = d.document_id WHERE er.safir_field_id = 'DF011' AND d.document_year = '2024' AND CAST(er.value AS REAL) > 500000;,True,"| city_name                                    |
+|:---------------------------------------------|
+| COMMUNAUTE AGGLOMERATION LUNEL AGGLO         |
+| BAGNOLET VILLE - VILLE                       |
+| COMMUNE DE BONIFACIO                         |
+| MAIRIE DE CALVI - SERVICE GENERAL CALVI - CA |
+| EUROMETROPOLE STRASBOURG                     |"
+139,Top 5 des communes par montant total de recettes d'investissement (RI01) en 2024.,"SELECT d.city_name, SUM(CAST(er.value AS REAL)) AS total_recettes_investissement FROM extraction_results er JOIN documents d ON er.document_id = d.document_id WHERE er.safir_field_id = 'RI01' AND d.document_year = '2024' GROUP BY d.city_name ORDER BY total_recettes_investissement DESC LIMIT 5;",True,Empty Result (0 rows returned)
+140,Pourcentage de documents sans erreur d'extraction pour l'indicateur D001 en 2024.,SELECT (COUNT(*) FILTER (WHERE er.message_error IS NULL OR er.message_error = '') * 100.0 / COUNT(*)) AS taux_succes FROM extraction_results er JOIN documents d ON er.document_id = d.document_id WHERE er.safir_field_id = 'D001' AND d.document_year = '2024';,True,"|   taux_succes |
+|--------------:|
+|             0 |"
+141,Comparaison des dépenses de fonctionnement moyennes (DF01) entre documents PDF et scans en 2024.,"SELECT d.format, AVG(CAST(er.value AS REAL)) AS depenses_moyennes FROM extraction_results er JOIN documents d ON er.document_id = d.document_id WHERE er.safir_field_id = 'DF01' AND d.document_year = '2024' GROUP BY d.format;",True,Empty Result (0 rows returned)
+142,Communes où les recettes de fonctionnement (RF01) ont diminué de plus de 5% entre 2023 et 2024.,SELECT d2024.city_name FROM extraction_results er2024 JOIN documents d2024 ON er2024.document_id = d2024.document_id JOIN extraction_results er2023 ON er2023.safir_field_id = 'RF01' JOIN documents d2023 ON er2023.document_id = d2023.document_id WHERE er2024.safir_field_id = 'RF01' AND d2024.document_year = '2024' AND d2023.document_year = '2023' AND d2024.siret = d2023.siret AND (CAST(er2024.value AS REAL) < CAST(er2023.value AS REAL) * 0.95);,True,Empty Result (0 rows returned)
+143,Montant total des investissements (DF011) par type de masque technique en 2024.,"SELECT d.mask, SUM(CAST(er.value AS REAL)) AS total_investissements FROM extraction_results er JOIN documents d ON er.document_id = d.document_id WHERE er.safir_field_id = 'DF011' AND d.document_year = '2024' GROUP BY d.mask;",True,"| mask    |   total_investissements |
+|:--------|------------------------:|
+| M57_CA  |             6.98373e+08 |
+| M57_CFU |             6.82518e+08 |"
+144,Nombre de communes ayant un excédent de fonctionnement (RF01 > DF01) en 2024.,SELECT COUNT(DISTINCT d.siret) FROM extraction_results er_rev JOIN extraction_results er_dep ON er_rev.document_id = er_dep.document_id JOIN documents d ON er_rev.document_id = d.document_id WHERE er_rev.safir_field_id = 'RF01' AND er_dep.safir_field_id = 'DF01' AND d.document_year = '2024' AND CAST(er_rev.value AS REAL) > CAST(er_dep.value AS REAL);,True,"|   COUNT(DISTINCT d.siret) |
+|--------------------------:|
+|                         0 |"
+145,Valeur moyenne de la dette (D001) pour les communes de plus de 100 000 habitants en 2024 (basé sur SIRET commençant par '21').,SELECT AVG(CAST(er.value AS REAL)) AS dette_moyenne FROM extraction_results er JOIN documents d ON er.document_id = d.document_id WHERE er.safir_field_id = 'D001' AND d.document_year = '2024' AND d.siret LIKE '21%';,True,"|   dette_moyenne |
+|----------------:|
+|     3.07151e+06 |"
+146,Top 3 des indicateurs financiers avec le plus d'erreurs d'extraction en 2024.,"SELECT er.safir_field_id, COUNT(*) AS nombre_erreurs FROM extraction_results er JOIN documents d ON er.document_id = d.document_id WHERE d.document_year = '2024' AND (er.message_error IS NOT NULL AND er.message_error != '') GROUP BY er.safir_field_id ORDER BY nombre_erreurs DESC LIMIT 3;",True,"| safir_field_id   |   nombre_erreurs |
+|:-----------------|-----------------:|
+| SIRET            |               93 |
+| RRI              |               93 |
+| RRF              |               93 |"
+147,Différence absolue moyenne entre les dépenses de fonctionnement (DF01) et les recettes de fonctionnement (RF01) par commune en 2024.,"SELECT d.city_name, AVG(ABS(CAST(er_dep.value AS REAL) - CAST(er_rev.value AS REAL))) AS difference_moyenne FROM extraction_results er_dep JOIN extraction_results er_rev ON er_dep.document_id = er_rev.document_id JOIN documents d ON er_dep.document_id = d.document_id WHERE er_dep.safir_field_id = 'DF01' AND er_rev.safir_field_id = 'RF01' AND d.document_year = '2024' GROUP BY d.city_name;",True,Empty Result (0 rows returned)
+148,Communes où la part des investissements dans les dépenses totales (DF011/(DF01+DF011)) dépasse 40% en 2024.,SELECT d.city_name FROM extraction_results er_inv JOIN extraction_results er_dep ON er_inv.document_id = er_dep.document_id JOIN documents d ON er_inv.document_id = d.document_id WHERE er_inv.safir_field_id = 'DF011' AND er_dep.safir_field_id = 'DF01' AND d.document_year = '2024' AND (CAST(er_inv.value AS REAL) / (CAST(er_inv.value AS REAL) + CAST(er_dep.value AS REAL))) > 0.4;,True,Empty Result (0 rows returned)
+149,Nombre de documents traités par mois en 2024.,"SELECT STRFTIME('%Y-%m', created_at) AS mois, COUNT(*) AS nombre_documents FROM documents WHERE document_year = '2024' GROUP BY mois;",True,"| mois   |   nombre_documents |
+|:-------|-------------------:|
+|        |                108 |"
+150,Ratio moyen des recettes d'investissement sur les dépenses d'investissement (RI01/DF011) par type de budget en 2024.,"SELECT d.budget_type, AVG(CAST(er_rev.value AS REAL) / CAST(er_dep.value AS REAL)) AS ratio_moyen FROM extraction_results er_rev JOIN extraction_results er_dep ON er_rev.document_id = er_dep.document_id JOIN documents d ON er_rev.document_id = d.document_id WHERE er_rev.safir_field_id = 'RI01' AND er_dep.safir_field_id = 'DF011' AND d.document_year = '2024' GROUP BY d.budget_type;",True,Empty Result (0 rows returned)
+151,Quel est le montant total des dépenses de fonctionnement pour la commune de Strasbourg en 2024 ?,SELECT SUM(CAST(e.value AS REAL)) AS total_depenses_fonctionnement FROM extraction_results e JOIN documents d ON e.document_id = d.document_id WHERE d.city_name = 'EUROMETROPOLE STRASBOURG' AND e.safir_field_id = 'DF01' AND d.document_year = '2024';,True,"| total_depenses_fonctionnement   |
+|:--------------------------------|
+|                                 |"
+152,Combien de communes ont publié des documents avec le masque M57_CA en 2023 ?,SELECT COUNT(DISTINCT siret) AS nombre_communes FROM documents WHERE mask = 'M57_CA' AND document_year = '2023';,True,"|   nombre_communes |
+|------------------:|
+|                 1 |"
+153,Quelle est la valeur moyenne des investissements déclarés en 2024 ?,SELECT AVG(CAST(e.value AS REAL)) AS investissement_moyen FROM extraction_results e JOIN documents d ON e.document_id = d.document_id WHERE e.safir_field_id = 'DF011' AND d.document_year = '2024';,True,"|   investissement_moyen |
+|-----------------------:|
+|            1.48483e+07 |"
+154,Top 5 des communes par montant de recettes d'investissement en 2024.,"SELECT d.city_name, CAST(e.value AS REAL) AS recettes_investissement FROM extraction_results e JOIN documents d ON e.document_id = d.document_id WHERE e.safir_field_id = 'RI01' AND d.document_year = '2024' ORDER BY recettes_investissement DESC LIMIT 5;",True,Empty Result (0 rows returned)
+155,Comparaison du nombre de documents traités avec succès entre 2023 et 2024.,"SELECT d.document_year, COUNT(*) AS documents_reussis FROM documents d JOIN states s ON d.state_id = s.state_id WHERE s.code = 'SUCCESS' AND d.document_year IN ('2023','2024') GROUP BY d.document_year;",True,"|   document_year |   documents_reussis |
+|----------------:|--------------------:|
+|            2023 |                  16 |
+|            2024 |                  93 |"
+156,Quel pourcentage des budgets annexes présente un excédent de fonctionnement en 2024 ?,"WITH budgets AS (SELECT d.document_id, MAX(CASE WHEN e.safir_field_id = 'RF01' THEN CAST(e.value AS REAL) END) AS recettes, MAX(CASE WHEN e.safir_field_id = 'DF01' THEN CAST(e.value AS REAL) END) AS depenses FROM documents d JOIN extraction_results e ON d.document_id = e.document_id WHERE d.budget_type = 'BA' AND d.document_year = '2024' GROUP BY d.document_id) SELECT (COUNT(CASE WHEN recettes > depenses THEN 1 END) * 100.0 / COUNT(*)) AS pourcentage_excedent FROM budgets;",True,"|   pourcentage_excedent |
+|-----------------------:|
+|                      0 |"
+157,Quelle est la commune avec la plus forte augmentation de dette entre 2023 et 2024 ?,"WITH dette_2023 AS (SELECT d.siret, CAST(e.value AS REAL) AS dette FROM extraction_results e JOIN documents d ON e.document_id = d.document_id WHERE e.safir_field_id = 'D001' AND d.document_year = '2023'), dette_2024 AS (SELECT d.siret, CAST(e.value AS REAL) AS dette FROM extraction_results e JOIN documents d ON e.document_id = d.document_id WHERE e.safir_field_id = 'D001' AND d.document_year = '2024') SELECT d.city_name, (d2024.dette - d2023.dette) AS augmentation FROM documents d JOIN dette_2023 d2023 ON d.siret = d2023.siret JOIN dette_2024 d2024 ON d.siret = d2024.siret ORDER BY augmentation DESC LIMIT 1;",True,Empty Result (0 rows returned)
+158,Répartition des types de masque technique pour les documents de plus de 200 pages.,"SELECT mask, COUNT(*) AS nombre_documents FROM documents WHERE nb_pages > 200 GROUP BY mask;",True,"| mask    |   nombre_documents |
+|:--------|-------------------:|
+| M57_CA  |                 36 |
+| M57_CFU |                 28 |"
+159,Quels indicateurs financiers ont le plus d'erreurs d'extraction en 2024 ?,"SELECT safir_field_id, COUNT(*) AS nombre_erreurs FROM extraction_results WHERE message_error IS NOT NULL AND message_error != '' AND document_id IN (SELECT document_id FROM documents WHERE document_year = '2024') GROUP BY safir_field_id ORDER BY nombre_erreurs DESC LIMIT 3;",True,"| safir_field_id   |   nombre_erreurs |
+|:-----------------|-----------------:|
+| SIRET            |               93 |
+| RRI              |               93 |
+| RRF              |               93 |"
+160,Montant total des investissements par région (3 premiers chiffres SIRET) en 2024.,"SELECT SUBSTR(d.siret,1,3) AS region, SUM(CAST(e.value AS REAL)) AS total_investissements FROM extraction_results e JOIN documents d ON e.document_id = d.document_id WHERE e.safir_field_id = 'DF011' AND d.document_year = '2024' GROUP BY region;",True,"|   region |   total_investissements |
+|---------:|------------------------:|
+|      200 |             3.48761e+08 |
+|      210 |        148061           |
+|      211 |             2.93437e+07 |
+|      212 |             9.05237e+07 |
+|      213 |             9.35102e+07 |"
+161,Communes où les dépenses de fonctionnement dépassent 1 million d'euros en 2024.,SELECT d.city_name FROM documents d JOIN extraction_results e ON d.document_id = e.document_id WHERE e.safir_field_id = 'DF01' AND CAST(e.value AS REAL) > 1000000 AND d.document_year = '2024';,True,Empty Result (0 rows returned)
+162,Évolution du taux d'endettement moyen entre 2023 et 2024.,"SELECT d.document_year, AVG(CAST(dette.value AS REAL) / CAST(recettes.value AS REAL)) AS taux_moyen FROM documents d JOIN extraction_results dette ON d.document_id = dette.document_id JOIN extraction_results recettes ON d.document_id = recettes.document_id WHERE dette.safir_field_id = 'D001' AND recettes.safir_field_id = 'RF01' AND d.document_year IN ('2023','2024') GROUP BY d.document_year;",True,Empty Result (0 rows returned)
+163,Quelle commune a le plus haut ratio investissements/recettes en 2024 ?,"SELECT d.city_name, MAX(CAST(inv.value AS REAL) / CAST(rec.value AS REAL)) AS ratio FROM documents d JOIN extraction_results inv ON d.document_id = inv.document_id JOIN extraction_results rec ON d.document_id = rec.document_id WHERE inv.safir_field_id = 'DF011' AND rec.safir_field_id = 'RI01' AND d.document_year = '2024' GROUP BY d.city_name ORDER BY ratio DESC LIMIT 1;",True,Empty Result (0 rows returned)
+164,Nombre de documents avec des erreurs de validation pour la règle 'D001_coherence' en 2024.,SELECT COUNT(DISTINCT er.result_id) AS nombre_erreurs FROM extraction_results er JOIN validation_rules vr ON er.message_error LIKE '%'||vr.validation_rule_id||'%' JOIN documents d ON er.document_id = d.document_id WHERE vr.definition LIKE '%D001_coherence%' AND d.document_year = '2024';,True,"|   nombre_erreurs |
+|-----------------:|
+|                0 |"
+165,Quel est le montant médian des recettes de fonctionnement par commune en 2024 ?,"SELECT d.city_name, CAST(e.value AS REAL) AS recettes FROM documents d JOIN extraction_results e ON d.document_id = e.document_id WHERE e.safir_field_id = 'RF01' AND d.document_year = '2024' ORDER BY recettes LIMIT 1 OFFSET (SELECT COUNT(*) FROM documents WHERE document_year = '2024') / 2;",True,Empty Result (0 rows returned)
+166,Répartition des budgets principaux (BP) et annexes (BA) en 2023.,"SELECT budget_type, COUNT(*) AS nombre FROM documents WHERE document_year = '2023' GROUP BY budget_type;",True,"| budget_type   |   nombre |
+|:--------------|---------:|
+| BA            |        1 |
+| BP            |       17 |"
+167,Communes dont la dette a diminué d'au moins 10% entre 2023 et 2024.,"WITH dette_2023 AS (SELECT d.siret, CAST(e.value AS REAL) AS dette FROM extraction_results e JOIN documents d ON e.document_id = d.document_id WHERE e.safir_field_id = 'D001' AND d.document_year = '2023'), dette_2024 AS (SELECT d.siret, CAST(e.value AS REAL) AS dette FROM extraction_results e JOIN documents d ON e.document_id = d.document_id WHERE e.safir_field_id = 'D001' AND d.document_year = '2024') SELECT d.city_name FROM documents d JOIN dette_2023 d23 ON d.siret = d23.siret JOIN dette_2024 d24 ON d.siret = d24.siret WHERE (d23.dette - d24.dette) / d23.dette >= 0.1;",True,Empty Result (0 rows returned)
+168,Top 3 des indicateurs avec le plus de valeurs manquantes en 2024.,"SELECT safir_field_id, COUNT(*) AS valeurs_manquantes FROM extraction_results WHERE (value IS NULL OR value = '') AND document_id IN (SELECT document_id FROM documents WHERE document_year = '2024') GROUP BY safir_field_id ORDER BY valeurs_manquantes DESC LIMIT 3;",True,"| safir_field_id   |   valeurs_manquantes |
+|:-----------------|---------------------:|
+| DCT              |                   33 |
+| DF66112          |                   29 |
+| EDBP             |                   28 |"
+169,Quel est le taux de documents sans avertissement pour les communes de plus de 100 000 habitants ?,"SELECT (COUNT(CASE WHEN d.warning_message = '' OR d.warning_message IS NULL THEN 1 END) * 100.0 / COUNT(*)) AS taux_sans_avertissement FROM documents d WHERE SUBSTR(d.siret,1,3) IN ('212','213','214') AND d.document_year = '2024';",True,"|   taux_sans_avertissement |
+|--------------------------:|
+|                   66.6667 |"
+170,Combien de communes ont publié un budget principal (BP) en 2023 ?,SELECT COUNT(DISTINCT siret) AS nombre_communes FROM documents WHERE budget_type = 'BP' AND document_year = '2023';,True,"|   nombre_communes |
+|------------------:|
+|                 5 |"
+171,Quel est le ratio moyen dépenses d'investissement / recettes d'investissement (DF011/RI01) par commune en 2024 ?,"SELECT d.siret, AVG(i.invest_depenses / i.invest_recettes) AS ratio_moyen FROM (SELECT er1.document_id, CAST(er1.value AS REAL) AS invest_depenses, CAST(er2.value AS REAL) AS invest_recettes FROM extraction_results er1 JOIN extraction_results er2 ON er1.document_id = er2.document_id WHERE er1.safir_field_id = 'DF011' AND er2.safir_field_id = 'RI01') i JOIN documents d ON i.document_id = d.document_id WHERE d.document_year = '2024' GROUP BY d.siret;",True,Empty Result (0 rows returned)
+172,Liste des 10 communes avec la plus forte augmentation de recettes de fonctionnement (RF01) entre 2023 et 2024.,"WITH data_2023 AS (SELECT d.siret, CAST(er.value AS REAL) AS rf01_2023 FROM extraction_results er JOIN documents d ON er.document_id = d.document_id WHERE er.safir_field_id = 'RF01' AND d.document_year = '2023'), data_2024 AS (SELECT d.siret, CAST(er.value AS REAL) AS rf01_2024 FROM extraction_results er JOIN documents d ON er.document_id = d.document_id WHERE er.safir_field_id = 'RF01' AND d.document_year = '2024') SELECT d.city_name, (d24.rf01_2024 - d23.rf01_2023) AS augmentation FROM data_2023 d23 JOIN data_2024 d24 ON d23.siret = d24.siret JOIN documents d ON d23.siret = d.siret ORDER BY augmentation DESC LIMIT 10;",True,Empty Result (0 rows returned)
+173,Pourcentage de documents avec des investissements (DF011) supérieurs à 500 000 euros en 2024.,SELECT (COUNT(CASE WHEN CAST(er.value AS REAL) > 500000 THEN 1 END) * 100.0 / COUNT(*)) AS pourcentage FROM extraction_results er JOIN documents d ON er.document_id = d.document_id WHERE er.safir_field_id = 'DF011' AND d.document_year = '2024';,True,"|   pourcentage |
+|--------------:|
+|       90.3226 |"
+174,"Répartition du nombre de documents par format (PDF, scan, image) et par année.","SELECT document_year, format, COUNT(*) AS nombre_documents FROM documents GROUP BY document_year, format;",True,"|   document_year | format   |   nombre_documents |
+|----------------:|:---------|-------------------:|
+|            2023 | pdf      |                 18 |
+|            2024 | pdf      |                 89 |
+|            2024 | scan     |                 19 |"
+175,Quelles communes ont un excédent de fonctionnement (RF01 > DF01) dans leurs budgets annexes (BA) en 2024 ?,SELECT DISTINCT d.city_name FROM extraction_results er1 JOIN extraction_results er2 ON er1.document_id = er2.document_id JOIN documents d ON er1.document_id = d.document_id WHERE er1.safir_field_id = 'RF01' AND er2.safir_field_id = 'DF01' AND d.budget_type = 'BA' AND d.document_year = '2024' AND CAST(er1.value AS REAL) > CAST(er2.value AS REAL);,True,Empty Result (0 rows returned)
+176,Taux de documents sans erreur d'extraction pour l'indicateur de dette (D001) en 2024.,SELECT (COUNT(CASE WHEN er.message_error IS NULL OR er.message_error = '' THEN 1 END) * 100.0 / COUNT(*)) AS taux_succes FROM extraction_results er JOIN documents d ON er.document_id = d.document_id WHERE er.safir_field_id = 'D001' AND d.document_year = '2024';,True,"|   taux_succes |
+|--------------:|
+|             0 |"
+177,Comparaison des dépenses de fonctionnement moyennes (DF01) entre documents M57_CA et M57_CFU en 2024.,"SELECT d.mask, AVG(CAST(er.value AS REAL)) AS depenses_moyennes FROM extraction_results er JOIN documents d ON er.document_id = d.document_id WHERE er.safir_field_id = 'DF01' AND d.document_year = '2024' AND d.mask IN ('M57_CA','M57_CFU') GROUP BY d.mask;",True,Empty Result (0 rows returned)
+178,Communes où les dépenses de fonctionnement (DF01) dépassent 1 million d'euros en 2024.,SELECT DISTINCT d.city_name FROM extraction_results er JOIN documents d ON er.document_id = d.document_id WHERE er.safir_field_id = 'DF01' AND d.document_year = '2024' AND CAST(er.value AS REAL) > 1000000;,True,Empty Result (0 rows returned)
+179,Ratio dette/recettes totales (D001/(RF01+RI01)) par commune en 2024.,"SELECT d.city_name, (CAST(er_d.value AS REAL) / (CAST(er_rf.value AS REAL) + CAST(er_ri.value AS REAL))) AS ratio FROM documents d JOIN extraction_results er_d ON d.document_id = er_d.document_id AND er_d.safir_field_id = 'D001' JOIN extraction_results er_rf ON d.document_id = er_rf.document_id AND er_rf.safir_field_id = 'RF01' JOIN extraction_results er_ri ON d.document_id = er_ri.document_id AND er_ri.safir_field_id = 'RI01' WHERE d.document_year = '2024';",True,Empty Result (0 rows returned)
+180,Nombre de communes avec une augmentation de plus de 10% des recettes de fonctionnement (RF01) entre 2023 et 2024.,"WITH data_2023 AS (SELECT d.siret, CAST(er.value AS REAL) AS rf01_2023 FROM extraction_results er JOIN documents d ON er.document_id = d.document_id WHERE er.safir_field_id = 'RF01' AND d.document_year = '2023'), data_2024 AS (SELECT d.siret, CAST(er.value AS REAL) AS rf01_2024 FROM extraction_results er JOIN documents d ON er.document_id = d.document_id WHERE er.safir_field_id = 'RF01' AND d.document_year = '2024') SELECT COUNT(*) AS nombre_communes FROM data_2023 d23 JOIN data_2024 d24 ON d23.siret = d24.siret WHERE (d24.rf01_2024 - d23.rf01_2023) / d23.rf01_2023 > 0.1;",True,"|   nombre_communes |
+|------------------:|
+|                 0 |"
+181,Valeur totale des investissements (DF011) par mois de création des documents en 2024.,"SELECT STRFTIME('%Y-%m', d.created_at) AS mois, SUM(CAST(er.value AS REAL)) AS total_investissements FROM extraction_results er JOIN documents d ON er.document_id = d.document_id WHERE er.safir_field_id = 'DF011' AND d.document_year = '2024' GROUP BY mois;",True,"| mois   |   total_investissements |
+|:-------|------------------------:|
+|        |             1.38089e+09 |"
+182,Communes dont la dette (D001) représente plus de 50% des recettes totales en 2024.,SELECT d.city_name FROM documents d JOIN extraction_results er_d ON d.document_id = er_d.document_id AND er_d.safir_field_id = 'D001' JOIN extraction_results er_rf ON d.document_id = er_rf.document_id AND er_rf.safir_field_id = 'RF01' JOIN extraction_results er_ri ON d.document_id = er_ri.document_id AND er_ri.safir_field_id = 'RI01' WHERE d.document_year = '2024' AND (CAST(er_d.value AS REAL) / (CAST(er_rf.value AS REAL) + CAST(er_ri.value AS REAL))) > 0.5;,True,Empty Result (0 rows returned)
+183,Différence absolue entre dépenses et recettes de fonctionnement (DF01 - RF01) par commune en 2024.,"SELECT d.city_name, (CAST(er_df.value AS REAL) - CAST(er_rf.value AS REAL)) AS solde_fonctionnement FROM documents d JOIN extraction_results er_df ON d.document_id = er_df.document_id AND er_df.safir_field_id = 'DF01' JOIN extraction_results er_rf ON d.document_id = er_rf.document_id AND er_rf.safir_field_id = 'RF01' WHERE d.document_year = '2024';",True,Empty Result (0 rows returned)
+184,Top 3 des indicateurs financiers avec le plus de valeurs nulles ou vides en 2024.,"SELECT safir_field_id, COUNT(*) AS nombre_vides FROM extraction_results er JOIN documents d ON er.document_id = d.document_id WHERE d.document_year = '2024' AND (er.value IS NULL OR er.value = '') GROUP BY safir_field_id ORDER BY nombre_vides DESC LIMIT 3;",True,"| safir_field_id   |   nombre_vides |
+|:-----------------|---------------:|
+| DCT              |             33 |
+| DF66112          |             29 |
+| EDBP             |             28 |"
+185,Communes avec une diminution de plus de 15% des dépenses d'investissement (DF011) entre 2023 et 2024.,"WITH data_2023 AS (SELECT d.siret, CAST(er.value AS REAL) AS df011_2023 FROM extraction_results er JOIN documents d ON er.document_id = d.document_id WHERE er.safir_field_id = 'DF011' AND d.document_year = '2023'), data_2024 AS (SELECT d.siret, CAST(er.value AS REAL) AS df011_2024 FROM extraction_results er JOIN documents d ON er.document_id = d.document_id WHERE er.safir_field_id = 'DF011' AND d.document_year = '2024') SELECT d.city_name FROM data_2023 d23 JOIN data_2024 d24 ON d23.siret = d24.siret JOIN documents d ON d23.siret = d.siret WHERE (d24.df011_2024 - d23.df011_2023) / d23.df011_2023 < -0.15;",True,Empty Result (0 rows returned)
+186,"Répartition des budgets par type (BP/BA) et par nombre de pages (<100, 100-300, >300) en 2024.","SELECT budget_type, CASE WHEN nb_pages < 100 THEN '<100' WHEN nb_pages BETWEEN 100 AND 300 THEN '100-300' ELSE '>300' END AS tranche_pages, COUNT(*) AS nombre_documents FROM documents WHERE document_year = '2024' GROUP BY budget_type, tranche_pages;",True,"| budget_type   | tranche_pages   |   nombre_documents |
+|:--------------|:----------------|-------------------:|
+| BA            | 100-300         |                  8 |
+| BA            | <100            |                  4 |
+| BP            | 100-300         |                 56 |
+| BP            | <100            |                 17 |
+| BP            | >300            |                 23 |"
+187,Quel est le montant total des recettes de fonctionnement (RF01) pour la commune de Strasbourg en 2024 ?,SELECT SUM(CAST(e.value AS REAL)) AS total_recettes FROM extraction_results e JOIN documents d ON e.document_id = d.document_id WHERE e.safir_field_id = 'RF01' AND d.city_name = 'EUROMETROPOLE STRASBOURG' AND d.document_year = '2024',True,"| total_recettes   |
+|:-----------------|
+|                  |"
+188,Quelle est la valeur moyenne des investissements (DF011) déclarés dans les budgets principaux (BP) en 2024 ?,SELECT AVG(CAST(e.value AS REAL)) AS investissement_moyen FROM extraction_results e JOIN documents d ON e.document_id = d.document_id WHERE e.safir_field_id = 'DF011' AND d.budget_type = 'BP' AND d.document_year = '2024',True,"|   investissement_moyen |
+|-----------------------:|
+|            1.62439e+07 |"
+189,Liste des communes ayant publié des documents avec plus de 300 pages en 2024.,SELECT DISTINCT city_name FROM documents WHERE nb_pages > 300 AND document_year = '2024',True,"| city_name                    |
+|:-----------------------------|
+| EUROMETROPOLE STRASBOURG     |
+| COMMUNE DE BRIVE             |
+| QUIMPER BRETAGNE OCCIDENTALE |
+| METROPOLE NICE COTE D'AZUR   |
+| Ville de Concarneau          |"
+190,Top 5 des communes par montant total de dette (D001) en 2024.,"SELECT d.city_name, SUM(CAST(e.value AS REAL)) AS dette_totale FROM extraction_results e JOIN documents d ON e.document_id = d.document_id WHERE e.safir_field_id = 'D001' AND d.document_year = '2024' GROUP BY d.siret, d.city_name ORDER BY dette_totale DESC LIMIT 5",True,"| city_name                  |   dette_totale |
+|:---------------------------|---------------:|
+| EUROMETROPOLE STRASBOURG   |    1.51073e+08 |
+| METROPOLE NICE COTE D'AZUR |    1.48696e+08 |
+| BAGNOLET VILLE - VILLE     |    7.29293e+07 |
+| COMMUNE DE BONIFACIO       |    4.77187e+07 |
+| VILLE DE SETE              |    3.20331e+07 |"
+191,Comparaison du nombre de documents traités entre formats PDF et scan par année.,"SELECT document_year, format, COUNT(*) AS nombre_documents FROM documents WHERE format IN ('pdf', 'scan') GROUP BY document_year, format",True,"|   document_year | format   |   nombre_documents |
+|----------------:|:---------|-------------------:|
+|            2023 | pdf      |                 18 |
+|            2024 | pdf      |                 89 |
+|            2024 | scan     |                 19 |"
+192,Pourcentage des budgets annexes (BA) présentant un excédent de fonctionnement (RF01 > DF01) en 2024.,SELECT (COUNT(CASE WHEN CAST(rf.value AS REAL) > CAST(df.value AS REAL) THEN 1 END) * 100.0 / COUNT(*)) AS pourcentage_excedent FROM documents d JOIN extraction_results rf ON d.document_id = rf.document_id AND rf.safir_field_id = 'RF01' JOIN extraction_results df ON d.document_id = df.document_id AND df.safir_field_id = 'DF01' WHERE d.budget_type = 'BA' AND d.document_year = '2024',True,"| pourcentage_excedent   |
+|:-----------------------|
+|                        |"
+193,Évolution du montant moyen des dépenses de fonctionnement (DF01) entre 2023 et 2024 par type de masque technique.,"SELECT mask, document_year, AVG(CAST(value AS REAL)) AS depenses_moyennes FROM extraction_results e JOIN documents d ON e.document_id = d.document_id WHERE e.safir_field_id = 'DF01' AND d.document_year IN ('2023','2024') GROUP BY mask, document_year",True,Empty Result (0 rows returned)
+194,Communes dont la part des investissements dans les dépenses totales (DF011/(DF01+DF011)) dépasse 30% en 2024.,"WITH depenses AS (SELECT d.document_id, d.siret, d.city_name, CAST(df01.value AS REAL) AS fonct, CAST(df011.value AS REAL) AS invest FROM documents d JOIN extraction_results df01 ON d.document_id = df01.document_id AND df01.safir_field_id = 'DF01' JOIN extraction_results df011 ON d.document_id = df011.document_id AND df011.safir_field_id = 'DF011' WHERE d.document_year = '2024') SELECT city_name, (invest / (fonct + invest)) * 100 AS part_investissement FROM depenses WHERE (invest / (fonct + invest)) > 0.3",True,Empty Result (0 rows returned)
+195,Indicateurs financiers avec le plus grand écart relatif entre valeur extraite et moyenne sectorielle en 2024 (top 10).,"WITH sectoriel AS (SELECT safir_field_id, AVG(CAST(value AS REAL)) AS moyenne FROM extraction_results e JOIN documents d ON e.document_id = d.document_id WHERE d.document_year = '2024' GROUP BY safir_field_id), ecarts AS (SELECT e.safir_field_id, e.document_id, ABS(CAST(e.value AS REAL) - s.moyenne) / s.moyenne AS ecart_rel FROM extraction_results e JOIN sectoriel s ON e.safir_field_id = s.safir_field_id JOIN documents d ON e.document_id = d.document_id WHERE d.document_year = '2024') SELECT safir_field_id, AVG(ecart_rel) AS ecart_moyen FROM ecarts GROUP BY safir_field_id ORDER BY ecart_moyen DESC LIMIT 10",True,"| safir_field_id   |   ecart_moyen |
+|:-----------------|--------------:|
+| RIA              |       3.29545 |
+| DIA              |       1.97849 |
+| DF6564           |       1.97849 |
+| DI1675           |       1.89247 |
+| RI1645           |       1.87097 |"
+196,Quel est le montant total des investissements (DF011) déclarés dans les budgets principaux (BP) pour l'année 2024 ?,"SELECT SUM(CAST(er.value AS REAL)) AS total_investissements
+FROM extraction_results er
+JOIN documents d ON er.document_id = d.document_id
+WHERE er.safir_field_id = 'DF011'
+AND d.budget_type = 'BP'
+AND d.document_year = '2024';",True,"|   total_investissements |
+|------------------------:|
+|             1.36448e+09 |"
